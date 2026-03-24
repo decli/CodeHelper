@@ -1,0 +1,15 @@
+.gradle/
+.idea/
+.kotlin/
+build/
+captures/
+local.properties
+app/build/
+*.iml
+*.jks
+*.keystore
+/.gradle-tmp/
+/gradle-8.13-bin.zip
+/.android-sdk/
+/commandlinetools-win-latest.zip
+
