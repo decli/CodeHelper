@@ -5,9 +5,12 @@ import android.content.ContentUris
 import android.net.Uri
 import android.provider.BaseColumns
 import android.provider.Telephony
+import android.text.Html
 import com.decli.codehelper.model.CodeFilterWindow
 import com.decli.codehelper.model.PickupCodeItem
 import com.decli.codehelper.util.PickupCodeExtractor
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 
 class SmsRepository(
     private val contentResolver: ContentResolver,
@@ -54,7 +57,7 @@ class SmsRepository(
         )
 
         contentResolver.query(
-            Telephony.Sms.CONTENT_URI,
+            Telephony.Sms.Inbox.CONTENT_URI,
             projection,
             "${Telephony.TextBasedSmsColumns.DATE} >= ?",
             arrayOf(sinceMillis.toString()),
@@ -106,7 +109,7 @@ class SmsRepository(
         val sinceSeconds = sinceMillis / 1000L
 
         contentResolver.query(
-            Telephony.Mms.CONTENT_URI,
+            Telephony.Mms.Inbox.CONTENT_URI,
             projection,
             "${Telephony.BaseMmsColumns.DATE} >= ?",
             arrayOf(sinceSeconds.toString()),
@@ -184,7 +187,7 @@ class SmsRepository(
 
         contentResolver.query(
             MMS_PARTS_URI,
-            arrayOf(BaseColumns._ID, "ct", "text", "_data"),
+            arrayOf(BaseColumns._ID, "ct", "text", "_data", "chset"),
             "mid = ?",
             arrayOf(mmsId.toString()),
             null,
@@ -193,19 +196,25 @@ class SmsRepository(
             val contentTypeIndex = cursor.getColumnIndexOrThrow("ct")
             val textIndex = cursor.getColumnIndexOrThrow("text")
             val dataIndex = cursor.getColumnIndexOrThrow("_data")
+            val charsetIndex = cursor.getColumnIndexOrThrow("chset")
 
             while (cursor.moveToNext()) {
                 val contentType = cursor.getString(contentTypeIndex).orEmpty()
-                if (!contentType.startsWith("text/", ignoreCase = true)) continue
+                if (isIgnoredPart(contentType)) continue
 
                 val inlineText = cursor.getString(textIndex).orEmpty()
                 val dataPointer = cursor.getString(dataIndex)
+                val charsetValue = cursor.getString(charsetIndex)
 
                 val partText = when {
-                    inlineText.isNotBlank() -> inlineText
+                    inlineText.isNotBlank() -> inlineText.normalizePartText(contentType)
                     !dataPointer.isNullOrBlank() -> {
                         val partId = cursor.getLong(idIndex)
-                        readMmsPartText(partId)
+                        readMmsPartText(
+                            partId = partId,
+                            contentType = contentType,
+                            charsetValue = charsetValue,
+                        )
                     }
                     else -> ""
                 }
@@ -223,11 +232,17 @@ class SmsRepository(
         return parts.joinToString(separator = "\n").trim()
     }
 
-    private fun readMmsPartText(partId: Long): String =
+    private fun readMmsPartText(
+        partId: Long,
+        contentType: String,
+        charsetValue: String?,
+    ): String =
         runCatching {
             contentResolver.openInputStream(ContentUris.withAppendedId(MMS_PARTS_URI, partId))
-                ?.bufferedReader()
-                ?.use { it.readText() }
+                ?.use { input ->
+                    val bytes = input.readBytes()
+                    decodePartBytes(bytes, charsetValue).normalizePartText(contentType)
+                }
                 .orEmpty()
         }.getOrDefault("")
 
@@ -254,6 +269,11 @@ class SmsRepository(
     companion object {
         private val MMS_PARTS_URI: Uri = Uri.parse("content://mms/part")
         private const val MMS_FROM_ADDRESS_TYPE = 137
+        private val mediaPrefixes = listOf("image/", "audio/", "video/")
+        private val skippedContentTypes = setOf(
+            "application/smil",
+            "application/octet-stream",
+        )
 
         fun buildUniqueKey(messageType: MessageType, messageId: Long, code: String): String =
             when (messageType) {
@@ -273,9 +293,69 @@ class SmsRepository(
         Sms,
         Mms,
     }
+
+    private fun isIgnoredPart(contentType: String): Boolean {
+        val normalized = contentType.lowercase()
+        return normalized in skippedContentTypes || mediaPrefixes.any(normalized::startsWith)
+    }
+
+    private fun decodePartBytes(bytes: ByteArray, charsetValue: String?): String {
+        if (bytes.isEmpty()) return ""
+        val candidates = buildList {
+            charsetValue?.toIntOrNull()?.let { mib ->
+                charsetFromMib(mib)?.let(::add)
+            }
+            add(StandardCharsets.UTF_8)
+            add(StandardCharsets.UTF_16)
+            add(StandardCharsets.UTF_16LE)
+            add(StandardCharsets.UTF_16BE)
+            add(Charsets.ISO_8859_1)
+        }.distinct()
+
+        return candidates
+            .asSequence()
+            .map { charset -> runCatching { bytes.toString(charset) }.getOrNull().orEmpty() }
+            .firstOrNull { it.isLikelyText() }
+            ?: bytes.toString(StandardCharsets.UTF_8)
+    }
+
+    private fun charsetFromMib(mib: Int): Charset? =
+        when (mib) {
+            3, 2252 -> Charsets.ISO_8859_1
+            106 -> StandardCharsets.UTF_8
+            1015 -> StandardCharsets.UTF_16
+            1013 -> StandardCharsets.UTF_16BE
+            1014 -> StandardCharsets.UTF_16LE
+            else -> null
+        }
 }
 
 private fun String.compactPreview(maxLength: Int = 78): String {
     val normalized = replace(Regex("""\s+"""), " ").trim()
     return if (normalized.length <= maxLength) normalized else normalized.take(maxLength - 1) + "…"
+}
+
+private fun String.normalizePartText(contentType: String): String {
+    val normalizedContentType = contentType.lowercase()
+    val text = if (
+        normalizedContentType.contains("html") ||
+        normalizedContentType.contains("xml") ||
+        normalizedContentType.contains("xhtml")
+    ) {
+        Html.fromHtml(this, Html.FROM_HTML_MODE_LEGACY).toString()
+    } else {
+        this
+    }
+
+    return text
+        .replace('\u0000', ' ')
+        .replace(Regex("""\s+"""), " ")
+        .trim()
+}
+
+private fun String.isLikelyText(): Boolean {
+    val cleaned = replace('\u0000', ' ').trim()
+    if (cleaned.isBlank()) return false
+    val printableCount = cleaned.count { it.isWhitespace() || !it.isISOControl() }
+    return printableCount >= (cleaned.length * 0.8)
 }
