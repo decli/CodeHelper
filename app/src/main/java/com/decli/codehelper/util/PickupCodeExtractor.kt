@@ -8,9 +8,14 @@ class PickupCodeExtractor {
     )
 
     companion object {
+        private const val codeCapture = """([A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)"""
+        private const val separator = """[：:\s]*"""
+        private const val openingQuote = """[“"'‘「『]?"""
+        private const val closingQuote = """[”"'’」』]?"""
+
         val defaultRules = listOf(
-            """取件码[：:\s]*([A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)""",
-            """凭[：:\s]*([A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)""",
+            """(?:取件码|提货码|货码|驿站码)$separator$openingQuote$codeCapture$closingQuote""",
+            """凭$separator$openingQuote$codeCapture$closingQuote""",
         )
 
         private val codeTokenRegex = Regex("""[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*""")

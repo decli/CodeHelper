@@ -57,6 +57,28 @@ class PickupCodeExtractorTest {
     }
 
     @Test
+    fun `extracts code wrapped by Chinese quotes after 凭`() {
+        val result = extractor.extract(
+            body = """【菜鸟驿站】请23:00前到站凭“1-3-27017”到龙腾苑四区免喜生活30号楼店站点领取您的中通*15733包裹。""",
+            rules = PickupCodeExtractor.defaultRules,
+        )
+
+        assertEquals(listOf("1-3-27017"), result.map { it.code })
+        assertEquals(listOf("命中规则2"), result.map { it.matchedRule })
+    }
+
+    @Test
+    fun `extracts code from expanded cargo keywords`() {
+        val result = extractor.extract(
+            body = "【快递】驿站码“Y0986”，请及时领取。",
+            rules = PickupCodeExtractor.defaultRules,
+        )
+
+        assertEquals(listOf("Y0986"), result.map { it.code })
+        assertEquals(listOf("命中规则1"), result.map { it.matchedRule })
+    }
+
+    @Test
     fun `reports syntax error for invalid draft rule`() {
         assertEquals("正则语法错误", extractor.validationError("""取件码([A-Z"""))
     }

@@ -28,8 +28,10 @@ class SmsRepository(
             Telephony.TextBasedSmsColumns.DATE,
         )
 
+        // Scan the full SMS table for the selected time range so vendor/provider-specific
+        // inbox views do not hide eligible pickup-code messages from the app.
         contentResolver.query(
-            Telephony.Sms.Inbox.CONTENT_URI,
+            Telephony.Sms.CONTENT_URI,
             projection,
             "${Telephony.TextBasedSmsColumns.DATE} >= ?",
             arrayOf(sinceMillis.toString()),
