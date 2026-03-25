@@ -3,7 +3,6 @@ package com.decli.codehelper.ui.home
 import android.Manifest
 import android.app.Application
 import android.content.pm.PackageManager
-import android.provider.Telephony
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -35,13 +34,9 @@ class HomeViewModel(
     private val selectedFilter = MutableStateFlow(CodeFilterWindow.Last12Hours)
     private val showAllItems = MutableStateFlow(false)
     private val permissionGranted = MutableStateFlow(hasSmsPermission())
-    private val defaultSmsApp = MutableStateFlow(isDefaultSmsApp())
     private val reloadNonce = MutableStateFlow(0)
     private val uiStateFlow = MutableStateFlow(
-        HomeUiState(
-            hasSmsPermission = permissionGranted.value,
-            isDefaultSmsApp = defaultSmsApp.value,
-        ),
+        HomeUiState(hasSmsPermission = permissionGranted.value),
     )
 
     private val messageFlow = MutableSharedFlow<String>(extraBufferCapacity = 8)
@@ -55,9 +50,7 @@ class HomeViewModel(
 
     fun refreshPermissionStatus() {
         val granted = hasSmsPermission()
-        val isDefault = isDefaultSmsApp()
         permissionGranted.value = granted
-        defaultSmsApp.value = isDefault
         if (granted) {
             reloadNonce.update { it + 1 }
         }
@@ -65,28 +58,9 @@ class HomeViewModel(
 
     fun updatePermissionStatus(granted: Boolean) {
         permissionGranted.value = granted
-        defaultSmsApp.value = isDefaultSmsApp()
         if (granted) {
             showAllItems.value = false
             reloadNonce.update { it + 1 }
-        }
-    }
-
-    fun refreshDefaultSmsStatus() {
-        defaultSmsApp.value = isDefaultSmsApp()
-        if (permissionGranted.value) {
-            reloadNonce.update { it + 1 }
-        }
-    }
-
-    fun handleDefaultSmsRoleResult() {
-        val isDefault = isDefaultSmsApp()
-        defaultSmsApp.value = isDefault
-        if (isDefault) {
-            reloadNonce.update { it + 1 }
-            messageFlow.tryEmit("已设为默认短信应用，请重新刷新取件码列表")
-        } else {
-            messageFlow.tryEmit("未切换为默认短信应用，平台短信可能仍受系统限制")
         }
     }
 
@@ -163,15 +137,13 @@ class HomeViewModel(
                 selectedFilter,
                 showAllItems,
                 permissionGranted,
-                defaultSmsApp,
-            ) { rules, pickedUpItems, filterWindow, showAll, hasPermission, isDefault ->
+            ) { rules, pickedUpItems, filterWindow, showAll, hasPermission ->
                 HomeLoadRequest(
                     rules = rules,
                     pickedUpItems = pickedUpItems,
                     filterWindow = filterWindow,
                     showAll = showAll,
                     hasPermission = hasPermission,
-                    isDefaultSmsApp = isDefault,
                 )
             }.combine(reloadNonce) { request, _ ->
                 request
@@ -179,7 +151,6 @@ class HomeViewModel(
                 uiStateFlow.update {
                     it.copy(
                         hasSmsPermission = request.hasPermission,
-                        isDefaultSmsApp = request.isDefaultSmsApp,
                         isLoading = request.hasPermission,
                         selectedFilter = request.filterWindow,
                         activeRules = request.rules,
@@ -224,15 +195,11 @@ class HomeViewModel(
             Manifest.permission.READ_SMS,
         ) == PackageManager.PERMISSION_GRANTED
 
-    private fun isDefaultSmsApp(): Boolean =
-        Telephony.Sms.getDefaultSmsPackage(getApplication()) == getApplication<Application>().packageName
-
     private data class HomeLoadRequest(
         val rules: List<String>,
         val pickedUpItems: Set<String>,
         val filterWindow: CodeFilterWindow,
         val showAll: Boolean,
         val hasPermission: Boolean,
-        val isDefaultSmsApp: Boolean,
     )
 }

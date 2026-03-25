@@ -1,12 +1,10 @@
 package com.decli.codehelper.ui
 
 import android.Manifest
-import android.app.role.RoleManager
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.provider.Telephony
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -136,11 +134,6 @@ fun CodeHelperApp(
     ) { granted ->
         viewModel.updatePermissionStatus(granted)
     }
-    val defaultSmsRoleLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
-    ) {
-        viewModel.handleDefaultSmsRoleResult()
-    }
 
     DisposableEffect(lifecycleOwner, viewModel) {
         val observer = LifecycleEventObserver { _, event ->
@@ -209,9 +202,6 @@ fun CodeHelperApp(
                         onFilterSelected = viewModel::selectFilter,
                         onForceRefreshAll = viewModel::forceRefreshAll,
                         onEditRules = { showRuleEditor = true },
-                        onRequestDefaultSmsRole = {
-                            buildDefaultSmsRoleIntent(context)?.let(defaultSmsRoleLauncher::launch)
-                        },
                     )
                 }
 
@@ -282,7 +272,6 @@ private fun HomeDashboard(
     onFilterSelected: (CodeFilterWindow) -> Unit,
     onForceRefreshAll: () -> Unit,
     onEditRules: () -> Unit,
-    onRequestDefaultSmsRole: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -314,12 +303,6 @@ private fun HomeDashboard(
             pendingCount = uiState.pendingCount,
             isLoading = uiState.isLoading,
         )
-
-        if (!uiState.isDefaultSmsApp) {
-            DefaultSmsRolePanel(
-                onRequestDefaultSmsRole = onRequestDefaultSmsRole,
-            )
-        }
     }
 }
 
@@ -479,37 +462,6 @@ private fun PendingSummaryPanel(
                     color = InkMuted,
                     textAlign = TextAlign.Center,
                 )
-            }
-        }
-    }
-}
-
-@Composable
-private fun DefaultSmsRolePanel(
-    onRequestDefaultSmsRole: () -> Unit,
-) {
-    PanelCard(containerColor = HeroSurface.copy(alpha = 0.98f)) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Text(
-                text = "平台短信可能需要默认短信应用权限",
-                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-                color = Ink,
-            )
-            Text(
-                text = "像“菜鸟驿站”这类平台消息，系统可能不会向普通应用暴露完整内容。设为默认短信应用后再强制刷新，能提高读取成功率。",
-                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                color = InkMuted,
-            )
-            OutlinedButton(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = onRequestDefaultSmsRole,
-            ) {
-                Text(text = "设为默认短信应用")
             }
         }
     }
@@ -1008,17 +960,3 @@ private fun formatTime(millis: Long): String =
         .ofEpochMilli(millis)
         .atZone(ZoneId.systemDefault())
         .format(DateTimeFormatter.ofPattern("MM-dd HH:mm"))
-
-private fun buildDefaultSmsRoleIntent(context: Context): Intent? =
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        val roleManager = context.getSystemService(RoleManager::class.java)
-        if (roleManager != null && roleManager.isRoleAvailable(RoleManager.ROLE_SMS)) {
-            roleManager.createRequestRoleIntent(RoleManager.ROLE_SMS)
-        } else {
-            null
-        }
-    } else {
-        Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT).apply {
-            putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, context.packageName)
-        }
-    }
