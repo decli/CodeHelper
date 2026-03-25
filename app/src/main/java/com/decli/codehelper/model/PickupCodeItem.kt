@@ -9,6 +9,6 @@ data class PickupCodeItem(
     val preview: String,
     val receivedAtMillis: Long,
     val matchedRule: String,
-    val isDeleted: Boolean,
+    val isPickedUp: Boolean,
 )
 

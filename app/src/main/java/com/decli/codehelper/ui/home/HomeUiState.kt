@@ -10,7 +10,10 @@ data class HomeUiState(
     val selectedFilter: CodeFilterWindow = CodeFilterWindow.Last12Hours,
     val items: List<PickupCodeItem> = emptyList(),
     val activeRules: List<String> = PickupCodeExtractor.defaultRules,
-    val showDeletedOnRefresh: Boolean = false,
+    val showAllItems: Boolean = false,
     val lastLoadedAtMillis: Long? = null,
-)
+) {
+    val pendingCount: Int
+        get() = items.count { !it.isPickedUp }
+}
 

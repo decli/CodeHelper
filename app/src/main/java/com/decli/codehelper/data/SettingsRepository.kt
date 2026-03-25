@@ -16,7 +16,8 @@ class SettingsRepository(
 ) {
     private companion object {
         val rulesKey = stringPreferencesKey("pickup_rules")
-        val deletedItemsKey = stringSetPreferencesKey("deleted_pickup_items")
+        val pickedUpItemsKey = stringSetPreferencesKey("picked_up_items")
+        val legacyDeletedItemsKey = stringSetPreferencesKey("deleted_pickup_items")
     }
 
     val rulesFlow: Flow<List<String>> =
@@ -30,9 +31,9 @@ class SettingsRepository(
                 ?: PickupCodeExtractor.defaultRules
         }
 
-    val deletedItemsFlow: Flow<Set<String>> =
+    val pickedUpItemsFlow: Flow<Set<String>> =
         context.settingsDataStore.data.map { preferences ->
-            preferences[deletedItemsKey].orEmpty()
+            preferences[pickedUpItemsKey].orEmpty() + preferences[legacyDeletedItemsKey].orEmpty()
         }
 
     suspend fun saveRules(rules: List<String>) {
@@ -41,11 +42,23 @@ class SettingsRepository(
         }
     }
 
-    suspend fun markDeleted(uniqueKey: String) {
+    suspend fun markPickedUp(uniqueKey: String) {
         context.settingsDataStore.edit { preferences ->
-            val current = preferences[deletedItemsKey].orEmpty().toMutableSet()
+            val current = (preferences[pickedUpItemsKey].orEmpty() + preferences[legacyDeletedItemsKey].orEmpty())
+                .toMutableSet()
             current += uniqueKey
-            preferences[deletedItemsKey] = current
+            preferences[pickedUpItemsKey] = current
+            preferences.remove(legacyDeletedItemsKey)
+        }
+    }
+
+    suspend fun markPending(uniqueKey: String) {
+        context.settingsDataStore.edit { preferences ->
+            val current = (preferences[pickedUpItemsKey].orEmpty() + preferences[legacyDeletedItemsKey].orEmpty())
+                .toMutableSet()
+            current -= uniqueKey
+            preferences[pickedUpItemsKey] = current
+            preferences.remove(legacyDeletedItemsKey)
         }
     }
 }

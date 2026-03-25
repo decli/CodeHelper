@@ -32,7 +32,7 @@ class HomeViewModel(
     private val smsRepository = SmsRepository(application.contentResolver, extractor)
 
     private val selectedFilter = MutableStateFlow(CodeFilterWindow.Last12Hours)
-    private val includeDeletedOnRefresh = MutableStateFlow(false)
+    private val showAllItems = MutableStateFlow(false)
     private val permissionGranted = MutableStateFlow(hasSmsPermission())
     private val reloadNonce = MutableStateFlow(0)
     private val uiStateFlow = MutableStateFlow(
@@ -49,37 +49,52 @@ class HomeViewModel(
     }
 
     fun refreshPermissionStatus() {
-        permissionGranted.value = hasSmsPermission()
-    }
-
-    fun updatePermissionStatus(granted: Boolean) {
+        val granted = hasSmsPermission()
         permissionGranted.value = granted
         if (granted) {
             reloadNonce.update { it + 1 }
         }
     }
 
+    fun updatePermissionStatus(granted: Boolean) {
+        permissionGranted.value = granted
+        if (granted) {
+            showAllItems.value = false
+            reloadNonce.update { it + 1 }
+        }
+    }
+
     fun selectFilter(filterWindow: CodeFilterWindow) {
-        includeDeletedOnRefresh.value = false
+        showAllItems.value = false
         selectedFilter.value = filterWindow
     }
 
-    fun forceRefresh() {
+    fun forceRefreshAll() {
         if (!permissionGranted.value) {
             messageFlow.tryEmit("请先授权短信读取权限")
             return
         }
-        includeDeletedOnRefresh.value = true
+        showAllItems.value = true
         reloadNonce.update { it + 1 }
-        messageFlow.tryEmit("已强制刷新，灰色卡片表示曾删除")
+        messageFlow.tryEmit("已重新加载当前时间范围内的全部取件码")
     }
 
-    fun hideCode(item: PickupCodeItem) {
-        if (item.isDeleted) return
+    fun markPickedUp(item: PickupCodeItem) {
+        if (item.isPickedUp) return
 
         viewModelScope.launch {
-            settingsRepository.markDeleted(item.uniqueKey)
-            messageFlow.emit("已隐藏取件码 ${item.code}")
+            showAllItems.value = false
+            settingsRepository.markPickedUp(item.uniqueKey)
+            messageFlow.emit("已将 ${item.code} 标记为已取件")
+        }
+    }
+
+    fun restorePending(item: PickupCodeItem) {
+        if (!item.isPickedUp) return
+
+        viewModelScope.launch {
+            settingsRepository.markPending(item.uniqueKey)
+            messageFlow.emit("已将 ${item.code} 恢复为未取件")
         }
     }
 
@@ -98,7 +113,7 @@ class HomeViewModel(
 
         viewModelScope.launch {
             settingsRepository.saveRules(sanitizedRules)
-            includeDeletedOnRefresh.value = false
+            showAllItems.value = false
             reloadNonce.update { it + 1 }
             messageFlow.emit("提取规则已保存")
         }
@@ -109,16 +124,16 @@ class HomeViewModel(
         viewModelScope.launch {
             combine(
                 settingsRepository.rulesFlow,
-                settingsRepository.deletedItemsFlow,
+                settingsRepository.pickedUpItemsFlow,
                 selectedFilter,
-                includeDeletedOnRefresh,
+                showAllItems,
                 permissionGranted,
-            ) { rules, deletedItems, filterWindow, showDeleted, hasPermission ->
+            ) { rules, pickedUpItems, filterWindow, showAll, hasPermission ->
                 HomeLoadRequest(
                     rules = rules,
-                    deletedItems = deletedItems,
+                    pickedUpItems = pickedUpItems,
                     filterWindow = filterWindow,
-                    showDeleted = showDeleted,
+                    showAll = showAll,
                     hasPermission = hasPermission,
                 )
             }.combine(reloadNonce) { request, _ ->
@@ -130,7 +145,7 @@ class HomeViewModel(
                         isLoading = request.hasPermission,
                         selectedFilter = request.filterWindow,
                         activeRules = request.rules,
-                        showDeletedOnRefresh = request.showDeleted,
+                        showAllItems = request.showAll,
                     )
                 }
 
@@ -149,8 +164,8 @@ class HomeViewModel(
                     smsRepository.loadPickupCodes(
                         filterWindow = request.filterWindow,
                         rules = request.rules,
-                        deletedKeys = request.deletedItems,
-                        includeDeleted = request.showDeleted,
+                        pickedUpKeys = request.pickedUpItems,
+                        includePickedUp = request.showAll,
                     )
                 }
 
@@ -173,9 +188,9 @@ class HomeViewModel(
 
     private data class HomeLoadRequest(
         val rules: List<String>,
-        val deletedItems: Set<String>,
+        val pickedUpItems: Set<String>,
         val filterWindow: CodeFilterWindow,
-        val showDeleted: Boolean,
+        val showAll: Boolean,
         val hasPermission: Boolean,
     )
 }

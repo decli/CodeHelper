@@ -8,43 +8,43 @@ import androidx.compose.ui.unit.sp
 val CodeHelperTypography = Typography(
     displayMedium = TextStyle(
         fontWeight = FontWeight.Bold,
-        fontSize = 34.sp,
-        lineHeight = 40.sp,
+        fontSize = 36.sp,
+        lineHeight = 42.sp,
     ),
     headlineLarge = TextStyle(
         fontWeight = FontWeight.Bold,
-        fontSize = 30.sp,
-        lineHeight = 36.sp,
+        fontSize = 32.sp,
+        lineHeight = 38.sp,
     ),
     headlineSmall = TextStyle(
         fontWeight = FontWeight.SemiBold,
-        fontSize = 24.sp,
-        lineHeight = 30.sp,
+        fontSize = 25.sp,
+        lineHeight = 31.sp,
     ),
     titleLarge = TextStyle(
         fontWeight = FontWeight.Bold,
-        fontSize = 20.sp,
-        lineHeight = 26.sp,
+        fontSize = 21.sp,
+        lineHeight = 28.sp,
     ),
     titleMedium = TextStyle(
         fontWeight = FontWeight.SemiBold,
-        fontSize = 18.sp,
-        lineHeight = 24.sp,
+        fontSize = 19.sp,
+        lineHeight = 25.sp,
     ),
     bodyLarge = TextStyle(
         fontWeight = FontWeight.Normal,
-        fontSize = 18.sp,
-        lineHeight = 26.sp,
+        fontSize = 19.sp,
+        lineHeight = 28.sp,
     ),
     bodyMedium = TextStyle(
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
+        fontSize = 17.sp,
+        lineHeight = 25.sp,
     ),
     labelLarge = TextStyle(
         fontWeight = FontWeight.SemiBold,
         fontSize = 16.sp,
-        lineHeight = 20.sp,
+        lineHeight = 22.sp,
     ),
 )
 

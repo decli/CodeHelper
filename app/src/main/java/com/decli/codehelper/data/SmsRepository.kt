@@ -14,8 +14,8 @@ class SmsRepository(
     fun loadPickupCodes(
         filterWindow: CodeFilterWindow,
         rules: List<String>,
-        deletedKeys: Set<String>,
-        includeDeleted: Boolean,
+        pickedUpKeys: Set<String>,
+        includePickedUp: Boolean,
         nowMillis: Long = System.currentTimeMillis(),
     ): List<PickupCodeItem> {
         val sinceMillis = nowMillis - (filterWindow.hours * 60L * 60L * 1000L)
@@ -48,8 +48,8 @@ class SmsRepository(
 
                 extractor.extract(body = body, rules = rules).forEach { extractedCode ->
                     val uniqueKey = buildUniqueKey(smsId = smsId, code = extractedCode.code)
-                    val isDeleted = uniqueKey in deletedKeys
-                    if (!isDeleted || includeDeleted) {
+                    val isPickedUp = uniqueKey in pickedUpKeys
+                    if (!isPickedUp || includePickedUp) {
                         results += PickupCodeItem(
                             uniqueKey = uniqueKey,
                             smsId = smsId,
@@ -59,18 +59,25 @@ class SmsRepository(
                             preview = body.compactPreview(),
                             receivedAtMillis = receivedAt,
                             matchedRule = extractedCode.matchedRule,
-                            isDeleted = isDeleted,
+                            isPickedUp = isPickedUp,
                         )
                     }
                 }
             }
         }
 
-        return results.sortedByDescending { it.receivedAtMillis }
+        return sortForDisplay(results)
     }
 
     companion object {
         fun buildUniqueKey(smsId: Long, code: String): String = "$smsId|${code.uppercase()}"
+
+        fun sortForDisplay(items: List<PickupCodeItem>): List<PickupCodeItem> =
+            items.sortedWith(
+                compareBy<PickupCodeItem> { it.isPickedUp }
+                    .thenByDescending { it.receivedAtMillis }
+                    .thenByDescending { it.smsId },
+            )
     }
 }
 

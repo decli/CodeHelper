@@ -1,5 +1,7 @@
 package com.decli.codehelper.util
 
+import com.decli.codehelper.data.SmsRepository
+import com.decli.codehelper.model.PickupCodeItem
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -39,4 +41,36 @@ class PickupCodeExtractorTest {
 
         assertEquals(listOf("17-3-18014"), result.map { it.code })
     }
+
+    @Test
+    fun `sorts pending items ahead of picked up items`() {
+        val items = listOf(
+            pickupCodeItem(code = "Y0986", receivedAt = 1000L, isPickedUp = true),
+            pickupCodeItem(code = "62667148", receivedAt = 3000L, isPickedUp = false),
+            pickupCodeItem(code = "17-3-18014", receivedAt = 2000L, isPickedUp = false),
+        )
+
+        val result = SmsRepository.sortForDisplay(items)
+
+        assertEquals(
+            listOf("62667148", "17-3-18014", "Y0986"),
+            result.map { it.code },
+        )
+    }
+
+    private fun pickupCodeItem(
+        code: String,
+        receivedAt: Long,
+        isPickedUp: Boolean,
+    ) = PickupCodeItem(
+        uniqueKey = "key-$code",
+        smsId = receivedAt,
+        code = code,
+        sender = "短信",
+        body = "测试短信 $code",
+        preview = "测试短信 $code",
+        receivedAtMillis = receivedAt,
+        matchedRule = "测试规则",
+        isPickedUp = isPickedUp,
+    )
 }
