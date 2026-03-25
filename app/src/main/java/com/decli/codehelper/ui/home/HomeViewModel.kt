@@ -99,6 +99,11 @@ class HomeViewModel(
     }
 
     fun saveRules(candidateRules: List<String>): Boolean {
+        if (candidateRules.any { it.trim().isEmpty() }) {
+            messageFlow.tryEmit("存在空白规则，请修改后再保存")
+            return false
+        }
+
         val sanitizedRules = extractor.sanitizeRules(candidateRules)
         if (sanitizedRules.isEmpty()) {
             messageFlow.tryEmit("至少保留 1 条提取规则")
@@ -107,7 +112,7 @@ class HomeViewModel(
 
         val invalidRule = extractor.firstInvalidRule(sanitizedRules)
         if (invalidRule != null) {
-            messageFlow.tryEmit("规则无效：$invalidRule")
+            messageFlow.tryEmit("存在语法错误规则，请检查后再保存")
             return false
         }
 
@@ -118,6 +123,10 @@ class HomeViewModel(
             messageFlow.emit("提取规则已保存")
         }
         return true
+    }
+
+    fun resetRulesToDefault() {
+        saveRules(PickupCodeExtractor.defaultRules)
     }
 
     private fun observeData() {

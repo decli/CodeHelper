@@ -22,28 +22,48 @@ class PickupCodeExtractor {
             .filter { it.isNotEmpty() }
             .distinct()
 
+    fun validationError(rule: String): String? {
+        val sanitizedRule = rule.trim()
+        if (sanitizedRule.isEmpty()) {
+            return "规则不能为空"
+        }
+
+        return if (runCatching {
+                sanitizedRule.toRegex(setOf(RegexOption.IGNORE_CASE))
+            }.isSuccess
+        ) {
+            null
+        } else {
+            "正则语法错误"
+        }
+    }
+
+    fun draftValidationErrors(rules: List<String>): List<String?> =
+        rules.map(::validationError)
+
     fun firstInvalidRule(rules: List<String>): String? =
         sanitizeRules(rules).firstOrNull { rule ->
-            runCatching {
-                rule.toRegex(setOf(RegexOption.IGNORE_CASE))
-            }.isFailure
+            validationError(rule) != null
         }
 
     fun extract(body: String, rules: List<String>): List<ExtractedCode> {
         val preparedRules = sanitizeRules(rules).ifEmpty { defaultRules }
         val matchesByKey = linkedMapOf<String, ExtractedCode>()
 
-        preparedRules.forEach { rawRule ->
+        preparedRules.forEachIndexed { index, rawRule ->
             val regex = runCatching {
                 rawRule.toRegex(setOf(RegexOption.IGNORE_CASE))
-            }.getOrNull() ?: return@forEach
+            }.getOrNull() ?: return@forEachIndexed
 
             regex.findAll(body).forEach { result ->
                 val code = extractCode(result.groupValues)
                 if (!code.isNullOrBlank()) {
                     matchesByKey.putIfAbsent(
                         code.uppercase(),
-                        ExtractedCode(code = code, matchedRule = rawRule),
+                        ExtractedCode(
+                            code = code,
+                            matchedRule = "命中规则${index + 1}",
+                        ),
                     )
                 }
             }

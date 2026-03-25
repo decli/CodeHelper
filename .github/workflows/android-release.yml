@@ -53,7 +53,39 @@ jobs:
                   RELEASE_STORE_PASSWORD: android
                   RELEASE_KEY_ALIAS: codehelper
                   RELEASE_KEY_PASSWORD: android
-              run: ./gradlew assembleRelease --stacktrace
+              run: |
+                  set -o pipefail
+                  ./gradlew assembleRelease --stacktrace --no-daemon 2>&1 | tee gradle-build.log
+
+            - name: Show Gradle failure excerpt
+              if: failure()
+              run: |
+                  tail -n 200 gradle-build.log || true
+                  python3 - <<'PY'
+                  from pathlib import Path
+                  log_path = Path("gradle-build.log")
+                  if not log_path.exists():
+                      print("::error title=Gradle build failed::gradle-build.log was not generated")
+                      raise SystemExit(0)
+                  lines = log_path.read_text(encoding="utf-8", errors="ignore").splitlines()
+                  patterns = (
+                      "e: ",
+                      "error: ",
+                      "Execution failed for task",
+                      "A failure occurred while executing",
+                      "What went wrong",
+                      "FAILURE: Build failed with an exception.",
+                  )
+                  windows = []
+                  for index, line in enumerate(lines):
+                      if any(pattern in line for pattern in patterns):
+                          start = max(0, index - 8)
+                          end = min(len(lines), index + 24)
+                          windows.append("\n".join(lines[start:end]))
+                  excerpt = "\n\n---\n\n".join(dict.fromkeys(windows)) if windows else "\n".join(lines[-160:])
+                  excerpt = excerpt.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+                  print(f"::error title=Gradle build failed::{excerpt}")
+                  PY
 
             - name: Upload APK artifact
               uses: actions/upload-artifact@v4

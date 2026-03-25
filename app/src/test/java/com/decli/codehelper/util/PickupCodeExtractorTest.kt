@@ -17,6 +17,7 @@ class PickupCodeExtractorTest {
         )
 
         assertEquals(listOf("62667148"), result.map { it.code })
+        assertEquals(listOf("命中规则1"), result.map { it.matchedRule })
     }
 
     @Test
@@ -40,6 +41,24 @@ class PickupCodeExtractorTest {
         )
 
         assertEquals(listOf("17-3-18014"), result.map { it.code })
+    }
+
+    @Test
+    fun `returns numbered rule label based on matched rule order`() {
+        val result = extractor.extract(
+            body = "您好，凭Y0986至菜鸟驿站取件。",
+            rules = listOf(
+                """取件码[：:\s]*([A-Za-z0-9-]+)""",
+                """凭[：:\s]*([A-Za-z0-9-]+)""",
+            ),
+        )
+
+        assertEquals(listOf("命中规则2"), result.map { it.matchedRule })
+    }
+
+    @Test
+    fun `reports syntax error for invalid draft rule`() {
+        assertEquals("正则语法错误", extractor.validationError("""取件码([A-Z"""))
     }
 
     @Test
@@ -70,7 +89,7 @@ class PickupCodeExtractorTest {
         body = "测试短信 $code",
         preview = "测试短信 $code",
         receivedAtMillis = receivedAt,
-        matchedRule = "测试规则",
+        matchedRule = "命中规则1",
         isPickedUp = isPickedUp,
     )
 }
