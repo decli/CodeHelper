@@ -919,12 +919,9 @@ private suspend fun openSmsOrConversation(
     onMessage: suspend (String) -> Unit,
 ) {
     val intents = buildList {
-        add(
-            Intent(
-                Intent.ACTION_VIEW,
-                ContentUris.withAppendedId(Telephony.Sms.Inbox.CONTENT_URI, item.smsId),
-            ),
-        )
+        val directUri = item.messageUri?.let(Uri::parse)
+            ?: ContentUris.withAppendedId(Telephony.Sms.CONTENT_URI, item.smsId)
+        add(Intent(Intent.ACTION_VIEW, directUri))
         if (item.sender.isNotBlank()) {
             add(
                 Intent(

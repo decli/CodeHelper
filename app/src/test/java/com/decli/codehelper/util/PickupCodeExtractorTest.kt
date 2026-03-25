@@ -84,6 +84,26 @@ class PickupCodeExtractorTest {
     }
 
     @Test
+    fun `uses different picked up keys for sms and mms items`() {
+        assertEquals(
+            "7|Y0986",
+            SmsRepository.buildUniqueKey(
+                messageType = SmsRepository.MessageType.Sms,
+                messageId = 7L,
+                code = "Y0986",
+            ),
+        )
+        assertEquals(
+            "mms:7|Y0986",
+            SmsRepository.buildUniqueKey(
+                messageType = SmsRepository.MessageType.Mms,
+                messageId = 7L,
+                code = "Y0986",
+            ),
+        )
+    }
+
+    @Test
     fun `sorts pending items ahead of picked up items`() {
         val items = listOf(
             pickupCodeItem(code = "Y0986", receivedAt = 1000L, isPickedUp = true),
@@ -106,6 +126,7 @@ class PickupCodeExtractorTest {
     ) = PickupCodeItem(
         uniqueKey = "key-$code",
         smsId = receivedAt,
+        messageUri = null,
         code = code,
         sender = "短信",
         body = "测试短信 $code",
