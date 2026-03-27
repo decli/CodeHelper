@@ -4,12 +4,21 @@ data class PickupCodeItem(
     val uniqueKey: String,
     val smsId: Long,
     val messageUri: String? = null,
-    val code: String,
+    val codes: List<String>,
     val sender: String,
     val body: String,
     val preview: String,
     val receivedAtMillis: Long,
-    val matchedRule: String,
+    val matchedRules: List<String>,
     val isPickedUp: Boolean,
-)
+) {
+    val codeDisplay: String
+        get() = codes.joinToString(separator = "\n")
+
+    val matchedRuleDisplay: String
+        get() = matchedRules.joinToString(separator = " · ")
+
+    val codeCount: Int
+        get() = codes.size
+}
 

@@ -18,7 +18,8 @@ class SmsRepository(
 ) {
     fun loadPickupCodes(
         filterWindow: CodeFilterWindow,
-        rules: List<String>,
+        promptKeywords: List<String>,
+        advancedRules: List<String>,
         pickedUpKeys: Set<String>,
         includePickedUp: Boolean,
         nowMillis: Long = System.currentTimeMillis(),
@@ -28,13 +29,15 @@ class SmsRepository(
 
         results += loadSmsItems(
             sinceMillis = sinceMillis,
-            rules = rules,
+            promptKeywords = promptKeywords,
+            advancedRules = advancedRules,
             pickedUpKeys = pickedUpKeys,
             includePickedUp = includePickedUp,
         )
         results += loadMmsItems(
             sinceMillis = sinceMillis,
-            rules = rules,
+            promptKeywords = promptKeywords,
+            advancedRules = advancedRules,
             pickedUpKeys = pickedUpKeys,
             includePickedUp = includePickedUp,
         )
@@ -44,7 +47,8 @@ class SmsRepository(
 
     private fun loadSmsItems(
         sinceMillis: Long,
-        rules: List<String>,
+        promptKeywords: List<String>,
+        advancedRules: List<String>,
         pickedUpKeys: Set<String>,
         includePickedUp: Boolean,
     ): List<PickupCodeItem> {
@@ -82,7 +86,8 @@ class SmsRepository(
                     sender = sender,
                     body = body,
                     receivedAtMillis = receivedAt,
-                    rules = rules,
+                    promptKeywords = promptKeywords,
+                    advancedRules = advancedRules,
                     pickedUpKeys = pickedUpKeys,
                     includePickedUp = includePickedUp,
                 )
@@ -94,7 +99,8 @@ class SmsRepository(
 
     private fun loadMmsItems(
         sinceMillis: Long,
-        rules: List<String>,
+        promptKeywords: List<String>,
+        advancedRules: List<String>,
         pickedUpKeys: Set<String>,
         includePickedUp: Boolean,
     ): List<PickupCodeItem> {
@@ -136,7 +142,8 @@ class SmsRepository(
                     sender = sender,
                     body = body,
                     receivedAtMillis = receivedAtMillis,
-                    rules = rules,
+                    promptKeywords = promptKeywords,
+                    advancedRules = advancedRules,
                     pickedUpKeys = pickedUpKeys,
                     includePickedUp = includePickedUp,
                 )
@@ -154,31 +161,45 @@ class SmsRepository(
         sender: String,
         body: String,
         receivedAtMillis: Long,
-        rules: List<String>,
+        promptKeywords: List<String>,
+        advancedRules: List<String>,
         pickedUpKeys: Set<String>,
         includePickedUp: Boolean,
     ) {
-        extractor.extract(body = body, rules = rules).forEach { extractedCode ->
-            val uniqueKey = buildUniqueKey(
+        val extractedCodes = extractor.extract(
+            body = body,
+            promptKeywords = promptKeywords,
+            advancedRules = advancedRules,
+        )
+        if (extractedCodes.isEmpty()) {
+            return
+        }
+
+        val uniqueKey = buildMessageKey(
+            messageType = messageType,
+            messageId = messageId,
+        )
+        val isPickedUp = uniqueKey in pickedUpKeys || extractedCodes.any { extractedCode ->
+            buildUniqueKey(
                 messageType = messageType,
                 messageId = messageId,
                 code = extractedCode.code,
+            ) in pickedUpKeys
+        }
+
+        if (!isPickedUp || includePickedUp) {
+            results += PickupCodeItem(
+                uniqueKey = uniqueKey,
+                smsId = messageId,
+                messageUri = messageUri,
+                codes = extractedCodes.map { it.code },
+                sender = sender,
+                body = body,
+                preview = body.compactPreview(),
+                receivedAtMillis = receivedAtMillis,
+                matchedRules = extractedCodes.map { it.matchedRule }.distinct(),
+                isPickedUp = isPickedUp,
             )
-            val isPickedUp = uniqueKey in pickedUpKeys
-            if (!isPickedUp || includePickedUp) {
-                results += PickupCodeItem(
-                    uniqueKey = uniqueKey,
-                    smsId = messageId,
-                    messageUri = messageUri,
-                    code = extractedCode.code,
-                    sender = sender,
-                    body = body,
-                    preview = body.compactPreview(),
-                    receivedAtMillis = receivedAtMillis,
-                    matchedRule = extractedCode.matchedRule,
-                    isPickedUp = isPickedUp,
-                )
-            }
         }
     }
 
@@ -274,6 +295,12 @@ class SmsRepository(
             "application/smil",
             "application/octet-stream",
         )
+
+        fun buildMessageKey(messageType: MessageType, messageId: Long): String =
+            when (messageType) {
+                MessageType.Sms -> "sms:$messageId"
+                MessageType.Mms -> "mms:$messageId"
+            }
 
         fun buildUniqueKey(messageType: MessageType, messageId: Long, code: String): String =
             when (messageType) {

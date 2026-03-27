@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.decli.codehelper.data.SettingsRepository
 import com.decli.codehelper.data.SmsRepository
 import com.decli.codehelper.model.CodeFilterWindow
+import com.decli.codehelper.model.ExtractorSettings
 import com.decli.codehelper.model.PickupCodeItem
 import com.decli.codehelper.util.PickupCodeExtractor
 import kotlinx.coroutines.Dispatchers
@@ -85,7 +86,7 @@ class HomeViewModel(
         viewModelScope.launch {
             showAllItems.value = false
             settingsRepository.markPickedUp(item.uniqueKey)
-            messageFlow.emit("已将 ${item.code} 标记为已取件")
+            messageFlow.emit("已将 ${item.codes.joinToString("、")} 标记为已取件")
         }
     }
 
@@ -94,30 +95,37 @@ class HomeViewModel(
 
         viewModelScope.launch {
             settingsRepository.markPending(item.uniqueKey)
-            messageFlow.emit("已将 ${item.code} 恢复为未取件")
+            messageFlow.emit("已将 ${item.codes.joinToString("、")} 恢复为未取件")
         }
     }
 
-    fun saveRules(candidateRules: List<String>): Boolean {
-        if (candidateRules.any { it.trim().isEmpty() }) {
-            messageFlow.tryEmit("存在空白规则，请修改后再保存")
+    fun saveExtractorSettings(
+        candidatePromptKeywords: List<String>,
+        candidateAdvancedRules: List<String>,
+    ): Boolean {
+        if (candidatePromptKeywords.any { it.trim().isEmpty() }) {
+            messageFlow.tryEmit("存在空白提示词，请修改后再保存")
             return false
         }
 
-        val sanitizedRules = extractor.sanitizeRules(candidateRules)
-        if (sanitizedRules.isEmpty()) {
-            messageFlow.tryEmit("至少保留 1 条提取规则")
+        val sanitizedPromptKeywords = extractor.sanitizePromptKeywords(candidatePromptKeywords)
+        if (sanitizedPromptKeywords.isEmpty()) {
+            messageFlow.tryEmit("至少保留 1 个识别提示词")
             return false
         }
 
-        val invalidRule = extractor.firstInvalidRule(sanitizedRules)
+        val sanitizedAdvancedRules = extractor.sanitizeRules(candidateAdvancedRules)
+        val invalidRule = extractor.firstInvalidRule(sanitizedAdvancedRules)
         if (invalidRule != null) {
             messageFlow.tryEmit("存在语法错误规则，请检查后再保存")
             return false
         }
 
         viewModelScope.launch {
-            settingsRepository.saveRules(sanitizedRules)
+            settingsRepository.saveExtractorSettings(
+                promptKeywords = sanitizedPromptKeywords,
+                advancedRules = sanitizedAdvancedRules,
+            )
             showAllItems.value = false
             reloadNonce.update { it + 1 }
             messageFlow.emit("提取规则已保存")
@@ -126,20 +134,23 @@ class HomeViewModel(
     }
 
     fun resetRulesToDefault() {
-        saveRules(PickupCodeExtractor.defaultRules)
+        saveExtractorSettings(
+            candidatePromptKeywords = PickupCodeExtractor.defaultPromptKeywords,
+            candidateAdvancedRules = PickupCodeExtractor.defaultAdvancedRules,
+        )
     }
 
     private fun observeData() {
         viewModelScope.launch {
             combine(
-                settingsRepository.rulesFlow,
+                settingsRepository.extractorSettingsFlow,
                 settingsRepository.pickedUpItemsFlow,
                 selectedFilter,
                 showAllItems,
                 permissionGranted,
-            ) { rules, pickedUpItems, filterWindow, showAll, hasPermission ->
+            ) { extractorSettings, pickedUpItems, filterWindow, showAll, hasPermission ->
                 HomeLoadRequest(
-                    rules = rules,
+                    extractorSettings = extractorSettings,
                     pickedUpItems = pickedUpItems,
                     filterWindow = filterWindow,
                     showAll = showAll,
@@ -153,7 +164,8 @@ class HomeViewModel(
                         hasSmsPermission = request.hasPermission,
                         isLoading = request.hasPermission,
                         selectedFilter = request.filterWindow,
-                        activeRules = request.rules,
+                        activePromptKeywords = request.extractorSettings.promptKeywords,
+                        activeAdvancedRules = request.extractorSettings.advancedRules,
                         showAllItems = request.showAll,
                     )
                 }
@@ -172,7 +184,8 @@ class HomeViewModel(
                 val items = withContext(Dispatchers.IO) {
                     smsRepository.loadPickupCodes(
                         filterWindow = request.filterWindow,
-                        rules = request.rules,
+                        promptKeywords = request.extractorSettings.promptKeywords,
+                        advancedRules = request.extractorSettings.advancedRules,
                         pickedUpKeys = request.pickedUpItems,
                         includePickedUp = request.showAll,
                     )
@@ -196,7 +209,7 @@ class HomeViewModel(
         ) == PackageManager.PERMISSION_GRANTED
 
     private data class HomeLoadRequest(
-        val rules: List<String>,
+        val extractorSettings: ExtractorSettings,
         val pickedUpItems: Set<String>,
         val filterWindow: CodeFilterWindow,
         val showAll: Boolean,

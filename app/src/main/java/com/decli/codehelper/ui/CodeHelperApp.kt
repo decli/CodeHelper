@@ -20,6 +20,7 @@ import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -46,8 +47,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -85,6 +84,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import com.decli.codehelper.model.CodeFilterWindow
 import com.decli.codehelper.model.PickupCodeItem
 import com.decli.codehelper.ui.home.HomeUiState
@@ -155,10 +155,16 @@ fun CodeHelperApp(
 
     if (showRuleEditor) {
         RulesEditorSheet(
-            initialRules = uiState.activeRules,
+            initialPromptKeywords = uiState.activePromptKeywords,
+            initialAdvancedRules = uiState.activeAdvancedRules,
             onDismissRequest = { showRuleEditor = false },
-            onSave = { rules ->
-                if (viewModel.saveRules(rules)) {
+            onSave = { promptKeywords, advancedRules ->
+                if (
+                    viewModel.saveExtractorSettings(
+                        candidatePromptKeywords = promptKeywords,
+                        candidateAdvancedRules = advancedRules,
+                    )
+                ) {
                     showRuleEditor = false
                 }
             },
@@ -311,14 +317,20 @@ private fun TimeFilterPanel(
     selectedFilter: CodeFilterWindow,
     onFilterSelected: (CodeFilterWindow) -> Unit,
 ) {
-    var showOtherFilters by rememberSaveable { mutableStateOf(false) }
+    var showOtherTimeSheet by rememberSaveable { mutableStateOf(false) }
     val otherFilters = remember {
         CodeFilterWindow.entries.filterNot { it == CodeFilterWindow.Last12Hours }
     }
-    val otherTimeLabel = if (selectedFilter == CodeFilterWindow.Last12Hours) {
-        "选择其它时间"
-    } else {
-        selectedFilter.label
+    if (showOtherTimeSheet) {
+        TimeFilterSheet(
+            selectedFilter = selectedFilter,
+            options = otherFilters,
+            onDismissRequest = { showOtherTimeSheet = false },
+            onSelect = { filter ->
+                showOtherTimeSheet = false
+                onFilterSelected(filter)
+            },
+        )
     }
 
     PanelCard {
@@ -357,40 +369,99 @@ private fun TimeFilterPanel(
                     if (selectedFilter == CodeFilterWindow.Last12Hours) {
                         OutlinedPanelButton(
                             modifier = Modifier.fillMaxWidth(),
-                            text = otherTimeLabel,
-                            onClick = { showOtherFilters = true },
+                            text = "其它时间",
+                            onClick = { showOtherTimeSheet = true },
                         )
                     } else {
                         FilledPanelButton(
                             modifier = Modifier.fillMaxWidth(),
-                            text = otherTimeLabel,
+                            text = "其它时间",
                             containerColor = HeroWarm,
-                            onClick = { showOtherFilters = true },
+                            onClick = { showOtherTimeSheet = true },
                         )
-                    }
-
-                    DropdownMenu(
-                        expanded = showOtherFilters,
-                        onDismissRequest = { showOtherFilters = false },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        otherFilters.forEach { filter ->
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        text = filter.label,
-                                        style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
-                                    )
-                                },
-                                onClick = {
-                                    showOtherFilters = false
-                                    onFilterSelected(filter)
-                                },
-                            )
-                        }
                     }
                 }
             }
+
+            if (selectedFilter != CodeFilterWindow.Last12Hours) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = AccentGreenContainer.copy(alpha = 0.78f)),
+                    border = BorderStroke(1.dp, PendingCardBorder),
+                ) {
+                    Text(
+                        text = "当前已选：${selectedFilter.label}",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 12.dp),
+                        style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(fontSize = 20.sp),
+                        color = Ink,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TimeFilterSheet(
+    selectedFilter: CodeFilterWindow,
+    options: List<CodeFilterWindow>,
+    onDismissRequest: () -> Unit,
+    onSelect: (CodeFilterWindow) -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        modifier = Modifier.imePadding(),
+        dragHandle = null,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Text(
+                text = "选择其它时间",
+                style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
+                color = Ink,
+            )
+            Text(
+                text = "点一下就会立刻重新读取短信，默认仍以 12 小时为基准。",
+                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
+                color = InkMuted,
+            )
+
+            options.forEach { filter ->
+                val isSelected = filter == selectedFilter
+                val containerColor = if (isSelected) HeroWarm else CardSurface
+                val borderColor = if (isSelected) PendingCardBorder else DividerTint
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(58.dp),
+                    onClick = { onSelect(filter) },
+                    shape = RoundedCornerShape(18.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = containerColor,
+                        contentColor = Ink,
+                    ),
+                    border = BorderStroke(1.dp, borderColor),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
+                ) {
+                    Text(
+                        text = filter.label,
+                        style = androidx.compose.material3.MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp),
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
@@ -614,7 +685,13 @@ private fun PickupCodeCardBody(
     val containerColor = if (item.isPickedUp) PickedCardSurface else PendingCardSurface
     val borderColor = if (item.isPickedUp) PickedCardBorder else PendingCardBorder
     val statusColor = if (item.isPickedUp) AccentGreen else AccentTerracotta
-    val codeFontSize = if (item.code.length >= 10) 48.sp else 56.sp
+    val longestCodeLength = item.codes.maxOfOrNull { it.length } ?: 0
+    val codeFontSize = when {
+        item.codeCount >= 4 -> 34.sp
+        item.codeCount >= 2 -> 38.sp
+        longestCodeLength >= 10 -> 46.sp
+        else -> 54.sp
+    }
 
     Card(
         modifier = Modifier
@@ -655,11 +732,11 @@ private fun PickupCodeCardBody(
             }
 
             Text(
-                text = item.code,
+                text = item.codeDisplay,
                 modifier = Modifier.fillMaxWidth(),
                 style = androidx.compose.material3.MaterialTheme.typography.displayMedium.copy(
                     fontSize = codeFontSize,
-                    lineHeight = codeFontSize,
+                    lineHeight = codeFontSize * 1.15f,
                     fontWeight = FontWeight.Normal,
                 ),
                 color = Ink,
@@ -684,7 +761,7 @@ private fun PickupCodeCardBody(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = item.matchedRule,
+                    text = item.matchedRuleDisplay,
                     style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
                     color = Ink,
                 )
@@ -768,29 +845,33 @@ private fun SwipeActionContainer(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun RulesEditorSheet(
-    initialRules: List<String>,
+    initialPromptKeywords: List<String>,
+    initialAdvancedRules: List<String>,
     onDismissRequest: () -> Unit,
-    onSave: (List<String>) -> Unit,
+    onSave: (List<String>, List<String>) -> Unit,
     onRestoreDefaults: () -> Unit,
 ) {
     val extractor = remember { PickupCodeExtractor() }
-    val rules = remember(initialRules) {
+    val promptKeywords = remember(initialPromptKeywords) {
         mutableStateListOf<String>().apply {
-            addAll(initialRules)
+            addAll(initialPromptKeywords)
         }
     }
-    val templates = remember {
-        listOf(
-            """取件码[：:\s]*([A-Za-z0-9-]+)""",
-            """凭[：:\s]*([A-Za-z0-9-]+)""",
-            """货码[：:\s]*([A-Za-z0-9-]+)""",
-        )
+    val advancedRules = remember(initialAdvancedRules) {
+        mutableStateListOf<String>().apply {
+            addAll(initialAdvancedRules)
+        }
     }
-    val fieldErrors = extractor.draftValidationErrors(rules.toList())
-    val canSave = rules.isNotEmpty() && fieldErrors.none { it != null }
+    val keywordTemplates = remember { PickupCodeExtractor.defaultPromptKeywords }
+    val promptKeywordErrors = extractor.draftKeywordErrors(promptKeywords.toList())
+    val ruleErrors = extractor.draftValidationErrors(advancedRules.toList())
+    val canSave =
+        promptKeywords.isNotEmpty() &&
+            promptKeywordErrors.none { it != null } &&
+            ruleErrors.none { it != null }
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -806,54 +887,56 @@ private fun RulesEditorSheet(
             verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
             Text(
-                text = "规则设置",
+                text = "提取设置",
                 style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
                 color = Ink,
             )
             Text(
-                text = "规则有语法错误时不能保存。恢复默认设置会立即覆盖当前规则并刷新列表。",
+                text = "先填短信里常见的提示词，比如“取件码”“货码”“凭”。应用会自动在这些词后面寻找一个或多个取件码；高级规则只在特殊平台场景下再用。",
                 style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
                 color = InkMuted,
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "常用模板",
+                    text = "快捷提示词",
                     style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
                     color = Ink,
                 )
-                templates.forEach { template ->
-                    OutlinedButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            if (template !in rules) {
-                                rules += template
-                            }
-                        },
-                    ) {
-                        Text(
-                            text = template,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    keywordTemplates.forEach { template ->
+                        OutlinedButton(
+                            onClick = {
+                                if (template !in promptKeywords) {
+                                    promptKeywords += template
+                                }
+                            },
+                            shape = RoundedCornerShape(14.dp),
+                        ) {
+                            Text(text = template)
+                        }
                     }
                 }
             }
 
-            rules.indices.forEach { index ->
-                val fieldError = fieldErrors.getOrNull(index)
+            promptKeywords.indices.forEach { index ->
+                val fieldError = promptKeywordErrors.getOrNull(index)
                 OutlinedTextField(
-                    value = rules[index],
+                    value = promptKeywords[index],
                     onValueChange = { updated ->
-                        rules[index] = updated
+                        promptKeywords[index] = updated
                     },
                     modifier = Modifier.fillMaxWidth(),
                     textStyle = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
-                    label = { Text(text = "规则 ${index + 1}") },
+                    label = { Text(text = "提示词 ${index + 1}") },
                     isError = fieldError != null,
                     supportingText = {
                         Text(
-                            text = fieldError ?: "示例：取件码[：:\\s]*([A-Za-z0-9-]+)",
+                            text = fieldError ?: "例如：取件码、货码、凭",
                             color = if (fieldError != null) {
                                 androidx.compose.material3.MaterialTheme.colorScheme.error
                             } else {
@@ -862,8 +945,8 @@ private fun RulesEditorSheet(
                         )
                     },
                     trailingIcon = {
-                        if (rules.size > 1) {
-                            TextButton(onClick = { rules.removeAt(index) }) {
+                        if (promptKeywords.size > 1) {
+                            TextButton(onClick = { promptKeywords.removeAt(index) }) {
                                 Text(text = "删除")
                             }
                         }
@@ -871,9 +954,51 @@ private fun RulesEditorSheet(
                 )
             }
 
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "高级规则（可选）",
+                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                    color = Ink,
+                )
+                Text(
+                    text = "只有遇到个别平台的特殊写法时，再补充正则规则。规则有语法错误时不能保存。",
+                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                    color = InkMuted,
+                )
+            }
+
+            advancedRules.indices.forEach { index ->
+                val fieldError = ruleErrors.getOrNull(index)
+                OutlinedTextField(
+                    value = advancedRules[index],
+                    onValueChange = { updated ->
+                        advancedRules[index] = updated
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    textStyle = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
+                    label = { Text(text = "高级规则 ${index + 1}") },
+                    isError = fieldError != null,
+                    supportingText = {
+                        Text(
+                            text = fieldError ?: "示例：货码[：:\\s]*([A-Za-z0-9-]+)",
+                            color = if (fieldError != null) {
+                                androidx.compose.material3.MaterialTheme.colorScheme.error
+                            } else {
+                                InkMuted
+                            },
+                        )
+                    },
+                    trailingIcon = {
+                        TextButton(onClick = { advancedRules.removeAt(index) }) {
+                            Text(text = "删除")
+                        }
+                    },
+                )
+            }
+
             if (!canSave) {
                 Text(
-                    text = "存在空白规则或正则语法错误，修正后才能保存。",
+                    text = "存在空白提示词或高级规则语法错误，修正后才能保存。",
                     style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
                     color = androidx.compose.material3.MaterialTheme.colorScheme.error,
                 )
@@ -882,14 +1007,21 @@ private fun RulesEditorSheet(
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedButton(
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = { rules += "" },
+                    onClick = { promptKeywords += "" },
+                ) {
+                    Text(text = "新增提示词")
+                }
+
+                OutlinedButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { advancedRules += "" },
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Rule,
                         contentDescription = null,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "新增规则")
+                    Text(text = "新增高级规则")
                 }
 
                 OutlinedButton(
@@ -902,7 +1034,12 @@ private fun RulesEditorSheet(
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = canSave,
-                    onClick = { onSave(rules.toList()) },
+                    onClick = {
+                        onSave(
+                            promptKeywords.toList(),
+                            advancedRules.toList(),
+                        )
+                    },
                 ) {
                     Text(text = "保存并刷新")
                 }

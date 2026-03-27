@@ -9,11 +9,14 @@ data class HomeUiState(
     val isLoading: Boolean = false,
     val selectedFilter: CodeFilterWindow = CodeFilterWindow.Last12Hours,
     val items: List<PickupCodeItem> = emptyList(),
-    val activeRules: List<String> = PickupCodeExtractor.defaultRules,
+    val activePromptKeywords: List<String> = PickupCodeExtractor.defaultPromptKeywords,
+    val activeAdvancedRules: List<String> = PickupCodeExtractor.defaultAdvancedRules,
     val showAllItems: Boolean = false,
     val lastLoadedAtMillis: Long? = null,
 ) {
     val pendingCount: Int
-        get() = items.count { !it.isPickedUp }
+        get() = items.sumOf { item ->
+            if (item.isPickedUp) 0 else item.codeCount
+        }
 }
 
