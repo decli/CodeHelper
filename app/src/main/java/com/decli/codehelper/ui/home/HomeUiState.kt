@@ -12,6 +12,7 @@ data class HomeUiState(
     val activePromptKeywords: List<String> = PickupCodeExtractor.defaultPromptKeywords,
     val activeAdvancedRules: List<String> = PickupCodeExtractor.defaultAdvancedRules,
     val showAllItems: Boolean = false,
+    val badgeRefreshMinutes: Int = 5,
     val lastLoadedAtMillis: Long? = null,
 ) {
     val pendingCount: Int

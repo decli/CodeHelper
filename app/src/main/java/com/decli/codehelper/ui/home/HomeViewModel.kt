@@ -11,6 +11,7 @@ import com.decli.codehelper.data.SmsRepository
 import com.decli.codehelper.model.CodeFilterWindow
 import com.decli.codehelper.model.ExtractorSettings
 import com.decli.codehelper.model.PickupCodeItem
+import com.decli.codehelper.util.BadgeNotifier
 import com.decli.codehelper.util.PickupCodeExtractor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -46,6 +47,7 @@ class HomeViewModel(
     val messages = messageFlow.asSharedFlow()
 
     init {
+        observeSelectedFilterSetting()
         observeData()
     }
 
@@ -68,6 +70,9 @@ class HomeViewModel(
     fun selectFilter(filterWindow: CodeFilterWindow) {
         showAllItems.value = false
         selectedFilter.value = filterWindow
+        viewModelScope.launch {
+            settingsRepository.saveSelectedFilter(filterWindow)
+        }
     }
 
     fun forceRefreshAll() {
@@ -140,22 +145,46 @@ class HomeViewModel(
         )
     }
 
+    fun saveBadgeRefreshMinutes(minutes: Int) {
+        val sanitizedMinutes = minutes.coerceIn(5, 120)
+        viewModelScope.launch {
+            settingsRepository.saveBadgeRefreshMinutes(sanitizedMinutes)
+            BadgeNotifier.scheduleNextBadgeRefresh(
+                context = getApplication(),
+                refreshMinutes = sanitizedMinutes,
+            )
+            BadgeNotifier.refreshBadgeFromSms(getApplication())
+            messageFlow.emit("角标刷新频率已保存")
+        }
+    }
+
+    private fun observeSelectedFilterSetting() {
+        viewModelScope.launch {
+            settingsRepository.selectedFilterFlow.collect { savedFilter ->
+                selectedFilter.value = savedFilter
+            }
+        }
+    }
+
     private fun observeData() {
         viewModelScope.launch {
             combine(
                 settingsRepository.extractorSettingsFlow,
                 settingsRepository.pickedUpItemsFlow,
+                settingsRepository.badgeRefreshMinutesFlow,
                 selectedFilter,
                 showAllItems,
-                permissionGranted,
-            ) { extractorSettings, pickedUpItems, filterWindow, showAll, hasPermission ->
+            ) { extractorSettings, pickedUpItems, badgeRefreshMinutes, filterWindow, showAll ->
                 HomeLoadRequest(
                     extractorSettings = extractorSettings,
                     pickedUpItems = pickedUpItems,
+                    badgeRefreshMinutes = badgeRefreshMinutes,
                     filterWindow = filterWindow,
                     showAll = showAll,
-                    hasPermission = hasPermission,
+                    hasPermission = false,
                 )
+            }.combine(permissionGranted) { request, hasPermission ->
+                request.copy(hasPermission = hasPermission)
             }.combine(reloadNonce) { request, _ ->
                 request
             }.collectLatest { request ->
@@ -167,10 +196,12 @@ class HomeViewModel(
                         activePromptKeywords = request.extractorSettings.promptKeywords,
                         activeAdvancedRules = request.extractorSettings.advancedRules,
                         showAllItems = request.showAll,
+                        badgeRefreshMinutes = request.badgeRefreshMinutes,
                     )
                 }
 
                 if (!request.hasPermission) {
+                    BadgeNotifier.clearBadge(getApplication())
                     uiStateFlow.update {
                         it.copy(
                             items = emptyList(),
@@ -198,6 +229,15 @@ class HomeViewModel(
                         lastLoadedAtMillis = System.currentTimeMillis(),
                     )
                 }
+
+                BadgeNotifier.updateBadge(
+                    context = getApplication(),
+                    pendingCount = items.sumOf { item -> if (item.isPickedUp) 0 else item.codeCount },
+                )
+                BadgeNotifier.scheduleNextBadgeRefresh(
+                    context = getApplication(),
+                    refreshMinutes = request.badgeRefreshMinutes,
+                )
             }
         }
     }
@@ -211,6 +251,7 @@ class HomeViewModel(
     private data class HomeLoadRequest(
         val extractorSettings: ExtractorSettings,
         val pickedUpItems: Set<String>,
+        val badgeRefreshMinutes: Int,
         val filterWindow: CodeFilterWindow,
         val showAll: Boolean,
         val hasPermission: Boolean,

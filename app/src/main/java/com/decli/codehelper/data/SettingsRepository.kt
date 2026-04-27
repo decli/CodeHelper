@@ -2,9 +2,11 @@ package com.decli.codehelper.data
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.decli.codehelper.model.CodeFilterWindow
 import com.decli.codehelper.model.ExtractorSettings
 import com.decli.codehelper.util.PickupCodeExtractor
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +22,8 @@ class SettingsRepository(
         val advancedRulesKey = stringPreferencesKey("pickup_rules")
         val pickedUpItemsKey = stringSetPreferencesKey("picked_up_items")
         val legacyDeletedItemsKey = stringSetPreferencesKey("deleted_pickup_items")
+        val selectedFilterKey = stringPreferencesKey("selected_filter")
+        val badgeRefreshMinutesKey = intPreferencesKey("badge_refresh_minutes")
     }
 
     val extractorSettingsFlow: Flow<ExtractorSettings> =
@@ -37,6 +41,17 @@ class SettingsRepository(
     val pickedUpItemsFlow: Flow<Set<String>> =
         context.settingsDataStore.data.map { preferences ->
             preferences[pickedUpItemsKey].orEmpty() + preferences[legacyDeletedItemsKey].orEmpty()
+        }
+
+    val selectedFilterFlow: Flow<CodeFilterWindow> =
+        context.settingsDataStore.data.map { preferences ->
+            val storedName = preferences[selectedFilterKey]
+            CodeFilterWindow.entries.firstOrNull { it.name == storedName } ?: CodeFilterWindow.Last12Hours
+        }
+
+    val badgeRefreshMinutesFlow: Flow<Int> =
+        context.settingsDataStore.data.map { preferences ->
+            coerceBadgeRefreshMinutes(preferences[badgeRefreshMinutesKey])
         }
 
     suspend fun saveExtractorSettings(
@@ -68,6 +83,18 @@ class SettingsRepository(
             preferences.remove(legacyDeletedItemsKey)
         }
     }
+
+    suspend fun saveSelectedFilter(filterWindow: CodeFilterWindow) {
+        context.settingsDataStore.edit { preferences ->
+            preferences[selectedFilterKey] = filterWindow.name
+        }
+    }
+
+    suspend fun saveBadgeRefreshMinutes(minutes: Int) {
+        context.settingsDataStore.edit { preferences ->
+            preferences[badgeRefreshMinutesKey] = coerceBadgeRefreshMinutes(minutes)
+        }
+    }
 }
 
 private fun String?.toSettingList(): List<String> =
@@ -77,4 +104,7 @@ private fun String?.toSettingList(): List<String> =
         ?.filter { it.isNotEmpty() }
         ?.toList()
         .orEmpty()
+
+private fun coerceBadgeRefreshMinutes(minutes: Int?): Int =
+    (minutes ?: 5).coerceIn(5, 120)
 

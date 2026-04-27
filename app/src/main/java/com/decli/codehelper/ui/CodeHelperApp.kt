@@ -5,6 +5,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Telephony
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -43,6 +44,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Rule
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -75,7 +77,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
@@ -106,6 +110,7 @@ import com.decli.codehelper.ui.theme.PendingCardBorder
 import com.decli.codehelper.ui.theme.PendingCardSurface
 import com.decli.codehelper.ui.theme.PickedCardBorder
 import com.decli.codehelper.ui.theme.PickedCardSurface
+import com.decli.codehelper.util.BadgeNotifier
 import com.decli.codehelper.util.PickupCodeExtractor
 import java.time.Instant
 import java.time.ZoneId
@@ -128,17 +133,30 @@ fun CodeHelperApp(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var showRuleEditor by rememberSaveable { mutableStateOf(false) }
+    var notificationPermissionGranted by remember {
+        mutableStateOf(BadgeNotifier.hasNotificationPermission(context))
+    }
+    val appVersionName = remember(context) { context.appVersionName() }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
     ) { granted ->
         viewModel.updatePermissionStatus(granted)
     }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) {
+        notificationPermissionGranted = BadgeNotifier.hasNotificationPermission(context)
+        if (notificationPermissionGranted) {
+            BadgeNotifier.updateBadge(context, uiState.pendingCount)
+        }
+    }
 
     DisposableEffect(lifecycleOwner, viewModel) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 viewModel.refreshPermissionStatus()
+                notificationPermissionGranted = BadgeNotifier.hasNotificationPermission(context)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -157,15 +175,26 @@ fun CodeHelperApp(
         RulesEditorSheet(
             initialPromptKeywords = uiState.activePromptKeywords,
             initialAdvancedRules = uiState.activeAdvancedRules,
+            initialBadgeRefreshMinutes = uiState.badgeRefreshMinutes,
+            notificationPermissionGranted = notificationPermissionGranted,
+            appVersionName = appVersionName,
             onDismissRequest = { showRuleEditor = false },
-            onSave = { promptKeywords, advancedRules ->
+            onSave = { promptKeywords, advancedRules, badgeRefreshMinutes ->
                 if (
                     viewModel.saveExtractorSettings(
                         candidatePromptKeywords = promptKeywords,
                         candidateAdvancedRules = advancedRules,
                     )
                 ) {
+                    viewModel.saveBadgeRefreshMinutes(badgeRefreshMinutes)
                     showRuleEditor = false
+                }
+            },
+            onRequestNotificationPermission = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    notificationPermissionGranted = true
                 }
             },
             onRestoreDefaults = {
@@ -353,7 +382,7 @@ private fun TimeFilterPanel(
                 if (selectedFilter == CodeFilterWindow.Last12Hours) {
                     FilledPanelButton(
                         modifier = Modifier.weight(1f),
-                        text = "12小时",
+                        text = "✅12小时",
                         containerColor = HeroWarm,
                         onClick = { onFilterSelected(CodeFilterWindow.Last12Hours) },
                     )
@@ -361,6 +390,7 @@ private fun TimeFilterPanel(
                     OutlinedPanelButton(
                         modifier = Modifier.weight(1f),
                         text = "12小时",
+                        containerColor = Color.White,
                         onClick = { onFilterSelected(CodeFilterWindow.Last12Hours) },
                     )
                 }
@@ -370,12 +400,13 @@ private fun TimeFilterPanel(
                         OutlinedPanelButton(
                             modifier = Modifier.fillMaxWidth(),
                             text = "其它时间",
+                            containerColor = Color.White,
                             onClick = { showOtherTimeSheet = true },
                         )
                     } else {
                         FilledPanelButton(
                             modifier = Modifier.fillMaxWidth(),
-                            text = "其它时间",
+                            text = "✅其它时间",
                             containerColor = HeroWarm,
                             onClick = { showOtherTimeSheet = true },
                         )
@@ -387,11 +418,11 @@ private fun TimeFilterPanel(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = AccentGreenContainer.copy(alpha = 0.78f)),
+                    colors = CardDefaults.cardColors(containerColor = HeroWarm),
                     border = BorderStroke(1.dp, PendingCardBorder),
                 ) {
                     Text(
-                        text = "当前已选：${selectedFilter.label}",
+                        text = "✅当前已选：${selectedFilter.label}",
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 12.dp, vertical = 12.dp),
@@ -438,7 +469,7 @@ private fun TimeFilterSheet(
 
             options.forEach { filter ->
                 val isSelected = filter == selectedFilter
-                val containerColor = if (isSelected) HeroWarm else CardSurface
+                val containerColor = if (isSelected) HeroWarm else Color.White
                 val borderColor = if (isSelected) PendingCardBorder else DividerTint
                 Button(
                     modifier = Modifier
@@ -454,7 +485,7 @@ private fun TimeFilterSheet(
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
                 ) {
                     Text(
-                        text = filter.label,
+                        text = if (isSelected) "✅${filter.label}" else filter.label,
                         style = androidx.compose.material3.MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp),
                         textAlign = TextAlign.Center,
                     )
@@ -586,6 +617,7 @@ private fun OutlinedPanelButton(
     text: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    containerColor: Color = Color.White,
     onClick: () -> Unit,
 ) {
     OutlinedButton(
@@ -595,7 +627,7 @@ private fun OutlinedPanelButton(
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(1.dp, PanelBorder),
         colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = CardSurface,
+            containerColor = containerColor,
             contentColor = Ink,
             disabledContentColor = Ink.copy(alpha = 0.5f),
         ),
@@ -850,8 +882,12 @@ private fun SwipeActionContainer(
 private fun RulesEditorSheet(
     initialPromptKeywords: List<String>,
     initialAdvancedRules: List<String>,
+    initialBadgeRefreshMinutes: Int,
+    notificationPermissionGranted: Boolean,
+    appVersionName: String,
     onDismissRequest: () -> Unit,
-    onSave: (List<String>, List<String>) -> Unit,
+    onSave: (List<String>, List<String>, Int) -> Unit,
+    onRequestNotificationPermission: () -> Unit,
     onRestoreDefaults: () -> Unit,
 ) {
     val extractor = remember { PickupCodeExtractor() }
@@ -865,13 +901,33 @@ private fun RulesEditorSheet(
             addAll(initialAdvancedRules)
         }
     }
+    var badgeRefreshMinutesText by rememberSaveable(initialBadgeRefreshMinutes) {
+        mutableStateOf(initialBadgeRefreshMinutes.toString())
+    }
+    var showAboutDialog by rememberSaveable { mutableStateOf(false) }
     val keywordTemplates = remember { PickupCodeExtractor.defaultPromptKeywords }
     val promptKeywordErrors = extractor.draftKeywordErrors(promptKeywords.toList())
     val ruleErrors = extractor.draftValidationErrors(advancedRules.toList())
+    val badgeRefreshMinutes = badgeRefreshMinutesText.toIntOrNull()
+    val hasBadgeRefreshError = badgeRefreshMinutes == null || badgeRefreshMinutes !in 5..120
     val canSave =
         promptKeywords.isNotEmpty() &&
             promptKeywordErrors.none { it != null } &&
-            ruleErrors.none { it != null }
+            ruleErrors.none { it != null } &&
+            !hasBadgeRefreshError
+
+    if (showAboutDialog) {
+        AlertDialog(
+            onDismissRequest = { showAboutDialog = false },
+            title = { Text(text = "关于取件码助手") },
+            text = { Text(text = "当前版本：$appVersionName") },
+            confirmButton = {
+                TextButton(onClick = { showAboutDialog = false }) {
+                    Text(text = "知道了")
+                }
+            },
+        )
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -996,9 +1052,69 @@ private fun RulesEditorSheet(
                 )
             }
 
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "图标角标",
+                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                    color = Ink,
+                )
+                Text(
+                    text = "桌面角标会显示当前时间范围内还未取件码数量，后台按设置频率自动更新。",
+                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                    color = InkMuted,
+                )
+                OutlinedTextField(
+                    value = badgeRefreshMinutesText,
+                    onValueChange = { updated ->
+                        badgeRefreshMinutesText = updated.filter { it.isDigit() }.take(3)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    textStyle = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
+                    label = { Text(text = "角标刷新频率（分钟）") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    isError = hasBadgeRefreshError,
+                    supportingText = {
+                        Text(
+                            text = if (hasBadgeRefreshError) {
+                                "请输入 5 到 120 之间的分钟数"
+                            } else {
+                                "默认 5 分钟，数字角标依赖系统桌面和通知权限支持"
+                            },
+                            color = if (hasBadgeRefreshError) {
+                                androidx.compose.material3.MaterialTheme.colorScheme.error
+                            } else {
+                                InkMuted
+                            },
+                        )
+                    },
+                )
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    listOf(5, 10, 15, 30).forEach { minutes ->
+                        OutlinedButton(
+                            onClick = { badgeRefreshMinutesText = minutes.toString() },
+                            shape = RoundedCornerShape(14.dp),
+                        ) {
+                            Text(text = "${minutes}分钟")
+                        }
+                    }
+                }
+                if (!notificationPermissionGranted) {
+                    OutlinedButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = onRequestNotificationPermission,
+                    ) {
+                        Text(text = "开启角标通知权限")
+                    }
+                }
+            }
+
             if (!canSave) {
                 Text(
-                    text = "存在空白提示词或高级规则语法错误，修正后才能保存。",
+                    text = "存在空白提示词、高级规则语法错误或角标频率无效，修正后才能保存。",
                     style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
                     color = androidx.compose.material3.MaterialTheme.colorScheme.error,
                 )
@@ -1031,6 +1147,13 @@ private fun RulesEditorSheet(
                     Text(text = "恢复默认设置")
                 }
 
+                OutlinedButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { showAboutDialog = true },
+                ) {
+                    Text(text = "关于")
+                }
+
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = canSave,
@@ -1038,6 +1161,7 @@ private fun RulesEditorSheet(
                         onSave(
                             promptKeywords.toList(),
                             advancedRules.toList(),
+                            badgeRefreshMinutes ?: 5,
                         )
                     },
                 ) {
@@ -1091,6 +1215,12 @@ private suspend fun openSmsOrConversation(
         onMessage("当前系统未定位到单条短信，已打开对应短信会话")
     }
 }
+
+@Suppress("DEPRECATION")
+private fun Context.appVersionName(): String =
+    runCatching {
+        packageManager.getPackageInfo(packageName, 0).versionName.orEmpty()
+    }.getOrDefault("").ifBlank { "未知版本" }
 
 private fun formatTime(millis: Long): String =
     Instant

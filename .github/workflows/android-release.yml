@@ -55,7 +55,7 @@ jobs:
                   RELEASE_KEY_PASSWORD: android
               run: |
                   set -o pipefail
-                  ./gradlew assembleRelease --stacktrace --no-daemon 2>&1 | tee gradle-build.log
+                  ./gradlew assembleRelease --no-daemon 2>&1 | tee gradle-build.log
 
             - name: Show Gradle failure excerpt
               if: failure()
