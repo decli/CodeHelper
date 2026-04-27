@@ -80,7 +80,7 @@ object BadgeNotifier {
             .setNumber(pendingCount)
             .setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL)
             .setOnlyAlertOnce(true)
-            .setOngoing(true)
+            // Xiaomi launchers do not count ongoing notifications toward icon badges.
             .setSilent(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
