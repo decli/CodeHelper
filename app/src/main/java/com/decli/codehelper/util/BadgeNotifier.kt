@@ -3,9 +3,11 @@ package com.decli.codehelper.util
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlarmManager
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -23,11 +25,15 @@ object BadgeNotifier {
     private const val CHANNEL_ID = "pickup_code_badge_number_v2"
     private const val CHANNEL_NAME = "取件码角标"
     private const val LEGACY_NOTIFICATION_ID = 1001
-    private const val NOTIFICATION_ID_PRIMARY = 1002
-    private const val NOTIFICATION_ID_SECONDARY = 1003
+    private const val LEGACY_SECONDARY_NOTIFICATION_ID = 1003
+    private const val NOTIFICATION_ID = 1002
     private const val ALARM_REQUEST_CODE = 2001
-    private const val BADGE_STATE_PREFS = "badge_notification_state"
-    private const val NEXT_NOTIFICATION_ID_KEY = "next_notification_id"
+
+    private const val XIAOMI_BADGE_ACTION = "android.intent.action.APPLICATION_MESSAGE_UPDATE"
+    private const val XIAOMI_BADGE_EXTRA_COMPONENT =
+        "android.intent.extra.update_application_component_name"
+    private const val XIAOMI_BADGE_EXTRA_TEXT =
+        "android.intent.extra.update_application_message_text"
 
     suspend fun refreshBadgeFromSms(context: Context) {
         val appContext = context.applicationContext
@@ -84,22 +90,25 @@ object BadgeNotifier {
             .setNumber(pendingCount)
             .setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL)
             .setOnlyAlertOnce(true)
-            // Keep it clearable; Xiaomi excludes ongoing notifications from icon badge counts.
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
 
-        val notificationId = nextNotificationId(appContext)
-        clearInactiveBadgeNotifications(appContext, notificationId)
+        applyMiuiBadgeCount(notification, pendingCount)
+        notificationManager.cancel(LEGACY_NOTIFICATION_ID)
+        notificationManager.cancel(LEGACY_SECONDARY_NOTIFICATION_ID)
         runCatching {
-            notificationManager.notify(notificationId, notification)
+            notificationManager.notify(NOTIFICATION_ID, notification)
         }
+        sendXiaomiBadgeBroadcast(appContext, pendingCount)
     }
 
     fun clearBadge(context: Context) {
-        val notificationManager = NotificationManagerCompat.from(context.applicationContext)
+        val appContext = context.applicationContext
+        val notificationManager = NotificationManagerCompat.from(appContext)
         notificationManager.cancel(LEGACY_NOTIFICATION_ID)
-        notificationManager.cancel(NOTIFICATION_ID_PRIMARY)
-        notificationManager.cancel(NOTIFICATION_ID_SECONDARY)
+        notificationManager.cancel(LEGACY_SECONDARY_NOTIFICATION_ID)
+        notificationManager.cancel(NOTIFICATION_ID)
+        sendXiaomiBadgeBroadcast(appContext, 0)
     }
 
     fun scheduleNextBadgeRefresh(context: Context, refreshMinutes: Int) {
@@ -142,28 +151,39 @@ object BadgeNotifier {
         notificationManager.createNotificationChannel(channel)
     }
 
-    private fun nextNotificationId(context: Context): Int {
-        val preferences = context.getSharedPreferences(BADGE_STATE_PREFS, Context.MODE_PRIVATE)
-        val currentId = preferences.getInt(NEXT_NOTIFICATION_ID_KEY, NOTIFICATION_ID_PRIMARY)
-            .takeIf { it == NOTIFICATION_ID_PRIMARY || it == NOTIFICATION_ID_SECONDARY }
-            ?: NOTIFICATION_ID_PRIMARY
-        val nextId = if (currentId == NOTIFICATION_ID_PRIMARY) {
-            NOTIFICATION_ID_SECONDARY
-        } else {
-            NOTIFICATION_ID_PRIMARY
+    private fun launcherComponent(context: Context): ComponentName? =
+        context.packageManager.getLaunchIntentForPackage(context.packageName)?.component
+
+    // MIUI / HyperOS 桌面不读取 Notification.number / setBadgeIconType。
+    // 数字角标走的是私有广播 APPLICATION_MESSAGE_UPDATE，需要主动发送。
+    private fun sendXiaomiBadgeBroadcast(context: Context, count: Int) {
+        val component = launcherComponent(context) ?: return
+        val intent = Intent(XIAOMI_BADGE_ACTION).apply {
+            putExtra(
+                XIAOMI_BADGE_EXTRA_COMPONENT,
+                "${component.packageName}/${component.className}",
+            )
+            putExtra(
+                XIAOMI_BADGE_EXTRA_TEXT,
+                if (count <= 0) "" else count.toString(),
+            )
         }
-        preferences.edit().putInt(NEXT_NOTIFICATION_ID_KEY, nextId).apply()
-        return currentId
+        runCatching { context.sendBroadcast(intent) }
     }
 
-    private fun clearInactiveBadgeNotifications(context: Context, activeNotificationId: Int) {
-        val notificationManager = NotificationManagerCompat.from(context.applicationContext)
-        notificationManager.cancel(LEGACY_NOTIFICATION_ID)
-        if (activeNotificationId != NOTIFICATION_ID_PRIMARY) {
-            notificationManager.cancel(NOTIFICATION_ID_PRIMARY)
-        }
-        if (activeNotificationId != NOTIFICATION_ID_SECONDARY) {
-            notificationManager.cancel(NOTIFICATION_ID_SECONDARY)
+    // 旧版 MIUI 通过 Notification.extraNotification 读取 messageCount。
+    // 在 HyperOS 上反射可能失败，但失败无副作用。
+    private fun applyMiuiBadgeCount(notification: Notification, count: Int) {
+        runCatching {
+            val field = notification.javaClass.getDeclaredField("extraNotification")
+            field.isAccessible = true
+            val extra = field.get(notification) ?: return@runCatching
+            val setter = extra.javaClass.getDeclaredMethod(
+                "setMessageCount",
+                Int::class.javaPrimitiveType,
+            )
+            setter.isAccessible = true
+            setter.invoke(extra, count)
         }
     }
 
