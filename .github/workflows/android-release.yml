@@ -93,6 +93,12 @@ jobs:
                   name: CodeHelper-release-apk
                   path: app/build/outputs/apk/release/*.apk
 
+            - name: Read app version
+              id: appversion
+              run: |
+                  VERSION=$(grep -E 'versionName\s*=' app/build.gradle.kts | head -1 | sed -E 's/.*"([^"]+)".*/\1/')
+                  echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
             - name: Publish tagged release
               if: startsWith(github.ref, 'refs/tags/')
               uses: softprops/action-gh-release@v2
@@ -100,3 +106,13 @@ jobs:
                   tag_name: ${{ github.ref_name }}
                   name: ${{ github.ref_name }}
                   files: app/build/outputs/apk/release/*.apk
+
+            - name: Publish release from main
+              if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ steps.appversion.outputs.tag }}
+                  name: ${{ steps.appversion.outputs.tag }}
+                  target_commitish: ${{ github.sha }}
+                  files: app/build/outputs/apk/release/*.apk
+                  fail_on_unmatched_files: true
