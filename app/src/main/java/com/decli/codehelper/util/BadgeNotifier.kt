@@ -12,6 +12,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -22,6 +23,7 @@ import com.decli.codehelper.data.SmsRepository
 import kotlinx.coroutines.flow.first
 
 object BadgeNotifier {
+    private const val TAG = "BadgeNotifier"
     private const val CHANNEL_ID = "pickup_code_badge_number_v2"
     private const val CHANNEL_NAME = "取件码角标"
     private const val LEGACY_NOTIFICATION_ID = 1001
@@ -34,6 +36,18 @@ object BadgeNotifier {
         "android.intent.extra.update_application_component_name"
     private const val XIAOMI_BADGE_EXTRA_TEXT =
         "android.intent.extra.update_application_message_text"
+
+    private const val SAMSUNG_BADGE_ACTION = "android.intent.action.BADGE_COUNT_UPDATE"
+
+    // HyperOS / MIUI 已知的桌面包名（中国版与全球版）。
+    // Android 14+ 隐式广播被限制，需要显式 setPackage 才能被 manifest 注册的 receiver 接收。
+    private val KNOWN_LAUNCHER_PACKAGES = listOf(
+        "com.miui.home",
+        "com.mi.android.globallauncher",
+        "com.miui.miuilite",
+        "com.miui.mihome",
+        "com.miui.mihome2",
+    )
 
     suspend fun refreshBadgeFromSms(context: Context) {
         val appContext = context.applicationContext
@@ -154,21 +168,57 @@ object BadgeNotifier {
     private fun launcherComponent(context: Context): ComponentName? =
         context.packageManager.getLaunchIntentForPackage(context.packageName)?.component
 
+    private fun activeHomeLauncherPackage(context: Context): String? {
+        val homeIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+        return runCatching {
+            context.packageManager
+                .resolveActivity(homeIntent, PackageManager.MATCH_DEFAULT_ONLY)
+                ?.activityInfo
+                ?.packageName
+        }.getOrNull()
+    }
+
+    private fun candidateLauncherPackages(context: Context): List<String> {
+        val resolved = activeHomeLauncherPackage(context)
+        val all = LinkedHashSet<String>()
+        if (resolved != null) all.add(resolved)
+        all.addAll(KNOWN_LAUNCHER_PACKAGES)
+        val installed = context.packageManager.getInstalledPackages(0).map { it.packageName }
+        return all.filter { it in installed }
+    }
+
     // MIUI / HyperOS 桌面不读取 Notification.number / setBadgeIconType。
     // 数字角标走的是私有广播 APPLICATION_MESSAGE_UPDATE，需要主动发送。
+    // Android 14+ 限制隐式广播投递到 manifest 注册的 receiver，所以必须显式 setPackage。
     private fun sendXiaomiBadgeBroadcast(context: Context, count: Int) {
         val component = launcherComponent(context) ?: return
-        val intent = Intent(XIAOMI_BADGE_ACTION).apply {
-            putExtra(
-                XIAOMI_BADGE_EXTRA_COMPONENT,
-                "${component.packageName}/${component.className}",
-            )
-            putExtra(
-                XIAOMI_BADGE_EXTRA_TEXT,
-                if (count <= 0) "" else count.toString(),
-            )
+        val targets = candidateLauncherPackages(context)
+        if (targets.isEmpty()) {
+            Log.w(TAG, "no launcher package resolved; skip badge broadcast")
+            return
         }
-        runCatching { context.sendBroadcast(intent) }
+        val componentName = "${component.packageName}/${component.className}"
+        val text = if (count <= 0) "" else count.toString()
+
+        for (pkg in targets) {
+            val miuiIntent = Intent(XIAOMI_BADGE_ACTION).apply {
+                setPackage(pkg)
+                putExtra(XIAOMI_BADGE_EXTRA_COMPONENT, componentName)
+                putExtra(XIAOMI_BADGE_EXTRA_TEXT, text)
+            }
+            runCatching { context.sendBroadcast(miuiIntent) }
+                .onFailure { Log.w(TAG, "miui badge broadcast to $pkg failed: ${it.message}") }
+
+            val samsungIntent = Intent(SAMSUNG_BADGE_ACTION).apply {
+                setPackage(pkg)
+                putExtra("badge_count_package_name", component.packageName)
+                putExtra("badge_count_class_name", component.className)
+                putExtra("badge_count", count.coerceAtLeast(0))
+            }
+            runCatching { context.sendBroadcast(samsungIntent) }
+                .onFailure { Log.w(TAG, "samsung badge broadcast to $pkg failed: ${it.message}") }
+        }
+        Log.i(TAG, "badge broadcast count=$count targets=$targets")
     }
 
     // 旧版 MIUI 通过 Notification.extraNotification 读取 messageCount。

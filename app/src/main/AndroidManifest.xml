@@ -15,6 +15,16 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="sms" />
         </intent>
+        <!-- Android 11+ package visibility: 必须声明才能 resolve 默认桌面，并对桌面包 setPackage 投递广播 -->
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.HOME" />
+        </intent>
+        <package android:name="com.miui.home" />
+        <package android:name="com.mi.android.globallauncher" />
+        <package android:name="com.miui.miuilite" />
+        <package android:name="com.miui.mihome" />
+        <package android:name="com.miui.mihome2" />
     </queries>
 
     <application
