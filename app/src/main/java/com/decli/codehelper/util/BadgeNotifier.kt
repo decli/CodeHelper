@@ -20,10 +20,14 @@ import com.decli.codehelper.data.SmsRepository
 import kotlinx.coroutines.flow.first
 
 object BadgeNotifier {
-    private const val CHANNEL_ID = "pickup_code_badge"
+    private const val CHANNEL_ID = "pickup_code_badge_number_v2"
     private const val CHANNEL_NAME = "取件码角标"
-    private const val NOTIFICATION_ID = 1001
+    private const val LEGACY_NOTIFICATION_ID = 1001
+    private const val NOTIFICATION_ID_PRIMARY = 1002
+    private const val NOTIFICATION_ID_SECONDARY = 1003
     private const val ALARM_REQUEST_CODE = 2001
+    private const val BADGE_STATE_PREFS = "badge_notification_state"
+    private const val NEXT_NOTIFICATION_ID_KEY = "next_notification_id"
 
     suspend fun refreshBadgeFromSms(context: Context) {
         val appContext = context.applicationContext
@@ -80,18 +84,22 @@ object BadgeNotifier {
             .setNumber(pendingCount)
             .setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL)
             .setOnlyAlertOnce(true)
-            // Xiaomi launchers do not count ongoing notifications toward icon badges.
-            .setSilent(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            // Keep it clearable; Xiaomi excludes ongoing notifications from icon badge counts.
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
 
+        val notificationId = nextNotificationId(appContext)
+        clearInactiveBadgeNotifications(appContext, notificationId)
         runCatching {
-            notificationManager.notify(NOTIFICATION_ID, notification)
+            notificationManager.notify(notificationId, notification)
         }
     }
 
     fun clearBadge(context: Context) {
-        NotificationManagerCompat.from(context.applicationContext).cancel(NOTIFICATION_ID)
+        val notificationManager = NotificationManagerCompat.from(context.applicationContext)
+        notificationManager.cancel(LEGACY_NOTIFICATION_ID)
+        notificationManager.cancel(NOTIFICATION_ID_PRIMARY)
+        notificationManager.cancel(NOTIFICATION_ID_SECONDARY)
     }
 
     fun scheduleNextBadgeRefresh(context: Context, refreshMinutes: Int) {
@@ -125,13 +133,38 @@ object BadgeNotifier {
         val channel = NotificationChannel(
             CHANNEL_ID,
             CHANNEL_NAME,
-            NotificationManager.IMPORTANCE_LOW,
+            NotificationManager.IMPORTANCE_DEFAULT,
         ).apply {
             setShowBadge(true)
             setSound(null, null)
             enableVibration(false)
         }
         notificationManager.createNotificationChannel(channel)
+    }
+
+    private fun nextNotificationId(context: Context): Int {
+        val preferences = context.getSharedPreferences(BADGE_STATE_PREFS, Context.MODE_PRIVATE)
+        val currentId = preferences.getInt(NEXT_NOTIFICATION_ID_KEY, NOTIFICATION_ID_PRIMARY)
+            .takeIf { it == NOTIFICATION_ID_PRIMARY || it == NOTIFICATION_ID_SECONDARY }
+            ?: NOTIFICATION_ID_PRIMARY
+        val nextId = if (currentId == NOTIFICATION_ID_PRIMARY) {
+            NOTIFICATION_ID_SECONDARY
+        } else {
+            NOTIFICATION_ID_PRIMARY
+        }
+        preferences.edit().putInt(NEXT_NOTIFICATION_ID_KEY, nextId).apply()
+        return currentId
+    }
+
+    private fun clearInactiveBadgeNotifications(context: Context, activeNotificationId: Int) {
+        val notificationManager = NotificationManagerCompat.from(context.applicationContext)
+        notificationManager.cancel(LEGACY_NOTIFICATION_ID)
+        if (activeNotificationId != NOTIFICATION_ID_PRIMARY) {
+            notificationManager.cancel(NOTIFICATION_ID_PRIMARY)
+        }
+        if (activeNotificationId != NOTIFICATION_ID_SECONDARY) {
+            notificationManager.cancel(NOTIFICATION_ID_SECONDARY)
+        }
     }
 
     private fun badgeRefreshIntent(context: Context): PendingIntent =
