@@ -7,13 +7,17 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Telephony
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -21,7 +25,6 @@ import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,36 +37,39 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Rule
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.rounded.ChatBubbleOutline
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Inventory2
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.TaskAlt
+import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material.icons.rounded.VerifiedUser
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -72,14 +78,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
@@ -88,42 +95,19 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import com.decli.codehelper.model.CodeFilterWindow
 import com.decli.codehelper.model.PickupCodeItem
 import com.decli.codehelper.ui.home.HomeUiState
 import com.decli.codehelper.ui.home.HomeViewModel
-import com.decli.codehelper.ui.theme.AccentBlueContainer
-import com.decli.codehelper.ui.theme.AccentGreen
-import com.decli.codehelper.ui.theme.AccentGreenContainer
-import com.decli.codehelper.ui.theme.AccentTerracotta
-import com.decli.codehelper.ui.theme.AppBackground
-import com.decli.codehelper.ui.theme.AppBackgroundShade
-import com.decli.codehelper.ui.theme.CardSurface
-import com.decli.codehelper.ui.theme.DividerTint
-import com.decli.codehelper.ui.theme.DrawerAction
-import com.decli.codehelper.ui.theme.HeroSurface
-import com.decli.codehelper.ui.theme.HeroWarm
-import com.decli.codehelper.ui.theme.Ink
-import com.decli.codehelper.ui.theme.InkMuted
-import com.decli.codehelper.ui.theme.PendingCardBorder
-import com.decli.codehelper.ui.theme.PendingCardSurface
-import com.decli.codehelper.ui.theme.PickedCardBorder
-import com.decli.codehelper.ui.theme.PickedCardSurface
+import com.decli.codehelper.ui.settings.SettingsScreen
 import com.decli.codehelper.util.BadgeNotifier
-import com.decli.codehelper.util.PickupCodeExtractor
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
-private val PanelBorder = Color(0xFF8C8377)
-private val ForceShowAllButtonColor = Color(0xFFE0D7EF)
-private val SettingsButtonColor = Color(0xFFE2EDFF)
-private val PendingSummaryColor = Color(0xFFFFD8D3)
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CodeHelperApp(
     viewModel: HomeViewModel,
@@ -132,7 +116,8 @@ fun CodeHelperApp(
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    var showRuleEditor by rememberSaveable { mutableStateOf(false) }
+    var showSettings by rememberSaveable { mutableStateOf(false) }
+    var showTimeSheet by rememberSaveable { mutableStateOf(false) }
     var notificationPermissionGranted by remember {
         mutableStateOf(BadgeNotifier.hasNotificationPermission(context))
     }
@@ -171,538 +156,537 @@ fun CodeHelperApp(
         }
     }
 
-    if (showRuleEditor) {
-        RulesEditorSheet(
-            initialPromptKeywords = uiState.activePromptKeywords,
-            initialAdvancedRules = uiState.activeAdvancedRules,
-            initialBadgeRefreshMinutes = uiState.badgeRefreshMinutes,
-            notificationPermissionGranted = notificationPermissionGranted,
-            appVersionName = appVersionName,
-            onDismissRequest = { showRuleEditor = false },
-            onSave = { promptKeywords, advancedRules, badgeRefreshMinutes ->
-                if (
-                    viewModel.saveExtractorSettings(
-                        candidatePromptKeywords = promptKeywords,
-                        candidateAdvancedRules = advancedRules,
-                    )
-                ) {
-                    viewModel.saveBadgeRefreshMinutes(badgeRefreshMinutes)
-                    showRuleEditor = false
-                }
+    if (showTimeSheet) {
+        TimeFilterSheet(
+            selectedFilter = uiState.selectedFilter,
+            options = remember {
+                CodeFilterWindow.entries.filterNot { it == CodeFilterWindow.Last12Hours }
             },
-            onRequestNotificationPermission = {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                } else {
-                    notificationPermissionGranted = true
-                }
-            },
-            onRestoreDefaults = {
-                viewModel.resetRulesToDefault()
-                showRuleEditor = false
+            onDismissRequest = { showTimeSheet = false },
+            onSelect = { filter ->
+                showTimeSheet = false
+                viewModel.selectFilter(filter)
             },
         )
     }
 
     Scaffold(
-        containerColor = AppBackground,
+        containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(AppBackground, AppBackgroundShade),
-                    ),
-                )
                 .padding(innerPadding),
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .widthIn(max = 680.dp)
-                    .align(Alignment.TopCenter)
-                    .statusBarsPadding()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 12.dp)
-                    .imePadding(),
-                contentPadding = PaddingValues(top = 10.dp, bottom = 28.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                item {
-                    HomeDashboard(
-                        uiState = uiState,
-                        onFilterSelected = viewModel::selectFilter,
-                        onForceRefreshAll = viewModel::forceRefreshAll,
-                        onEditRules = { showRuleEditor = true },
-                    )
-                }
-
-                when {
-                    !uiState.hasSmsPermission -> {
-                        item {
-                            StateCard(
-                                title = "需要短信权限才能读取取件码",
-                                subtitle = "应用不会联网，只会在本机读取短信。授权后会默认展示最近 12 小时内的未取件码。",
-                                actionText = "授权读取短信",
-                                onAction = {
-                                    permissionLauncher.launch(Manifest.permission.READ_SMS)
-                                },
+            if (showSettings) {
+                BackHandler { showSettings = false }
+                SettingsScreen(
+                    initialPromptKeywords = uiState.activePromptKeywords,
+                    initialAdvancedRules = uiState.activeAdvancedRules,
+                    initialBadgeRefreshMinutes = uiState.badgeRefreshMinutes,
+                    notificationPermissionGranted = notificationPermissionGranted,
+                    appVersionName = appVersionName,
+                    onBack = { showSettings = false },
+                    onSave = { promptKeywords, advancedRules, badgeRefreshMinutes ->
+                        if (
+                            viewModel.saveExtractorSettings(
+                                candidatePromptKeywords = promptKeywords,
+                                candidateAdvancedRules = advancedRules,
                             )
+                        ) {
+                            viewModel.saveBadgeRefreshMinutes(badgeRefreshMinutes)
+                            showSettings = false
                         }
-                    }
-
-                    uiState.isLoading && uiState.items.isEmpty() -> {
-                        item {
-                            StateCard(
-                                title = "正在读取短信",
-                                subtitle = "页面会按照当前时间范围和规则立即刷新内容。",
-                            )
+                    },
+                    onRequestNotificationPermission = {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                            notificationPermissionGranted = true
                         }
-                    }
-
-                    uiState.items.isEmpty() -> {
-                        item {
-                            StateCard(
-                                title = if (uiState.showAllItems) {
-                                    "当前时间范围没有取件码"
-                                } else {
-                                    "当前时间范围没有未取件码"
-                                },
-                                subtitle = if (uiState.showAllItems) {
-                                    "可以切换时间范围，或者进入设置调整提取规则。"
-                                } else {
-                                    "如果想查看已取件记录，请点击“强制展示所有”。"
-                                },
-                            )
-                        }
-                    }
-
-                    else -> {
-                        items(uiState.items, key = { it.uniqueKey }) { item ->
-                            PickupCodeCard(
-                                item = item,
-                                onMarkPickedUp = { viewModel.markPickedUp(item) },
-                                onOpenSms = {
-                                    openSmsOrConversation(
-                                        context = context,
-                                        item = item,
-                                        onMessage = { snackbarHostState.showSnackbar(it) },
-                                    )
-                                },
-                            )
-                        }
-                    }
-                }
+                    },
+                    onRestoreDefaults = {
+                        viewModel.resetRulesToDefault()
+                        showSettings = false
+                    },
+                )
+            } else {
+                HomeContent(
+                    uiState = uiState,
+                    onSelect12Hours = { viewModel.selectFilter(CodeFilterWindow.Last12Hours) },
+                    onOpenTimeSheet = { showTimeSheet = true },
+                    onShowAll = viewModel::forceRefreshAll,
+                    onShowPendingOnly = { viewModel.selectFilter(uiState.selectedFilter) },
+                    onOpenSettings = { showSettings = true },
+                    onGrantPermission = {
+                        permissionLauncher.launch(Manifest.permission.READ_SMS)
+                    },
+                    onMarkPickedUp = viewModel::markPickedUp,
+                    onOpenSms = { item ->
+                        openSmsOrConversation(
+                            context = context,
+                            item = item,
+                            onMessage = { snackbarHostState.showSnackbar(it) },
+                        )
+                    },
+                )
             }
         }
     }
 }
 
 @Composable
-private fun HomeDashboard(
+private fun HomeContent(
     uiState: HomeUiState,
-    onFilterSelected: (CodeFilterWindow) -> Unit,
-    onForceRefreshAll: () -> Unit,
-    onEditRules: () -> Unit,
+    onSelect12Hours: () -> Unit,
+    onOpenTimeSheet: () -> Unit,
+    onShowAll: () -> Unit,
+    onShowPendingOnly: () -> Unit,
+    onOpenSettings: () -> Unit,
+    onGrantPermission: () -> Unit,
+    onMarkPickedUp: (PickupCodeItem) -> Unit,
+    onOpenSms: suspend (PickupCodeItem) -> Unit,
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Text(
-            text = "取件码助手",
-            modifier = Modifier.fillMaxWidth(),
-            style = androidx.compose.material3.MaterialTheme.typography.displayMedium.copy(
-                fontSize = 30.sp,
-                lineHeight = 34.sp,
-            ),
-            color = Ink,
-            textAlign = TextAlign.Center,
-        )
-
-        TimeFilterPanel(
-            selectedFilter = uiState.selectedFilter,
-            onFilterSelected = onFilterSelected,
-        )
-
-        ActionPanel(
-            hasSmsPermission = uiState.hasSmsPermission,
-            onForceRefreshAll = onForceRefreshAll,
-            onEditRules = onEditRules,
-        )
-
-        PendingSummaryPanel(
-            pendingCount = uiState.pendingCount,
-            isLoading = uiState.isLoading,
-        )
-    }
-}
-
-@Composable
-private fun TimeFilterPanel(
-    selectedFilter: CodeFilterWindow,
-    onFilterSelected: (CodeFilterWindow) -> Unit,
-) {
-    var showOtherTimeSheet by rememberSaveable { mutableStateOf(false) }
-    val otherFilters = remember {
-        CodeFilterWindow.entries.filterNot { it == CodeFilterWindow.Last12Hours }
-    }
-    if (showOtherTimeSheet) {
-        TimeFilterSheet(
-            selectedFilter = selectedFilter,
-            options = otherFilters,
-            onDismissRequest = { showOtherTimeSheet = false },
-            onSelect = { filter ->
-                showOtherTimeSheet = false
-                onFilterSelected(filter)
-            },
-        )
-    }
-
-    PanelCard {
-        Column(
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 14.dp),
+                .widthIn(max = 680.dp)
+                .align(Alignment.TopCenter)
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(horizontal = 16.dp)
+                .imePadding(),
+            contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            Text(
-                text = "时间筛选",
-                style = androidx.compose.material3.MaterialTheme.typography.titleLarge,
-                color = Ink,
-            )
+            item(key = "header") {
+                HomeHeader(onOpenSettings = onOpenSettings)
+            }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                if (selectedFilter == CodeFilterWindow.Last12Hours) {
-                    FilledPanelButton(
-                        modifier = Modifier.weight(1f),
-                        text = "✅12小时",
-                        containerColor = HeroWarm,
-                        onClick = { onFilterSelected(CodeFilterWindow.Last12Hours) },
-                    )
+            item(key = "hero") {
+                HeroCard(
+                    pendingCount = uiState.pendingCount,
+                    rangeLabel = rangeLabel(uiState.selectedFilter),
+                    isLoading = uiState.isLoading,
+                    hasSmsPermission = uiState.hasSmsPermission,
+                )
+            }
+
+            item(key = "time-filter") {
+                TimeSegmentedControl(
+                    selectedFilter = uiState.selectedFilter,
+                    onSelect12Hours = onSelect12Hours,
+                    onOpenTimeSheet = onOpenTimeSheet,
+                )
+            }
+
+            item(key = "list-mode") {
+                if (uiState.showAllItems) {
+                    ShowAllBanner(onShowPendingOnly = onShowPendingOnly)
                 } else {
-                    OutlinedPanelButton(
-                        modifier = Modifier.weight(1f),
-                        text = "12小时",
-                        containerColor = Color.White,
-                        onClick = { onFilterSelected(CodeFilterWindow.Last12Hours) },
+                    PendingSectionRow(
+                        onShowAll = onShowAll,
+                        showAllEnabled = uiState.hasSmsPermission,
                     )
                 }
+            }
 
-                Box(modifier = Modifier.weight(1f)) {
-                    if (selectedFilter == CodeFilterWindow.Last12Hours) {
-                        OutlinedPanelButton(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = "其它时间",
-                            containerColor = Color.White,
-                            onClick = { showOtherTimeSheet = true },
+            when {
+                !uiState.hasSmsPermission -> {
+                    item(key = "state-permission") {
+                        StateCard(
+                            icon = Icons.Rounded.VerifiedUser,
+                            iconTint = MaterialTheme.colorScheme.primary,
+                            iconBackground = MaterialTheme.colorScheme.primaryContainer,
+                            title = "需要允许读取短信\n才能帮您找取件码",
+                            subtitle = "应用不联网、不上传、不发送短信，只在这台手机上帮您查找取件码。",
+                            actionText = "允许读取短信",
+                            onAction = onGrantPermission,
                         )
-                    } else {
-                        FilledPanelButton(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = "✅其它时间",
-                            containerColor = HeroWarm,
-                            onClick = { showOtherTimeSheet = true },
+                    }
+                }
+
+                uiState.isLoading && uiState.items.isEmpty() -> {
+                    item(key = "state-loading") {
+                        StateCard(
+                            showProgress = true,
+                            title = "正在读取短信",
+                            subtitle = "马上就好，页面会按当前时间范围自动刷新。",
+                        )
+                    }
+                }
+
+                uiState.items.isEmpty() -> {
+                    item(key = "state-empty") {
+                        if (uiState.showAllItems) {
+                            StateCard(
+                                icon = Icons.Rounded.Inventory2,
+                                iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                iconBackground = MaterialTheme.colorScheme.surfaceVariant,
+                                title = "当前时间范围没有取件码",
+                                subtitle = "可以换个时间范围，或到「设置」调整识别提示词。",
+                                actionText = "看更早的短信",
+                                actionIsPrimary = false,
+                                onAction = onOpenTimeSheet,
+                            )
+                        } else {
+                            StateCard(
+                                icon = Icons.Rounded.TaskAlt,
+                                iconTint = MaterialTheme.colorScheme.tertiary,
+                                iconBackground = MaterialTheme.colorScheme.tertiaryContainer,
+                                title = "包裹都取完了",
+                                subtitle = "${rangeLabel(uiState.selectedFilter)}内没有待取的取件码。想查看更早的短信，可以换个时间范围。",
+                                actionText = "看更早的短信",
+                                actionIsPrimary = false,
+                                onAction = onOpenTimeSheet,
+                            )
+                        }
+                    }
+                }
+
+                else -> {
+                    items(uiState.items, key = { it.uniqueKey }) { item ->
+                        PickupCodeCard(
+                            item = item,
+                            onMarkPickedUp = { onMarkPickedUp(item) },
+                            onOpenSms = { onOpenSms(item) },
                         )
                     }
                 }
             }
-
-            if (selectedFilter != CodeFilterWindow.Last12Hours) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = HeroWarm),
-                    border = BorderStroke(1.dp, PendingCardBorder),
-                ) {
-                    Text(
-                        text = "✅当前已选：${selectedFilter.label}",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 12.dp),
-                        style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(fontSize = 20.sp),
-                        color = Ink,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+// ─────────────────────────── 首页头部 ───────────────────────────
+
 @Composable
-private fun TimeFilterSheet(
-    selectedFilter: CodeFilterWindow,
-    options: List<CodeFilterWindow>,
-    onDismissRequest: () -> Unit,
-    onSelect: (CodeFilterWindow) -> Unit,
+private fun HomeHeader(
+    onOpenSettings: () -> Unit,
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        modifier = Modifier.imePadding(),
-        dragHandle = null,
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 18.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            Text(
-                text = "选择其它时间",
-                style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
-                color = Ink,
-            )
-            Text(
-                text = "点一下就会立刻重新读取短信，默认仍以 12 小时为基准。",
-                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
-                color = InkMuted,
-            )
-
-            options.forEach { filter ->
-                val isSelected = filter == selectedFilter
-                val containerColor = if (isSelected) HeroWarm else Color.White
-                val borderColor = if (isSelected) PendingCardBorder else DividerTint
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(58.dp),
-                    onClick = { onSelect(filter) },
-                    shape = RoundedCornerShape(18.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = containerColor,
-                        contentColor = Ink,
-                    ),
-                    border = BorderStroke(1.dp, borderColor),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
-                ) {
-                    Text(
-                        text = if (isSelected) "✅${filter.label}" else filter.label,
-                        style = androidx.compose.material3.MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp),
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
-}
-
-@Composable
-private fun ActionPanel(
-    hasSmsPermission: Boolean,
-    onForceRefreshAll: () -> Unit,
-    onEditRules: () -> Unit,
-) {
-    PanelCard(containerColor = AccentBlueContainer.copy(alpha = 0.68f)) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            FilledPanelButton(
-                modifier = Modifier.weight(1f),
-                text = "强制展示所有",
-                containerColor = ForceShowAllButtonColor,
-                enabled = hasSmsPermission,
-                onClick = onForceRefreshAll,
-            )
-
-            FilledPanelButton(
-                text = "设置",
-                containerColor = SettingsButtonColor,
-                onClick = onEditRules,
-            )
-        }
-    }
-}
-
-@Composable
-private fun PendingSummaryPanel(
-    pendingCount: Int,
-    isLoading: Boolean,
-) {
-    PanelCard {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Card(
-                shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = PendingSummaryColor),
-                border = BorderStroke(1.dp, PendingCardBorder),
+            Surface(
+                modifier = Modifier.size(38.dp),
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.primary,
             ) {
-                Text(
-                    text = "还未取件码共：$pendingCount 个",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 14.dp),
-                    style = androidx.compose.material3.MaterialTheme.typography.titleLarge,
-                    color = Ink,
-                    textAlign = TextAlign.Center,
-                )
-            }
-
-            if (isLoading) {
-                Text(
-                    text = "正在刷新当前列表…",
-                    modifier = Modifier.fillMaxWidth(),
-                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                    color = InkMuted,
-                    textAlign = TextAlign.Center,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun PanelCard(
-    containerColor: Color = HeroSurface.copy(alpha = 0.94f),
-    content: @Composable () -> Unit,
-) {
-    Card(
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        border = BorderStroke(1.dp, PanelBorder),
-    ) {
-        content()
-    }
-}
-
-@Composable
-private fun FilledPanelButton(
-    text: String,
-    modifier: Modifier = Modifier,
-    containerColor: Color,
-    enabled: Boolean = true,
-    onClick: () -> Unit,
-) {
-    Button(
-        modifier = modifier.height(48.dp),
-        onClick = onClick,
-        enabled = enabled,
-        shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = containerColor,
-            contentColor = Ink,
-            disabledContainerColor = containerColor.copy(alpha = 0.5f),
-            disabledContentColor = Ink.copy(alpha = 0.5f),
-        ),
-        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
-        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp),
-    ) {
-        Text(
-            text = text,
-            style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
-        )
-    }
-}
-
-@Composable
-private fun OutlinedPanelButton(
-    text: String,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    containerColor: Color = Color.White,
-    onClick: () -> Unit,
-) {
-    OutlinedButton(
-        modifier = modifier.height(48.dp),
-        onClick = onClick,
-        enabled = enabled,
-        shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(1.dp, PanelBorder),
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = containerColor,
-            contentColor = Ink,
-            disabledContentColor = Ink.copy(alpha = 0.5f),
-        ),
-        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp),
-    ) {
-        Text(
-            text = text,
-            style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
-        )
-    }
-}
-
-@Composable
-private fun StateCard(
-    title: String,
-    subtitle: String,
-    actionText: String? = null,
-    onAction: (() -> Unit)? = null,
-) {
-    Card(
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = CardSurface),
-        border = BorderStroke(1.dp, DividerTint),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 22.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            Text(
-                text = title,
-                style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
-                color = Ink,
-                textAlign = TextAlign.Center,
-            )
-            Text(
-                text = subtitle,
-                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
-                color = InkMuted,
-                textAlign = TextAlign.Center,
-            )
-
-            if (actionText != null && onAction != null) {
-                Button(onClick = onAction) {
-                    Text(text = actionText)
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Rounded.Inventory2,
+                        contentDescription = null,
+                        modifier = Modifier.size(22.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                    )
                 }
             }
+            Text(
+                text = "取件码助手",
+                style = MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp),
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+        }
+
+        Surface(
+            onClick = onOpenSettings,
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = 2.dp,
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Tune,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = "设置",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+// ─────────────────────────── 英雄区 ───────────────────────────
+
+@Composable
+private fun HeroCard(
+    pendingCount: Int,
+    rangeLabel: String,
+    isLoading: Boolean,
+    hasSmsPermission: Boolean,
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 2.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 22.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                text = rangeLabel,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row {
+                Text(
+                    text = "$pendingCount",
+                    modifier = Modifier.alignByBaseline(),
+                    style = MaterialTheme.typography.displayLarge,
+                    color = if (pendingCount == 0) {
+                        MaterialTheme.colorScheme.tertiary
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    },
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = "个包裹待取",
+                    modifier = Modifier.alignByBaseline(),
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp),
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            Text(
+                text = when {
+                    !hasSmsPermission -> "等待授权后开始读取"
+                    isLoading -> "正在读取短信…"
+                    else -> "已自动读取本机短信 · 全程离线"
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+// ─────────────────────────── 时间筛选 ───────────────────────────
+
+@Composable
+private fun TimeSegmentedControl(
+    selectedFilter: CodeFilterWindow,
+    onSelect12Hours: () -> Unit,
+    onOpenTimeSheet: () -> Unit,
+) {
+    val is12Hours = selectedFilter == CodeFilterWindow.Last12Hours
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 2.dp,
+    ) {
+        Row(
+            modifier = Modifier.padding(5.dp),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            TimeSegment(
+                modifier = Modifier.weight(1f),
+                selected = is12Hours,
+                label = "12小时",
+                onClick = onSelect12Hours,
+            )
+            TimeSegment(
+                modifier = Modifier.weight(1f),
+                selected = !is12Hours,
+                label = if (is12Hours) "其它时间" else selectedFilter.label,
+                showArrow = true,
+                onClick = onOpenTimeSheet,
+            )
+        }
+    }
+}
+
+@Composable
+private fun TimeSegment(
+    selected: Boolean,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    showArrow: Boolean = false,
+) {
+    val shape = RoundedCornerShape(14.dp)
+    val contentColor = if (selected) {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    Box(
+        modifier = modifier
+            .height(52.dp)
+            .clip(shape)
+            .background(
+                if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+            )
+            .then(
+                if (selected) {
+                    Modifier.border(1.6.dp, MaterialTheme.colorScheme.primary, shape)
+                } else {
+                    Modifier
+                },
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (selected) {
+                CheckBadge()
+            }
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
+                color = contentColor,
+            )
+            if (showArrow) {
+                Icon(
+                    imageVector = Icons.Rounded.KeyboardArrowDown,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = contentColor,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CheckBadge() {
+    Box(
+        modifier = Modifier
+            .size(21.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primary),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.Check,
+            contentDescription = null,
+            modifier = Modifier.size(14.dp),
+            tint = MaterialTheme.colorScheme.onPrimary,
+        )
+    }
+}
+
+// ─────────────────────────── 列表模式行 ───────────────────────────
+
+@Composable
+private fun PendingSectionRow(
+    onShowAll: () -> Unit,
+    showAllEnabled: Boolean,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "待取包裹",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Surface(
+            onClick = onShowAll,
+            enabled = showAllEnabled,
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.secondaryContainer.copy(
+                alpha = if (showAllEnabled) 1f else 0.45f,
+            ),
+        ) {
+            Text(
+                text = "查看全部（含已取）",
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                style = MaterialTheme.typography.labelMedium.copy(fontSize = 15.sp),
+                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(
+                    alpha = if (showAllEnabled) 1f else 0.6f,
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ShowAllBanner(
+    onShowPendingOnly: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.primaryContainer,
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "正在显示全部记录（含已取）",
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.labelMedium.copy(fontSize = 15.sp),
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Surface(
+                onClick = onShowPendingOnly,
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surface,
+                shadowElevation = 1.dp,
+            ) {
+                Text(
+                    text = "只看未取",
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 15.sp),
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        }
+    }
+}
+
+// ─────────────────────────── 取件码卡片 ───────────────────────────
+
 @Composable
 private fun PickupCodeCard(
     item: PickupCodeItem,
     onMarkPickedUp: () -> Unit,
     onOpenSms: suspend () -> Unit,
 ) {
-    val content: @Composable () -> Unit = {
+    if (item.isPickedUp) {
         PickupCodeCardBody(
             item = item,
             onOpenSms = onOpenSms,
+            onMarkPickedUp = null,
         )
-    }
-
-    if (item.isPickedUp) {
-        content()
     } else {
-        SwipeActionContainer(
-            actionLabel = "已取件",
-            onActionClick = onMarkPickedUp,
-        ) {
-            content()
+        SwipeActionContainer(onActionClick = onMarkPickedUp) {
+            PickupCodeCardBody(
+                item = item,
+                onOpenSms = onOpenSms,
+                onMarkPickedUp = onMarkPickedUp,
+            )
         }
     }
 }
@@ -712,20 +696,18 @@ private fun PickupCodeCard(
 private fun PickupCodeCardBody(
     item: PickupCodeItem,
     onOpenSms: suspend () -> Unit,
+    onMarkPickedUp: (() -> Unit)?,
 ) {
     val scope = rememberCoroutineScope()
-    val containerColor = if (item.isPickedUp) PickedCardSurface else PendingCardSurface
-    val borderColor = if (item.isPickedUp) PickedCardBorder else PendingCardBorder
-    val statusColor = if (item.isPickedUp) AccentGreen else AccentTerracotta
     val longestCodeLength = item.codes.maxOfOrNull { it.length } ?: 0
     val codeFontSize = when {
-        item.codeCount >= 4 -> 34.sp
-        item.codeCount >= 2 -> 38.sp
-        longestCodeLength >= 10 -> 46.sp
-        else -> 54.sp
+        item.codeCount >= 4 -> 30.sp
+        item.codeCount >= 2 -> 34.sp
+        longestCodeLength >= 10 -> 40.sp
+        else -> 48.sp
     }
 
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .combinedClickable(
@@ -737,85 +719,229 @@ private fun PickupCodeCardBody(
                 },
             ),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        border = BorderStroke(1.4.dp, borderColor),
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 2.dp,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+        Column {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 18.dp, end = 18.dp, top = 14.dp, bottom = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = if (item.isPickedUp) "已取件" else "未取件",
-                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-                    color = statusColor,
-                )
+                StatusChip(isPickedUp = item.isPickedUp, codeCount = item.codeCount)
                 Text(
                     text = formatTime(item.receivedAtMillis),
-                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                    color = InkMuted,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
-            Text(
-                text = item.codeDisplay,
-                modifier = Modifier.fillMaxWidth(),
-                style = androidx.compose.material3.MaterialTheme.typography.displayMedium.copy(
-                    fontSize = codeFontSize,
-                    lineHeight = codeFontSize * 1.15f,
-                    fontWeight = FontWeight.Normal,
-                ),
-                color = Ink,
-                textAlign = TextAlign.Center,
-            )
+            TicketDivider()
 
-            Text(
-                text = item.body,
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
-                color = Ink,
-                textAlign = TextAlign.Center,
-                maxLines = 4,
-                overflow = TextOverflow.Ellipsis,
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                    .padding(horizontal = 18.dp, vertical = 6.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 Text(
-                    text = item.matchedRuleDisplay,
-                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                    color = Ink,
+                    text = "取件码",
+                    style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 6.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = "双击打开短信",
-                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                    color = Ink,
+                    text = item.codeDisplay,
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.displayMedium.copy(
+                        fontSize = codeFontSize,
+                        lineHeight = codeFontSize * 1.3f,
+                    ),
+                    color = if (item.isPickedUp) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                    textAlign = TextAlign.Center,
                 )
+            }
+
+            if (item.body.isNotBlank()) {
+                Text(
+                    text = item.body,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 2.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            if (item.matchedRuleDisplay.isNotBlank()) {
+                Text(
+                    text = "识别自提示词「${item.matchedRuleDisplay}」",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Normal,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                    textAlign = TextAlign.Center,
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                CardActionButton(
+                    modifier = Modifier.weight(1f),
+                    text = "查看短信",
+                    icon = Icons.Rounded.ChatBubbleOutline,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    onClick = {
+                        scope.launch {
+                            onOpenSms()
+                        }
+                    },
+                )
+                if (onMarkPickedUp != null) {
+                    CardActionButton(
+                        modifier = Modifier.weight(1.35f),
+                        text = "已取到",
+                        icon = Icons.Rounded.Check,
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary,
+                        onClick = onMarkPickedUp,
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
+private fun StatusChip(
+    isPickedUp: Boolean,
+    codeCount: Int,
+) {
+    val backgroundColor: Color
+    val contentColor: Color
+    if (isPickedUp) {
+        backgroundColor = MaterialTheme.colorScheme.tertiaryContainer
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+    } else {
+        backgroundColor = MaterialTheme.colorScheme.secondaryContainer
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+    }
+    Surface(
+        shape = CircleShape,
+        color = backgroundColor,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = if (isPickedUp) Icons.Rounded.CheckCircle else Icons.Rounded.Inventory2,
+                contentDescription = null,
+                modifier = Modifier.size(15.dp),
+                tint = contentColor,
+            )
+            Text(
+                text = when {
+                    isPickedUp -> "已取件"
+                    codeCount > 1 -> "未取件 · ${codeCount} 个码"
+                    else -> "未取件"
+                },
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                color = contentColor,
+            )
+        }
+    }
+}
+
+/** 取件小票撕边：虚线 + 两侧打孔缺口 */
+@Composable
+private fun TicketDivider() {
+    val dashColor = MaterialTheme.colorScheme.outlineVariant
+    val notchColor = MaterialTheme.colorScheme.background
+    Canvas(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(18.dp),
+    ) {
+        val centerY = size.height / 2f
+        drawLine(
+            color = dashColor,
+            start = Offset(14.dp.toPx(), centerY),
+            end = Offset(size.width - 14.dp.toPx(), centerY),
+            strokeWidth = 2.dp.toPx(),
+            cap = StrokeCap.Round,
+            pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 10f)),
+        )
+        drawCircle(color = notchColor, radius = 9.dp.toPx(), center = Offset(0f, centerY))
+        drawCircle(color = notchColor, radius = 9.dp.toPx(), center = Offset(size.width, centerY))
+    }
+}
+
+@Composable
+private fun CardActionButton(
+    text: String,
+    icon: ImageVector,
+    containerColor: Color,
+    contentColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier.height(54.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = containerColor,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = contentColor,
+            )
+            Spacer(modifier = Modifier.width(7.dp))
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelLarge,
+                color = contentColor,
+            )
+        }
+    }
+}
+
+// ─────────────────────────── 左滑抽屉（保留手势） ───────────────────────────
+
+@Composable
 private fun SwipeActionContainer(
-    actionLabel: String,
     onActionClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
-    val revealWidth = 126.dp
+    val revealWidth = 132.dp
     val revealWidthPx = with(density) { revealWidth.toPx() }
     val offsetX = remember { Animatable(0f) }
 
@@ -827,26 +953,31 @@ private fun SwipeActionContainer(
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .background(DrawerAction),
+                .background(MaterialTheme.colorScheme.tertiary),
             contentAlignment = Alignment.CenterEnd,
         ) {
             Box(
                 modifier = Modifier
                     .width(revealWidth)
                     .fillMaxHeight()
-                    .background(AccentGreenContainer),
+                    .clickable(onClick = onActionClick),
                 contentAlignment = Alignment.Center,
             ) {
-                Button(
-                    onClick = onActionClick,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = DrawerAction,
-                        contentColor = CardSurface,
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp),
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Text(text = actionLabel)
+                    Icon(
+                        imageVector = Icons.Rounded.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp),
+                        tint = MaterialTheme.colorScheme.onTertiary,
+                    )
+                    Text(
+                        text = "已取到",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onTertiary,
+                    )
                 }
             }
         }
@@ -877,302 +1008,265 @@ private fun SwipeActionContainer(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+// ─────────────────────────── 状态卡片 ───────────────────────────
+
 @Composable
-private fun RulesEditorSheet(
-    initialPromptKeywords: List<String>,
-    initialAdvancedRules: List<String>,
-    initialBadgeRefreshMinutes: Int,
-    notificationPermissionGranted: Boolean,
-    appVersionName: String,
-    onDismissRequest: () -> Unit,
-    onSave: (List<String>, List<String>, Int) -> Unit,
-    onRequestNotificationPermission: () -> Unit,
-    onRestoreDefaults: () -> Unit,
+private fun StateCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector? = null,
+    iconTint: Color = MaterialTheme.colorScheme.primary,
+    iconBackground: Color = MaterialTheme.colorScheme.primaryContainer,
+    showProgress: Boolean = false,
+    actionText: String? = null,
+    actionIsPrimary: Boolean = true,
+    onAction: (() -> Unit)? = null,
 ) {
-    val extractor = remember { PickupCodeExtractor() }
-    val promptKeywords = remember(initialPromptKeywords) {
-        mutableStateListOf<String>().apply {
-            addAll(initialPromptKeywords)
-        }
-    }
-    val advancedRules = remember(initialAdvancedRules) {
-        mutableStateListOf<String>().apply {
-            addAll(initialAdvancedRules)
-        }
-    }
-    var badgeRefreshMinutesText by rememberSaveable(initialBadgeRefreshMinutes) {
-        mutableStateOf(initialBadgeRefreshMinutes.toString())
-    }
-    var showAboutDialog by rememberSaveable { mutableStateOf(false) }
-    val keywordTemplates = remember { PickupCodeExtractor.defaultPromptKeywords }
-    val promptKeywordErrors = extractor.draftKeywordErrors(promptKeywords.toList())
-    val ruleErrors = extractor.draftValidationErrors(advancedRules.toList())
-    val badgeRefreshMinutes = badgeRefreshMinutesText.toIntOrNull()
-    val hasBadgeRefreshError = badgeRefreshMinutes == null || badgeRefreshMinutes !in 5..120
-    val canSave =
-        promptKeywords.isNotEmpty() &&
-            promptKeywordErrors.none { it != null } &&
-            ruleErrors.none { it != null } &&
-            !hasBadgeRefreshError
-
-    if (showAboutDialog) {
-        AlertDialog(
-            onDismissRequest = { showAboutDialog = false },
-            title = { Text(text = "关于取件码助手") },
-            text = { Text(text = "当前版本：$appVersionName") },
-            confirmButton = {
-                TextButton(onClick = { showAboutDialog = false }) {
-                    Text(text = "知道了")
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 2.dp,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 28.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            if (showProgress) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .padding(bottom = 6.dp)
+                        .size(48.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 5.dp,
+                )
+            } else if (icon != null) {
+                Box(
+                    modifier = Modifier
+                        .padding(bottom = 6.dp)
+                        .size(84.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(iconBackground),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(44.dp),
+                        tint = iconTint,
+                    )
                 }
-            },
-        )
-    }
+            }
 
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+
+            if (actionText != null && onAction != null) {
+                if (actionIsPrimary) {
+                    Button(
+                        onClick = onAction,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                            .height(60.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                        ),
+                    ) {
+                        Text(
+                            text = actionText,
+                            style = MaterialTheme.typography.labelLarge.copy(fontSize = 19.sp),
+                        )
+                    }
+                } else {
+                    Surface(
+                        onClick = onAction,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                            .height(56.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = actionText,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ─────────────────────────── 时间范围弹层 ───────────────────────────
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TimeFilterSheet(
+    selectedFilter: CodeFilterWindow,
+    options: List<CodeFilterWindow>,
+    onDismissRequest: () -> Unit,
+    onSelect: (CodeFilterWindow) -> Unit,
+) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         modifier = Modifier.imePadding(),
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
         dragHandle = null,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Text(
-                text = "提取设置",
-                style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
-                color = Ink,
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 8.dp)
+                    .size(width = 44.dp, height = 5.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.outlineVariant),
             )
             Text(
-                text = "先填短信里常见的提示词，比如“取件码”“货码”“凭”。应用会自动在这些词后面寻找一个或多个取件码；高级规则只在特殊平台场景下再用。",
-                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
-                color = InkMuted,
+                text = "选择时间范围",
+                modifier = Modifier.padding(top = 6.dp),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = "选好后立刻重新读取短信",
+                modifier = Modifier.padding(bottom = 4.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "快捷提示词",
-                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-                    color = Ink,
-                )
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    keywordTemplates.forEach { template ->
-                        OutlinedButton(
-                            onClick = {
-                                if (template !in promptKeywords) {
-                                    promptKeywords += template
-                                }
-                            },
-                            shape = RoundedCornerShape(14.dp),
-                        ) {
-                            Text(text = template)
-                        }
-                    }
-                }
-            }
-
-            promptKeywords.indices.forEach { index ->
-                val fieldError = promptKeywordErrors.getOrNull(index)
-                OutlinedTextField(
-                    value = promptKeywords[index],
-                    onValueChange = { updated ->
-                        promptKeywords[index] = updated
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    textStyle = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
-                    label = { Text(text = "提示词 ${index + 1}") },
-                    isError = fieldError != null,
-                    supportingText = {
-                        Text(
-                            text = fieldError ?: "例如：取件码、货码、凭",
-                            color = if (fieldError != null) {
-                                androidx.compose.material3.MaterialTheme.colorScheme.error
-                            } else {
-                                InkMuted
-                            },
-                        )
-                    },
-                    trailingIcon = {
-                        if (promptKeywords.size > 1) {
-                            TextButton(onClick = { promptKeywords.removeAt(index) }) {
-                                Text(text = "删除")
-                            }
-                        }
-                    },
+            options.forEach { filter ->
+                TimeOptionRow(
+                    filter = filter,
+                    selected = filter == selectedFilter,
+                    onClick = { onSelect(filter) },
                 )
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "高级规则（可选）",
-                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-                    color = Ink,
-                )
-                Text(
-                    text = "只有遇到个别平台的特殊写法时，再补充正则规则。规则有语法错误时不能保存。",
-                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                    color = InkMuted,
-                )
-            }
-
-            advancedRules.indices.forEach { index ->
-                val fieldError = ruleErrors.getOrNull(index)
-                OutlinedTextField(
-                    value = advancedRules[index],
-                    onValueChange = { updated ->
-                        advancedRules[index] = updated
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    textStyle = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
-                    label = { Text(text = "高级规则 ${index + 1}") },
-                    isError = fieldError != null,
-                    supportingText = {
-                        Text(
-                            text = fieldError ?: "示例：货码[：:\\s]*([A-Za-z0-9-]+)",
-                            color = if (fieldError != null) {
-                                androidx.compose.material3.MaterialTheme.colorScheme.error
-                            } else {
-                                InkMuted
-                            },
-                        )
-                    },
-                    trailingIcon = {
-                        TextButton(onClick = { advancedRules.removeAt(index) }) {
-                            Text(text = "删除")
-                        }
-                    },
-                )
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "图标角标",
-                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-                    color = Ink,
-                )
-                Text(
-                    text = "桌面角标会显示当前时间范围内还未取件码数量，后台按设置频率自动更新。",
-                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                    color = InkMuted,
-                )
-                OutlinedTextField(
-                    value = badgeRefreshMinutesText,
-                    onValueChange = { updated ->
-                        badgeRefreshMinutesText = updated.filter { it.isDigit() }.take(3)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    textStyle = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
-                    label = { Text(text = "角标刷新频率（分钟）") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    isError = hasBadgeRefreshError,
-                    supportingText = {
-                        Text(
-                            text = if (hasBadgeRefreshError) {
-                                "请输入 5 到 120 之间的分钟数"
-                            } else {
-                                "默认 5 分钟，数字角标依赖系统桌面和通知权限支持"
-                            },
-                            color = if (hasBadgeRefreshError) {
-                                androidx.compose.material3.MaterialTheme.colorScheme.error
-                            } else {
-                                InkMuted
-                            },
-                        )
-                    },
-                )
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    listOf(5, 10, 15, 30).forEach { minutes ->
-                        OutlinedButton(
-                            onClick = { badgeRefreshMinutesText = minutes.toString() },
-                            shape = RoundedCornerShape(14.dp),
-                        ) {
-                            Text(text = "${minutes}分钟")
-                        }
-                    }
-                }
-                if (!notificationPermissionGranted) {
-                    OutlinedButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = onRequestNotificationPermission,
-                    ) {
-                        Text(text = "开启角标通知权限")
-                    }
-                }
-            }
-
-            if (!canSave) {
-                Text(
-                    text = "存在空白提示词、高级规则语法错误或角标频率无效，修正后才能保存。",
-                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                    color = androidx.compose.material3.MaterialTheme.colorScheme.error,
-                )
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { promptKeywords += "" },
-                ) {
-                    Text(text = "新增提示词")
-                }
-
-                OutlinedButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { advancedRules += "" },
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Rule,
-                        contentDescription = null,
+            Surface(
+                onClick = onDismissRequest,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp)
+                    .height(56.dp),
+                shape = RoundedCornerShape(18.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "取消",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "新增高级规则")
-                }
-
-                OutlinedButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = onRestoreDefaults,
-                ) {
-                    Text(text = "恢复默认设置")
-                }
-
-                OutlinedButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { showAboutDialog = true },
-                ) {
-                    Text(text = "关于")
-                }
-
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = canSave,
-                    onClick = {
-                        onSave(
-                            promptKeywords.toList(),
-                            advancedRules.toList(),
-                            badgeRefreshMinutes ?: 5,
-                        )
-                    },
-                ) {
-                    Text(text = "保存并刷新")
                 }
             }
-
-            Spacer(modifier = Modifier.height(18.dp))
         }
     }
 }
+
+@Composable
+private fun TimeOptionRow(
+    filter: CodeFilterWindow,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp),
+        shape = RoundedCornerShape(18.dp),
+        color = if (selected) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceVariant
+        },
+        border = if (selected) {
+            BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+        } else {
+            null
+        },
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (selected) {
+                Box(
+                    modifier = Modifier
+                        .size(26.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                    )
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(26.dp)
+                        .border(2.5.dp, MaterialTheme.colorScheme.outline, CircleShape),
+                )
+            }
+            Text(
+                text = sheetOptionLabel(filter),
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 19.sp, fontWeight = FontWeight.Bold),
+                color = if (selected) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                },
+            )
+        }
+    }
+}
+
+// ─────────────────────────── 工具函数 ───────────────────────────
+
+private fun rangeLabel(filter: CodeFilterWindow): String =
+    if (filter == CodeFilterWindow.Last12Hours) {
+        "最近 12 小时"
+    } else {
+        "最近 ${filter.hours / 24} 天"
+    }
+
+private fun sheetOptionLabel(filter: CodeFilterWindow): String = "最近 ${filter.hours / 24} 天"
 
 private suspend fun openSmsOrConversation(
     context: Context,
@@ -1222,8 +1316,14 @@ private fun Context.appVersionName(): String =
         packageManager.getPackageInfo(packageName, 0).versionName.orEmpty()
     }.getOrDefault("").ifBlank { "未知版本" }
 
-private fun formatTime(millis: Long): String =
-    Instant
-        .ofEpochMilli(millis)
-        .atZone(ZoneId.systemDefault())
-        .format(DateTimeFormatter.ofPattern("MM-dd HH:mm"))
+private fun formatTime(millis: Long): String {
+    val zone = ZoneId.systemDefault()
+    val dateTime = Instant.ofEpochMilli(millis).atZone(zone)
+    val today = LocalDate.now(zone)
+    val timeText = dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
+    return when (dateTime.toLocalDate()) {
+        today -> "今天 $timeText"
+        today.minusDays(1) -> "昨天 $timeText"
+        else -> dateTime.format(DateTimeFormatter.ofPattern("MM-dd HH:mm"))
+    }
+}
