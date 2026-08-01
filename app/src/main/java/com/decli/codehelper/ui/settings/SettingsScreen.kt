@@ -1,6 +1,5 @@
 package com.decli.codehelper.ui.settings
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,10 +39,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -53,11 +54,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -164,13 +161,15 @@ fun SettingsScreen(
                     )
                     promptKeywords.indices.forEach { index ->
                         val fieldError = promptKeywordErrors.getOrNull(index)
-                        OutlinedTextField(
+                        TextField(
                             value = promptKeywords[index],
                             onValueChange = { updated ->
                                 promptKeywords[index] = updated
                             },
                             modifier = Modifier.fillMaxWidth(),
                             textStyle = MaterialTheme.typography.bodyLarge,
+                            shape = RoundedCornerShape(14.dp),
+                            colors = settingsFieldColors(),
                             label = { Text(text = "提示词 ${index + 1}") },
                             isError = fieldError != null,
                             supportingText = {
@@ -196,7 +195,7 @@ fun SettingsScreen(
                             },
                         )
                     }
-                    DashedAddButton(
+                    TonalAddButton(
                         text = "新增提示词",
                         icon = Icons.Rounded.Add,
                         onClick = { promptKeywords += "" },
@@ -226,13 +225,15 @@ fun SettingsScreen(
                     )
                     advancedRules.indices.forEach { index ->
                         val fieldError = ruleErrors.getOrNull(index)
-                        OutlinedTextField(
+                        TextField(
                             value = advancedRules[index],
                             onValueChange = { updated ->
                                 advancedRules[index] = updated
                             },
                             modifier = Modifier.fillMaxWidth(),
                             textStyle = MaterialTheme.typography.bodyLarge,
+                            shape = RoundedCornerShape(14.dp),
+                            colors = settingsFieldColors(),
                             label = { Text(text = "高级规则 ${index + 1}") },
                             isError = fieldError != null,
                             supportingText = {
@@ -256,7 +257,7 @@ fun SettingsScreen(
                             },
                         )
                     }
-                    DashedAddButton(
+                    TonalAddButton(
                         text = "新增高级规则",
                         icon = Icons.Rounded.Rule,
                         onClick = { advancedRules += "" },
@@ -287,13 +288,15 @@ fun SettingsScreen(
                             )
                         }
                     }
-                    OutlinedTextField(
+                    TextField(
                         value = badgeRefreshMinutesText,
                         onValueChange = { updated ->
                             badgeRefreshMinutesText = updated.filter { it.isDigit() }.take(3)
                         },
                         modifier = Modifier.fillMaxWidth(),
                         textStyle = MaterialTheme.typography.bodyLarge,
+                        shape = RoundedCornerShape(14.dp),
+                        colors = settingsFieldColors(),
                         label = { Text(text = "角标刷新频率（分钟）") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         isError = hasBadgeRefreshError,
@@ -319,8 +322,7 @@ fun SettingsScreen(
                                 .fillMaxWidth()
                                 .height(54.dp),
                             shape = RoundedCornerShape(14.dp),
-                            color = MaterialTheme.colorScheme.surface,
-                            border = BorderStroke(1.6.dp, MaterialTheme.colorScheme.primary),
+                            color = MaterialTheme.colorScheme.primaryContainer,
                         ) {
                             Row(
                                 modifier = Modifier.fillMaxSize(),
@@ -331,13 +333,13 @@ fun SettingsScreen(
                                     imageVector = Icons.Rounded.NotificationsActive,
                                     contentDescription = null,
                                     modifier = Modifier.size(20.dp),
-                                    tint = MaterialTheme.colorScheme.secondary,
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "开启通知权限，角标才能显示",
                                     style = MaterialTheme.typography.labelLarge.copy(fontSize = 16.sp),
-                                    color = MaterialTheme.colorScheme.secondary,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 )
                             }
                         }
@@ -449,6 +451,18 @@ private fun SettingsTopBar(
     }
 }
 
+/** 填充式输入框配色：与整体无边框设计语言一致，仅聚焦/报错时显示下划线 */
+@Composable
+private fun settingsFieldColors(): TextFieldColors =
+    TextFieldDefaults.colors(
+        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+        errorContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+        unfocusedIndicatorColor = Color.Transparent,
+        errorIndicatorColor = MaterialTheme.colorScheme.error,
+    )
+
 @Composable
 private fun SettingsGroup(
     contentSpacing: Dp = 10.dp,
@@ -503,12 +517,7 @@ private fun SelectableChip(
         color = if (selected) {
             MaterialTheme.colorScheme.secondaryContainer
         } else {
-            MaterialTheme.colorScheme.surface
-        },
-        border = if (selected) {
-            null
-        } else {
-            BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline)
+            MaterialTheme.colorScheme.surfaceVariant
         },
     ) {
         Row(
@@ -538,29 +547,18 @@ private fun SelectableChip(
 }
 
 @Composable
-private fun DashedAddButton(
+private fun TonalAddButton(
     text: String,
     icon: ImageVector,
     onClick: () -> Unit,
 ) {
-    val dashColor = MaterialTheme.colorScheme.outline
     Surface(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .height(52.dp)
-            .drawBehind {
-                drawRoundRect(
-                    color = dashColor,
-                    style = Stroke(
-                        width = 2.dp.toPx(),
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(14f, 10f)),
-                    ),
-                    cornerRadius = CornerRadius(14.dp.toPx()),
-                )
-            },
+            .height(52.dp),
         shape = RoundedCornerShape(14.dp),
-        color = Color.Transparent,
+        color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
