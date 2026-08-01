@@ -284,7 +284,7 @@ private fun HomeContent(
             }
 
             item(key = "list-mode") {
-                if (uiState.showAllItems) {
+                if (uiState.showAllItems && uiState.hasSmsPermission) {
                     ShowAllBanner(onShowPendingOnly = onShowPendingOnly)
                 } else {
                     PendingSectionRow(

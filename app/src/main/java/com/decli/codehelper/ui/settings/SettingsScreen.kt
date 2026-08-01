@@ -70,6 +70,7 @@ import com.decli.codehelper.util.PickupCodeExtractor
  * 全屏设置页：识别提示词、高级规则、桌面角标、恢复默认与关于。
  * 校验逻辑与保存行为与旧版设置弹层完全一致。
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     initialPromptKeywords: List<String>,
