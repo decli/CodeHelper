@@ -12,7 +12,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -62,8 +61,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -153,6 +154,19 @@ fun CodeHelperApp(
     LaunchedEffect(viewModel) {
         viewModel.messages.collect { message ->
             snackbarHostState.showSnackbar(message)
+        }
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.pickedUpEvents.collect { item ->
+            val result = snackbarHostState.showSnackbar(
+                message = "已把「${item.codes.joinToString("、")}」标记为已取到",
+                actionLabel = "撤销",
+                duration = SnackbarDuration.Long,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.restorePending(item)
+            }
         }
     }
 
@@ -284,14 +298,12 @@ private fun HomeContent(
             }
 
             item(key = "list-mode") {
-                if (uiState.showAllItems && uiState.hasSmsPermission) {
-                    ShowAllBanner(onShowPendingOnly = onShowPendingOnly)
-                } else {
-                    PendingSectionRow(
-                        onShowAll = onShowAll,
-                        showAllEnabled = uiState.hasSmsPermission,
-                    )
-                }
+                ListModeTabs(
+                    showAll = uiState.showAllItems && uiState.hasSmsPermission,
+                    allTabEnabled = uiState.hasSmsPermission,
+                    onSelectPending = onShowPendingOnly,
+                    onSelectAll = onShowAll,
+                )
             }
 
             when {
@@ -351,6 +363,7 @@ private fun HomeContent(
                     items(uiState.items, key = { it.uniqueKey }) { item ->
                         PickupCodeCard(
                             item = item,
+                            promptKeywords = uiState.activePromptKeywords,
                             onMarkPickedUp = { onMarkPickedUp(item) },
                             onOpenSms = { onOpenSms(item) },
                         )
@@ -528,7 +541,7 @@ private fun TimeSegment(
 ) {
     val shape = RoundedCornerShape(14.dp)
     val contentColor = if (selected) {
-        MaterialTheme.colorScheme.onPrimaryContainer
+        MaterialTheme.colorScheme.onPrimary
     } else {
         MaterialTheme.colorScheme.onSurfaceVariant
     }
@@ -537,24 +550,22 @@ private fun TimeSegment(
             .height(52.dp)
             .clip(shape)
             .background(
-                if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-            )
-            .then(
-                if (selected) {
-                    Modifier.border(1.6.dp, MaterialTheme.colorScheme.primary, shape)
-                } else {
-                    Modifier
-                },
+                if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
             )
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(7.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (selected) {
-                CheckBadge()
+                Icon(
+                    imageVector = Icons.Rounded.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = contentColor,
+                )
             }
             Text(
                 text = label,
@@ -573,96 +584,74 @@ private fun TimeSegment(
     }
 }
 
-@Composable
-private fun CheckBadge() {
-    Box(
-        modifier = Modifier
-            .size(21.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primary),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            imageVector = Icons.Rounded.Check,
-            contentDescription = null,
-            modifier = Modifier.size(14.dp),
-            tint = MaterialTheme.colorScheme.onPrimary,
-        )
-    }
-}
-
-// ─────────────────────────── 列表模式行 ───────────────────────────
+// ─────────────────────────── 列表模式双标签 ───────────────────────────
 
 @Composable
-private fun PendingSectionRow(
-    onShowAll: () -> Unit,
-    showAllEnabled: Boolean,
+private fun ListModeTabs(
+    showAll: Boolean,
+    allTabEnabled: Boolean,
+    onSelectPending: () -> Unit,
+    onSelectAll: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
+        ListTab(
+            modifier = Modifier.weight(1f),
             text = "待取包裹",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground,
+            selected = !showAll,
+            enabled = true,
+            onClick = onSelectPending,
         )
-        Surface(
-            onClick = onShowAll,
-            enabled = showAllEnabled,
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.secondaryContainer.copy(
-                alpha = if (showAllEnabled) 1f else 0.45f,
-            ),
-        ) {
-            Text(
-                text = "查看全部（含已取）",
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                style = MaterialTheme.typography.labelMedium.copy(fontSize = 15.sp),
-                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(
-                    alpha = if (showAllEnabled) 1f else 0.6f,
-                ),
-            )
-        }
+        ListTab(
+            modifier = Modifier.weight(1f),
+            text = "全部包裹",
+            selected = showAll,
+            enabled = allTabEnabled,
+            onClick = onSelectAll,
+        )
     }
 }
 
 @Composable
-private fun ShowAllBanner(
-    onShowPendingOnly: () -> Unit,
+private fun ListTab(
+    text: String,
+    selected: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.primaryContainer,
+    val textColor = when {
+        !enabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+        selected -> MaterialTheme.colorScheme.onBackground
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(enabled = enabled && !selected, onClick = onClick)
+            .padding(top = 10.dp, bottom = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Row(
-            modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "正在显示全部记录（含已取）",
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.labelMedium.copy(fontSize = 15.sp),
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-            Surface(
-                onClick = onShowPendingOnly,
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 1.dp,
-            ) {
-                Text(
-                    text = "只看未取",
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 15.sp),
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-            }
-        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontSize = 19.sp,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+            ),
+            color = textColor,
+        )
+        Box(
+            modifier = Modifier
+                .size(width = 52.dp, height = 4.dp)
+                .clip(CircleShape)
+                .background(
+                    if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                ),
+        )
     }
 }
 
@@ -671,12 +660,14 @@ private fun ShowAllBanner(
 @Composable
 private fun PickupCodeCard(
     item: PickupCodeItem,
+    promptKeywords: List<String>,
     onMarkPickedUp: () -> Unit,
     onOpenSms: suspend () -> Unit,
 ) {
     if (item.isPickedUp) {
         PickupCodeCardBody(
             item = item,
+            promptKeywords = promptKeywords,
             onOpenSms = onOpenSms,
             onMarkPickedUp = null,
         )
@@ -684,6 +675,7 @@ private fun PickupCodeCard(
         SwipeActionContainer(onActionClick = onMarkPickedUp) {
             PickupCodeCardBody(
                 item = item,
+                promptKeywords = promptKeywords,
                 onOpenSms = onOpenSms,
                 onMarkPickedUp = onMarkPickedUp,
             )
@@ -695,6 +687,7 @@ private fun PickupCodeCard(
 @Composable
 private fun PickupCodeCardBody(
     item: PickupCodeItem,
+    promptKeywords: List<String>,
     onOpenSms: suspend () -> Unit,
     onMarkPickedUp: (() -> Unit)?,
 ) {
@@ -782,9 +775,9 @@ private fun PickupCodeCardBody(
                 )
             }
 
-            if (item.matchedRuleDisplay.isNotBlank()) {
+            if (item.matchedRules.isNotEmpty()) {
                 Text(
-                    text = "识别自提示词「${item.matchedRuleDisplay}」",
+                    text = "识别依据：${matchedRuleLabel(item.matchedRules, promptKeywords)}",
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 4.dp),
@@ -818,7 +811,7 @@ private fun PickupCodeCardBody(
                 if (onMarkPickedUp != null) {
                     CardActionButton(
                         modifier = Modifier.weight(1.35f),
-                        text = "已取到",
+                        text = "我已取到",
                         icon = Icons.Rounded.Check,
                         containerColor = MaterialTheme.colorScheme.tertiary,
                         contentColor = MaterialTheme.colorScheme.onTertiary,
@@ -974,7 +967,7 @@ private fun SwipeActionContainer(
                         tint = MaterialTheme.colorScheme.onTertiary,
                     )
                     Text(
-                        text = "已取到",
+                        text = "我已取到",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onTertiary,
                     )
@@ -1205,14 +1198,9 @@ private fun TimeOptionRow(
             .height(60.dp),
         shape = RoundedCornerShape(18.dp),
         color = if (selected) {
-            MaterialTheme.colorScheme.primaryContainer
+            MaterialTheme.colorScheme.primary
         } else {
             MaterialTheme.colorScheme.surfaceVariant
-        },
-        border = if (selected) {
-            BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-        } else {
-            null
         },
     ) {
         Row(
@@ -1227,14 +1215,14 @@ private fun TimeOptionRow(
                     modifier = Modifier
                         .size(26.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
+                        .background(MaterialTheme.colorScheme.onPrimary),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Check,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
             } else {
@@ -1248,7 +1236,7 @@ private fun TimeOptionRow(
                 text = sheetOptionLabel(filter),
                 style = MaterialTheme.typography.titleMedium.copy(fontSize = 19.sp, fontWeight = FontWeight.Bold),
                 color = if (selected) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
+                    MaterialTheme.colorScheme.onPrimary
                 } else {
                     MaterialTheme.colorScheme.onSurface
                 },
@@ -1267,6 +1255,23 @@ private fun rangeLabel(filter: CodeFilterWindow): String =
     }
 
 private fun sheetOptionLabel(filter: CodeFilterWindow): String = "最近 ${filter.hours / 24} 天"
+
+/**
+ * 把提取器的技术标签（命中规则N）翻译成老人能看懂的识别依据：
+ * 规则号落在提示词范围内时直接显示命中的提示词，超出部分归为高级规则。
+ */
+private fun matchedRuleLabel(
+    matchedRules: List<String>,
+    promptKeywords: List<String>,
+): String =
+    matchedRules.joinToString(separator = "、") { rule ->
+        val ruleNumber = rule.removePrefix("命中规则").toIntOrNull()
+        when {
+            ruleNumber == null || ruleNumber < 1 -> rule
+            ruleNumber <= promptKeywords.size -> "「${promptKeywords[ruleNumber - 1]}」"
+            else -> "高级规则${ruleNumber - promptKeywords.size}"
+        }
+    }
 
 private suspend fun openSmsOrConversation(
     context: Context,

@@ -42,9 +42,13 @@ class HomeViewModel(
     )
 
     private val messageFlow = MutableSharedFlow<String>(extraBufferCapacity = 8)
+    private val pickedUpEventFlow = MutableSharedFlow<PickupCodeItem>(extraBufferCapacity = 8)
 
     val uiState: StateFlow<HomeUiState> = uiStateFlow.asStateFlow()
     val messages = messageFlow.asSharedFlow()
+
+    /** 标记已取到后的可撤销事件，item 为已置为已取件状态的副本 */
+    val pickedUpEvents = pickedUpEventFlow.asSharedFlow()
 
     init {
         observeSelectedFilterSetting()
@@ -91,7 +95,7 @@ class HomeViewModel(
         viewModelScope.launch {
             showAllItems.value = false
             settingsRepository.markPickedUp(item.uniqueKey)
-            messageFlow.emit("已将 ${item.codes.joinToString("、")} 标记为已取件")
+            pickedUpEventFlow.emit(item.copy(isPickedUp = true))
         }
     }
 
