@@ -1,7 +1,8 @@
 # 取件码助手（CodeHelper）
 
 一款为老人场景设计的本地短信取件码助手。
-<img width="1200" height="2608" alt="13695a70b5d2fa825c7789c99729e938" src="https://github.com/user-attachments/assets/5d984094-9569-4b46-9892-4576313ef7cb" />
+<img width="600" height="1304" alt="7d327784bd7ca5fcaf904bd209f11966" src="https://github.com/user-attachments/assets/84f91751-aeaf-4b77-a81b-1d3d3706ce66" />
+
 
 
 ## 功能
