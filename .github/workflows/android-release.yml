@@ -32,17 +32,28 @@ jobs:
             - name: Install Android 16 build packages
               run: sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
-            - name: Generate CI release keystore
+            # 优先使用仓库 Secrets 中的固定签名密钥（RELEASE_KEYSTORE_BASE64），
+            # 保证每个版本签名一致、可覆盖安装升级；
+            # 未配置 Secrets 时回退为一次性密钥并给出警告（此时升级需先卸载旧版）。
+            - name: Prepare release keystore
+              env:
+                  RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
               run: |
-                  keytool -genkeypair -v \
-                    -keystore "$GITHUB_WORKSPACE/release.keystore" \
-                    -storepass android \
-                    -keypass android \
-                    -alias codehelper \
-                    -keyalg RSA \
-                    -keysize 2048 \
-                    -validity 3650 \
-                    -dname "CN=CodeHelper,O=CodeHelper,C=CN"
+                  if [ -n "$RELEASE_KEYSTORE_BASE64" ]; then
+                    printf '%s' "$RELEASE_KEYSTORE_BASE64" | base64 -d > "$GITHUB_WORKSPACE/release.keystore"
+                    echo "使用仓库 Secrets 中的固定签名密钥"
+                  else
+                    echo "::warning title=未配置固定签名密钥::本次构建使用一次性密钥签名，用户覆盖安装升级会因签名不一致失败。请按 README「发布签名配置」一节配置 RELEASE_KEYSTORE_BASE64 等 Secrets。"
+                    keytool -genkeypair -v \
+                      -keystore "$GITHUB_WORKSPACE/release.keystore" \
+                      -storepass android \
+                      -keypass android \
+                      -alias codehelper \
+                      -keyalg RSA \
+                      -keysize 2048 \
+                      -validity 3650 \
+                      -dname "CN=CodeHelper,O=CodeHelper,C=CN"
+                  fi
 
             - name: Ensure Gradle wrapper is executable
               run: chmod +x gradlew
@@ -50,9 +61,9 @@ jobs:
             - name: Build release APK
               env:
                   RELEASE_KEYSTORE_PATH: ${{ github.workspace }}/release.keystore
-                  RELEASE_STORE_PASSWORD: android
-                  RELEASE_KEY_ALIAS: codehelper
-                  RELEASE_KEY_PASSWORD: android
+                  RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD || 'android' }}
+                  RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS || 'codehelper' }}
+                  RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD || 'android' }}
               run: |
                   set -o pipefail
                   ./gradlew assembleRelease --no-daemon 2>&1 | tee gradle-build.log
