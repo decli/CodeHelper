@@ -11,8 +11,8 @@ val CodeHelperTypography = Typography(
     // 首屏待取数量大数字
     displayLarge = TextStyle(
         fontWeight = FontWeight.ExtraBold,
-        fontSize = 56.sp,
-        lineHeight = 62.sp,
+        fontSize = 72.sp,
+        lineHeight = 78.sp,
         fontFeatureSettings = "tnum",
     ),
     // 取件码基准字号（卡片内按长度自适应缩放）

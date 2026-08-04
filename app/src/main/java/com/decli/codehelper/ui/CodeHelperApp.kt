@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -44,6 +45,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChatBubbleOutline
 import androidx.compose.material.icons.rounded.Check
@@ -52,6 +55,7 @@ import androidx.compose.material.icons.rounded.Inventory2
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.TaskAlt
 import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material.icons.rounded.Undo
 import androidx.compose.material.icons.rounded.VerifiedUser
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -92,6 +96,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -238,6 +243,7 @@ fun CodeHelperApp(
                         permissionLauncher.launch(Manifest.permission.READ_SMS)
                     },
                     onMarkPickedUp = viewModel::markPickedUp,
+                    onRestorePending = viewModel::restorePending,
                     onOpenSms = { item ->
                         openSmsOrConversation(
                             context = context,
@@ -261,6 +267,7 @@ private fun HomeContent(
     onOpenSettings: () -> Unit,
     onGrantPermission: () -> Unit,
     onMarkPickedUp: (PickupCodeItem) -> Unit,
+    onRestorePending: (PickupCodeItem) -> Unit,
     onOpenSms: suspend (PickupCodeItem) -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -365,6 +372,7 @@ private fun HomeContent(
                             item = item,
                             promptKeywords = uiState.activePromptKeywords,
                             onMarkPickedUp = { onMarkPickedUp(item) },
+                            onRestorePending = { onRestorePending(item) },
                             onOpenSms = { onOpenSms(item) },
                         )
                     }
@@ -478,7 +486,7 @@ private fun HeroCard(
                 Text(
                     text = "个包裹待取",
                     modifier = Modifier.alignByBaseline(),
-                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp),
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp),
                     color = MaterialTheme.colorScheme.onSurface,
                 )
             }
@@ -495,15 +503,12 @@ private fun HeroCard(
     }
 }
 
-// ─────────────────────────── 时间筛选 ───────────────────────────
+// ─────────────── 分段控件（全应用统一的选中语言：柿橙实心底 + 对勾） ───────────────
 
 @Composable
-private fun TimeSegmentedControl(
-    selectedFilter: CodeFilterWindow,
-    onSelect12Hours: () -> Unit,
-    onOpenTimeSheet: () -> Unit,
+private fun SegmentedCard(
+    content: @Composable RowScope.() -> Unit,
 ) {
-    val is12Hours = selectedFilter == CodeFilterWindow.Last12Hours
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -513,37 +518,26 @@ private fun TimeSegmentedControl(
         Row(
             modifier = Modifier.padding(5.dp),
             horizontalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-            TimeSegment(
-                modifier = Modifier.weight(1f),
-                selected = is12Hours,
-                label = "12小时",
-                onClick = onSelect12Hours,
-            )
-            TimeSegment(
-                modifier = Modifier.weight(1f),
-                selected = !is12Hours,
-                label = if (is12Hours) "其它时间" else selectedFilter.label,
-                showArrow = true,
-                onClick = onOpenTimeSheet,
-            )
-        }
+            content = content,
+        )
     }
 }
 
 @Composable
-private fun TimeSegment(
+private fun Segment(
     selected: Boolean,
     label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     showArrow: Boolean = false,
+    clickableWhenSelected: Boolean = false,
 ) {
     val shape = RoundedCornerShape(14.dp)
-    val contentColor = if (selected) {
-        MaterialTheme.colorScheme.onPrimary
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
+    val contentColor = when {
+        selected -> MaterialTheme.colorScheme.onPrimary
+        !enabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
     Box(
         modifier = modifier
@@ -552,7 +546,10 @@ private fun TimeSegment(
             .background(
                 if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
             )
-            .clickable(onClick = onClick),
+            .clickable(
+                enabled = enabled && (!selected || clickableWhenSelected),
+                onClick = onClick,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Row(
@@ -584,7 +581,35 @@ private fun TimeSegment(
     }
 }
 
-// ─────────────────────────── 列表模式双标签 ───────────────────────────
+// ─────────────────────────── 时间筛选 ───────────────────────────
+
+@Composable
+private fun TimeSegmentedControl(
+    selectedFilter: CodeFilterWindow,
+    onSelect12Hours: () -> Unit,
+    onOpenTimeSheet: () -> Unit,
+) {
+    val is12Hours = selectedFilter == CodeFilterWindow.Last12Hours
+    SegmentedCard {
+        Segment(
+            modifier = Modifier.weight(1f),
+            selected = is12Hours,
+            label = "12小时",
+            onClick = onSelect12Hours,
+        )
+        Segment(
+            modifier = Modifier.weight(1f),
+            selected = !is12Hours,
+            label = if (is12Hours) "其它时间" else selectedFilter.label,
+            showArrow = true,
+            // 选中「3天内」等档位后仍可再点开面板换档
+            clickableWhenSelected = true,
+            onClick = onOpenTimeSheet,
+        )
+    }
+}
+
+// ─────────────────────────── 待取 / 全部 双标签 ───────────────────────────
 
 @Composable
 private fun ListModeTabs(
@@ -593,64 +618,19 @@ private fun ListModeTabs(
     onSelectPending: () -> Unit,
     onSelectAll: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 4.dp),
-    ) {
-        ListTab(
+    SegmentedCard {
+        Segment(
             modifier = Modifier.weight(1f),
-            text = "待取包裹",
             selected = !showAll,
-            enabled = true,
+            label = "待取包裹",
             onClick = onSelectPending,
         )
-        ListTab(
+        Segment(
             modifier = Modifier.weight(1f),
-            text = "全部包裹",
             selected = showAll,
+            label = "全部包裹",
             enabled = allTabEnabled,
             onClick = onSelectAll,
-        )
-    }
-}
-
-@Composable
-private fun ListTab(
-    text: String,
-    selected: Boolean,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val textColor = when {
-        !enabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-        selected -> MaterialTheme.colorScheme.onBackground
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
-    }
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(enabled = enabled && !selected, onClick = onClick)
-            .padding(top = 10.dp, bottom = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontSize = 19.sp,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
-            ),
-            color = textColor,
-        )
-        Box(
-            modifier = Modifier
-                .size(width = 52.dp, height = 4.dp)
-                .clip(CircleShape)
-                .background(
-                    if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                ),
         )
     }
 }
@@ -662,22 +642,39 @@ private fun PickupCodeCard(
     item: PickupCodeItem,
     promptKeywords: List<String>,
     onMarkPickedUp: () -> Unit,
+    onRestorePending: () -> Unit,
     onOpenSms: suspend () -> Unit,
 ) {
     if (item.isPickedUp) {
-        PickupCodeCardBody(
-            item = item,
-            promptKeywords = promptKeywords,
-            onOpenSms = onOpenSms,
-            onMarkPickedUp = null,
-        )
+        SwipeActionContainer(
+            actionLabel = "恢复未取",
+            actionIcon = Icons.Rounded.Undo,
+            actionBackground = MaterialTheme.colorScheme.primary,
+            actionContentColor = MaterialTheme.colorScheme.onPrimary,
+            onActionClick = onRestorePending,
+        ) {
+            PickupCodeCardBody(
+                item = item,
+                promptKeywords = promptKeywords,
+                onOpenSms = onOpenSms,
+                onMarkPickedUp = null,
+                onRestorePending = onRestorePending,
+            )
+        }
     } else {
-        SwipeActionContainer(onActionClick = onMarkPickedUp) {
+        SwipeActionContainer(
+            actionLabel = "我已取到",
+            actionIcon = Icons.Rounded.Check,
+            actionBackground = MaterialTheme.colorScheme.tertiary,
+            actionContentColor = MaterialTheme.colorScheme.onTertiary,
+            onActionClick = onMarkPickedUp,
+        ) {
             PickupCodeCardBody(
                 item = item,
                 promptKeywords = promptKeywords,
                 onOpenSms = onOpenSms,
                 onMarkPickedUp = onMarkPickedUp,
+                onRestorePending = null,
             )
         }
     }
@@ -690,15 +687,9 @@ private fun PickupCodeCardBody(
     promptKeywords: List<String>,
     onOpenSms: suspend () -> Unit,
     onMarkPickedUp: (() -> Unit)?,
+    onRestorePending: (() -> Unit)?,
 ) {
     val scope = rememberCoroutineScope()
-    val longestCodeLength = item.codes.maxOfOrNull { it.length } ?: 0
-    val codeFontSize = when {
-        item.codeCount >= 4 -> 30.sp
-        item.codeCount >= 2 -> 34.sp
-        longestCodeLength >= 10 -> 40.sp
-        else -> 48.sp
-    }
 
     Surface(
         modifier = Modifier
@@ -736,7 +727,7 @@ private fun PickupCodeCardBody(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 18.dp, vertical = 6.dp),
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
@@ -745,19 +736,27 @@ private fun PickupCodeCardBody(
                     style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 6.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Text(
+                // 自适应字号：在不折行的前提下让取件码尽可能大；
+                // maxLines = 码数，任何一行放不下即触发整体缩小，多个码保持同一字号。
+                BasicText(
                     text = item.codeDisplay,
                     modifier = Modifier.fillMaxWidth(),
                     style = MaterialTheme.typography.displayMedium.copy(
-                        fontSize = codeFontSize,
-                        lineHeight = codeFontSize * 1.3f,
+                        lineHeight = 1.3.em,
+                        textAlign = TextAlign.Center,
+                        color = if (item.isPickedUp) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
                     ),
-                    color = if (item.isPickedUp) {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    },
-                    textAlign = TextAlign.Center,
+                    maxLines = item.codeCount,
+                    overflow = TextOverflow.Ellipsis,
+                    autoSize = TextAutoSize.StepBased(
+                        minFontSize = 20.sp,
+                        maxFontSize = 72.sp,
+                        stepSize = 1.sp,
+                    ),
                 )
             }
 
@@ -816,6 +815,17 @@ private fun PickupCodeCardBody(
                         containerColor = MaterialTheme.colorScheme.tertiary,
                         contentColor = MaterialTheme.colorScheme.onTertiary,
                         onClick = onMarkPickedUp,
+                    )
+                }
+                if (onRestorePending != null) {
+                    // 老人不一定会左滑手势，已取件卡片同时保留可见的恢复按钮
+                    CardActionButton(
+                        modifier = Modifier.weight(1.35f),
+                        text = "恢复未取",
+                        icon = Icons.Rounded.Undo,
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        onClick = onRestorePending,
                     )
                 }
             }
@@ -925,10 +935,14 @@ private fun CardActionButton(
     }
 }
 
-// ─────────────────────────── 左滑抽屉（保留手势） ───────────────────────────
+// ─────────────────────────── 左滑抽屉（未取件=标已取，已取件=恢复未取） ───────────────────────────
 
 @Composable
 private fun SwipeActionContainer(
+    actionLabel: String,
+    actionIcon: ImageVector,
+    actionBackground: Color,
+    actionContentColor: Color,
     onActionClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
@@ -946,7 +960,7 @@ private fun SwipeActionContainer(
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .background(MaterialTheme.colorScheme.tertiary),
+                .background(actionBackground),
             contentAlignment = Alignment.CenterEnd,
         ) {
             Box(
@@ -961,15 +975,15 @@ private fun SwipeActionContainer(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Check,
+                        imageVector = actionIcon,
                         contentDescription = null,
                         modifier = Modifier.size(28.dp),
-                        tint = MaterialTheme.colorScheme.onTertiary,
+                        tint = actionContentColor,
                     )
                     Text(
-                        text = "我已取到",
+                        text = actionLabel,
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onTertiary,
+                        color = actionContentColor,
                     )
                 }
             }
