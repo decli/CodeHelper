@@ -24,6 +24,7 @@ import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -46,8 +47,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChatBubbleOutline
 import androidx.compose.material.icons.rounded.Check
@@ -92,12 +91,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -729,30 +729,16 @@ private fun PickupCodeCardBody(
                     style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 6.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                // 自适应字号：在不折行的前提下让取件码尽可能大，多个码保持同一字号。
-                // softWrap=false 保证单个取件码物理上不可能折行（只在 \n 处分行）：
-                // 某行放不下 → 该行溢出 → autoSize 整体缩小字号；缩到下限仍放不下时
-                // 该行以省略号收尾，但永远保持一码一行。
-                BasicText(
-                    text = item.codeDisplay,
+                // 自适应字号：每个取件码固定一行、绝不折行，所有码共用同一字号，
+                // 字号 = 最长的码单行放得下的最大值（16–72sp，逐档实测）。
+                AutoSizeCodeLines(
+                    codes = item.codes,
+                    color = if (item.isPickedUp) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
                     modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.displayMedium.copy(
-                        lineHeight = 1.3.em,
-                        textAlign = TextAlign.Center,
-                        color = if (item.isPickedUp) {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        },
-                    ),
-                    softWrap = false,
-                    maxLines = item.codeCount,
-                    overflow = TextOverflow.Ellipsis,
-                    autoSize = TextAutoSize.StepBased(
-                        minFontSize = 16.sp,
-                        maxFontSize = 72.sp,
-                        stepSize = 1.sp,
-                    ),
                 )
             }
 
@@ -828,6 +814,68 @@ private fun PickupCodeCardBody(
         }
     }
 }
+
+/**
+ * 取件码专用自适应文本：每个码渲染成独立的单行 Text（一码一行、物理上不可能折行），
+ * 所有码共用同一字号，取值为「最长的码单行放得下」的最大档位，用 TextMeasurer 二分实测。
+ *
+ * 不使用 TextAutoSize 的多行组合：softWrap=false + Ellipsis 时 Compose 会把
+ * maxLines 强制为 1（LayoutUtils.finalMaxLines），含 \n 的多码文本会被压成一行
+ * 并吞掉后续的码；实测方案没有这类隐藏分支，行为完全确定。
+ */
+@Composable
+private fun AutoSizeCodeLines(
+    codes: List<String>,
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
+    BoxWithConstraints(modifier = modifier) {
+        val textMeasurer = rememberTextMeasurer()
+        val baseStyle = MaterialTheme.typography.displayMedium
+        val maxWidthPx = constraints.maxWidth
+        val fontSizeSp = remember(codes, maxWidthPx, textMeasurer, baseStyle) {
+            var low = MIN_CODE_FONT_SP
+            var high = MAX_CODE_FONT_SP
+            while (low < high) {
+                val mid = (low + high + 1) / 2
+                val fits = codes.all { code ->
+                    textMeasurer.measure(
+                        text = AnnotatedString(code),
+                        style = baseStyle.copy(fontSize = mid.sp),
+                        softWrap = false,
+                        maxLines = 1,
+                    ).size.width <= maxWidthPx
+                }
+                if (fits) low = mid else high = mid - 1
+            }
+            low
+        }
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            codes.forEach { code ->
+                Text(
+                    text = code,
+                    modifier = Modifier.fillMaxWidth(),
+                    style = baseStyle.copy(
+                        fontSize = fontSizeSp.sp,
+                        lineHeight = (fontSizeSp * 1.3f).sp,
+                    ),
+                    color = color,
+                    softWrap = false,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+    }
+}
+
+/** 取件码自适应字号范围（sp） */
+private const val MIN_CODE_FONT_SP = 16
+private const val MAX_CODE_FONT_SP = 72
 
 @Composable
 private fun StatusChip(
