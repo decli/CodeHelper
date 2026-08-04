@@ -12,6 +12,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -178,9 +179,8 @@ fun CodeHelperApp(
     if (showTimeSheet) {
         TimeFilterSheet(
             selectedFilter = uiState.selectedFilter,
-            options = remember {
-                CodeFilterWindow.entries.filterNot { it == CodeFilterWindow.Last12Hours }
-            },
+            // 时间分段行取消后，默认档「12小时」也要能在面板里选回
+            options = remember { CodeFilterWindow.entries.toList() },
             onDismissRequest = { showTimeSheet = false },
             onSelect = { filter ->
                 showTimeSheet = false
@@ -234,7 +234,6 @@ fun CodeHelperApp(
             } else {
                 HomeContent(
                     uiState = uiState,
-                    onSelect12Hours = { viewModel.selectFilter(CodeFilterWindow.Last12Hours) },
                     onOpenTimeSheet = { showTimeSheet = true },
                     onShowAll = viewModel::forceRefreshAll,
                     onShowPendingOnly = { viewModel.selectFilter(uiState.selectedFilter) },
@@ -260,7 +259,6 @@ fun CodeHelperApp(
 @Composable
 private fun HomeContent(
     uiState: HomeUiState,
-    onSelect12Hours: () -> Unit,
     onOpenTimeSheet: () -> Unit,
     onShowAll: () -> Unit,
     onShowPendingOnly: () -> Unit,
@@ -293,13 +291,6 @@ private fun HomeContent(
                     rangeLabel = rangeLabel(uiState.selectedFilter),
                     isLoading = uiState.isLoading,
                     hasSmsPermission = uiState.hasSmsPermission,
-                )
-            }
-
-            item(key = "time-filter") {
-                TimeSegmentedControl(
-                    selectedFilter = uiState.selectedFilter,
-                    onSelect12Hours = onSelect12Hours,
                     onOpenTimeSheet = onOpenTimeSheet,
                 )
             }
@@ -455,6 +446,7 @@ private fun HeroCard(
     rangeLabel: String,
     isLoading: Boolean,
     hasSmsPermission: Boolean,
+    onOpenTimeSheet: () -> Unit,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -463,14 +455,24 @@ private fun HeroCard(
         shadowElevation = 2.dp,
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 22.dp, vertical = 18.dp),
+            modifier = Modifier.padding(horizontal = 22.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            Text(
-                text = rangeLabel,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "包裹待取",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                RangeChip(
+                    label = rangeLabel,
+                    onClick = onOpenTimeSheet,
+                )
+            }
             Row {
                 Text(
                     text = "$pendingCount",
@@ -503,6 +505,38 @@ private fun HeroCard(
     }
 }
 
+/** 英雄卡右上角的时间范围胶囊：显示当前档位，点击打开时间面板 */
+@Composable
+private fun RangeChip(
+    label: String,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.primaryContainer,
+        border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Icon(
+                imageVector = Icons.Rounded.KeyboardArrowDown,
+                contentDescription = null,
+                modifier = Modifier.size(22.dp),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+        }
+    }
+}
+
 // ─────────────── 分段控件（全应用统一的选中语言：柿橙实心底 + 对勾） ───────────────
 
 @Composable
@@ -530,8 +564,6 @@ private fun Segment(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    showArrow: Boolean = false,
-    clickableWhenSelected: Boolean = false,
 ) {
     val shape = RoundedCornerShape(14.dp)
     val contentColor = when {
@@ -546,10 +578,7 @@ private fun Segment(
             .background(
                 if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
             )
-            .clickable(
-                enabled = enabled && (!selected || clickableWhenSelected),
-                onClick = onClick,
-            ),
+            .clickable(enabled = enabled && !selected, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Row(
@@ -569,43 +598,7 @@ private fun Segment(
                 style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
                 color = contentColor,
             )
-            if (showArrow) {
-                Icon(
-                    imageVector = Icons.Rounded.KeyboardArrowDown,
-                    contentDescription = null,
-                    modifier = Modifier.size(22.dp),
-                    tint = contentColor,
-                )
-            }
         }
-    }
-}
-
-// ─────────────────────────── 时间筛选 ───────────────────────────
-
-@Composable
-private fun TimeSegmentedControl(
-    selectedFilter: CodeFilterWindow,
-    onSelect12Hours: () -> Unit,
-    onOpenTimeSheet: () -> Unit,
-) {
-    val is12Hours = selectedFilter == CodeFilterWindow.Last12Hours
-    SegmentedCard {
-        Segment(
-            modifier = Modifier.weight(1f),
-            selected = is12Hours,
-            label = "12小时",
-            onClick = onSelect12Hours,
-        )
-        Segment(
-            modifier = Modifier.weight(1f),
-            selected = !is12Hours,
-            label = if (is12Hours) "其它时间" else selectedFilter.label,
-            showArrow = true,
-            // 选中「3天内」等档位后仍可再点开面板换档
-            clickableWhenSelected = true,
-            onClick = onOpenTimeSheet,
-        )
     }
 }
 
@@ -736,8 +729,10 @@ private fun PickupCodeCardBody(
                     style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 6.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                // 自适应字号：在不折行的前提下让取件码尽可能大；
-                // maxLines = 码数，任何一行放不下即触发整体缩小，多个码保持同一字号。
+                // 自适应字号：在不折行的前提下让取件码尽可能大，多个码保持同一字号。
+                // softWrap=false 保证单个取件码物理上不可能折行（只在 \n 处分行）：
+                // 某行放不下 → 该行溢出 → autoSize 整体缩小字号；缩到下限仍放不下时
+                // 该行以省略号收尾，但永远保持一码一行。
                 BasicText(
                     text = item.codeDisplay,
                     modifier = Modifier.fillMaxWidth(),
@@ -750,10 +745,11 @@ private fun PickupCodeCardBody(
                             MaterialTheme.colorScheme.onSurface
                         },
                     ),
+                    softWrap = false,
                     maxLines = item.codeCount,
                     overflow = TextOverflow.Ellipsis,
                     autoSize = TextAutoSize.StepBased(
-                        minFontSize = 20.sp,
+                        minFontSize = 16.sp,
                         maxFontSize = 72.sp,
                         stepSize = 1.sp,
                     ),
@@ -1268,7 +1264,8 @@ private fun rangeLabel(filter: CodeFilterWindow): String =
         "最近 ${filter.hours / 24} 天"
     }
 
-private fun sheetOptionLabel(filter: CodeFilterWindow): String = "最近 ${filter.hours / 24} 天"
+/** 面板选项与英雄卡胶囊使用同一套时间范围文案 */
+private fun sheetOptionLabel(filter: CodeFilterWindow): String = rangeLabel(filter)
 
 /**
  * 把提取器的技术标签（命中规则N）翻译成老人能看懂的识别依据：
