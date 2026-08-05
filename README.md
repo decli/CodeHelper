@@ -2,7 +2,8 @@
 
 一款为老人场景设计的本地短信取件码助手。
 
-<img width="400" height="870" alt="7d327784bd7ca5fcaf904bd209f11966" src="https://github.com/user-attachments/assets/84f91751-aeaf-4b77-a81b-1d3d3706ce66" />
+<img width="400" height="870" alt="1708c1639ee9f889d30a9c27ce1a32d9" src="https://github.com/user-attachments/assets/f3d01b4f-31aa-4289-be76-27b72f03ed24" />
+
 
 
 
