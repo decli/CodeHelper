@@ -14,10 +14,11 @@ data class HomeUiState(
     val showAllItems: Boolean = false,
     val badgeRefreshMinutes: Int = 5,
     val lastLoadedAtMillis: Long? = null,
+    /** 时间面板的件数预览；尚未统计出来时为 null，界面显示「—」 */
+    val pendingCountByWindow: Map<CodeFilterWindow, Int>? = null,
 ) {
     val pendingCount: Int
         get() = items.sumOf { item ->
             if (item.isPickedUp) 0 else item.codeCount
         }
 }
-

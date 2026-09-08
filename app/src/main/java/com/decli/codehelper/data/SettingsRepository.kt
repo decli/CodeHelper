@@ -1,13 +1,17 @@
 package com.decli.codehelper.data
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.decli.codehelper.model.CodeFilterWindow
+import com.decli.codehelper.model.CodeScale
+import com.decli.codehelper.model.DisplaySettings
 import com.decli.codehelper.model.ExtractorSettings
+import com.decli.codehelper.model.ThemeMode
 import com.decli.codehelper.util.PickupCodeExtractor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -24,6 +28,10 @@ class SettingsRepository(
         val legacyDeletedItemsKey = stringSetPreferencesKey("deleted_pickup_items")
         val selectedFilterKey = stringPreferencesKey("selected_filter")
         val badgeRefreshMinutesKey = intPreferencesKey("badge_refresh_minutes")
+        val onboardingDoneKey = booleanPreferencesKey("onboarding_done")
+        val codeScaleKey = stringPreferencesKey("code_scale")
+        val groupBySenderKey = booleanPreferencesKey("group_by_sender")
+        val themeModeKey = stringPreferencesKey("theme_mode")
     }
 
     val extractorSettingsFlow: Flow<ExtractorSettings> =
@@ -52,6 +60,21 @@ class SettingsRepository(
     val badgeRefreshMinutesFlow: Flow<Int> =
         context.settingsDataStore.data.map { preferences ->
             coerceBadgeRefreshMinutes(preferences[badgeRefreshMinutesKey])
+        }
+
+    val displaySettingsFlow: Flow<DisplaySettings> =
+        context.settingsDataStore.data.map { preferences ->
+            DisplaySettings(
+                codeScale = CodeScale.entries
+                    .firstOrNull { it.name == preferences[codeScaleKey] }
+                    ?: CodeScale.Standard,
+                groupBySender = preferences[groupBySenderKey] ?: true,
+                themeMode = ThemeMode.entries
+                    .firstOrNull { it.name == preferences[themeModeKey] }
+                    ?: ThemeMode.System,
+                onboardingDone = preferences[onboardingDoneKey] ?: false,
+                isLoaded = true,
+            )
         }
 
     suspend fun saveExtractorSettings(
@@ -95,7 +118,47 @@ class SettingsRepository(
             preferences[badgeRefreshMinutesKey] = coerceBadgeRefreshMinutes(minutes)
         }
     }
+
+    suspend fun saveOnboardingDone(done: Boolean) {
+        context.settingsDataStore.edit { preferences ->
+            preferences[onboardingDoneKey] = done
+        }
+    }
+
+    suspend fun saveCodeScale(codeScale: CodeScale) {
+        context.settingsDataStore.edit { preferences ->
+            preferences[codeScaleKey] = codeScale.name
+        }
+    }
+
+    suspend fun saveGroupBySender(enabled: Boolean) {
+        context.settingsDataStore.edit { preferences ->
+            preferences[groupBySenderKey] = enabled
+        }
+    }
+
+    suspend fun saveThemeMode(themeMode: ThemeMode) {
+        context.settingsDataStore.edit { preferences ->
+            preferences[themeModeKey] = themeMode.name
+        }
+    }
+
+    /** 恢复默认：识别规则、角标频率与显示设置一起回到出厂值，不影响已取件记录与引导标记 */
+    suspend fun restoreDefaults() {
+        context.settingsDataStore.edit { preferences ->
+            preferences[promptKeywordsKey] =
+                PickupCodeExtractor.defaultPromptKeywords.joinToString(separator = "\n")
+            preferences[advancedRulesKey] =
+                PickupCodeExtractor.defaultAdvancedRules.joinToString(separator = "\n")
+            preferences[badgeRefreshMinutesKey] = DEFAULT_BADGE_REFRESH_MINUTES
+            preferences[codeScaleKey] = CodeScale.Standard.name
+            preferences[groupBySenderKey] = true
+            preferences[themeModeKey] = ThemeMode.System.name
+        }
+    }
 }
+
+private const val DEFAULT_BADGE_REFRESH_MINUTES = 5
 
 private fun String?.toSettingList(): List<String> =
     this
@@ -106,5 +169,4 @@ private fun String?.toSettingList(): List<String> =
         .orEmpty()
 
 private fun coerceBadgeRefreshMinutes(minutes: Int?): Int =
-    (minutes ?: 5).coerceIn(5, 120)
-
+    (minutes ?: DEFAULT_BADGE_REFRESH_MINUTES).coerceIn(5, 120)

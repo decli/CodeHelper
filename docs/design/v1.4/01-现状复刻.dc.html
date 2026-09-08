@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="design_doc_mode" content="canvas"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet"><style>body{margin:0;background:#e9e5dd;font-family:Roboto,"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;color:#221D15}a{color:#A93307}a:hover{color:#D2400E}</style></helmet>
+<div style="padding:40px 44px 60px;display:flex;flex-direction:column;gap:28px">
+<div style="max-width:760px;display:flex;flex-direction:column;gap:8px">
+<div style="font:600 11px ui-monospace,Menlo,monospace;letter-spacing:1px;color:#6E675A">01 · 现状复刻（v1.3.1 · main@b7df407）</div>
+<h1 style="margin:0;font:800 28px/1.2 'Noto Sans SC',sans-serif">取件码助手 · 当前界面对照</h1>
+<p style="margin:0;font:400 15px/1.6 'Noto Sans SC',sans-serif;color:#6E675A">按 CodeHelperApp.kt / SettingsScreen.kt / Color.kt / Type.kt 逐值复刻。机型 430×932（6.9″ 2608×1200 @ ~3x）。<br>调研结论：产品定位为「老人本地取件码助手」——单一任务、全程离线、手势必有按钮替身。现有「柿柿如意」主题已具备语义色（柿橙=待办、松绿=完成）和适老化字阶，但存在 6 处可改进点（见 02 方案页）。</p>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start">
+
+<!-- ── 首页 · 待取包裹 ── -->
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font:600 13px 'Noto Sans SC',sans-serif;color:#221D15">A · 首页 · 待取包裹（默认）</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ w }}" height="{{ h }}" hint-size="430px,932px">
+<div data-screen-label="现状-首页待取" style="background:#F5F2EC;min-height:100%;padding:8px 16px 32px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:38px;height:38px;border-radius:12px;background:#D2400E;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#fff" d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/></svg></div>
+      <div style="font-size:22px;font-weight:700;line-height:28px">取件码助手</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;padding:12px 18px;border-radius:999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.14)"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#221D15" d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg><span style="font-size:18px;font-weight:600">设置</span></div>
+  </div>
+  <div style="background:#fff;border-radius:24px;box-shadow:0 1px 3px rgba(0,0,0,.14);padding:16px 22px;display:flex;flex-direction:column;gap:2px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:15px;font-weight:600;color:#6E675A">包裹待取</span>
+      <div style="display:flex;align-items:center;gap:2px;padding:8px 8px 8px 14px;border-radius:999px;background:#FBEADF;border:1.5px solid #D2400E"><span style="font-size:18px;font-weight:600;color:#A93307">最近 12 小时</span><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#A93307" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:72px;line-height:78px;font-weight:800;color:#D2400E;font-variant-numeric:tabular-nums">3</span><span style="font-size:24px;font-weight:700">个包裹待取</span></div>
+    <div style="font-size:15px;color:#6E675A;line-height:22px">已自动读取本机短信 · 全程离线</div>
+  </div>
+  <div style="background:#fff;border-radius:18px;box-shadow:0 1px 3px rgba(0,0,0,.14);padding:5px;display:flex;gap:5px">
+    <div style="flex:1;height:52px;border-radius:14px;background:#D2400E;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#fff" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:18px;font-weight:700;color:#fff">待取包裹</span></div>
+    <div style="flex:1;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center"><span style="font-size:18px;font-weight:700;color:#6E675A">全部包裹</span></div>
+  </div>
+  <div style="background:#fff;border-radius:24px;box-shadow:0 1px 3px rgba(0,0,0,.14);overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px 10px">
+      <div style="display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;background:#FFE3D2"><svg width="15" height="15" viewBox="0 0 24 24"><path fill="#A93307" d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/></svg><span style="font-size:14px;font-weight:700;color:#A93307">未取件 · 2 个码</span></div>
+      <span style="font-size:15px;font-weight:600;color:#6E675A">今天 14:32</span>
+    </div>
+    <div style="position:relative;height:18px"><div style="position:absolute;left:14px;right:14px;top:8px;border-top:2px dashed #ECE6DB"></div><div style="position:absolute;left:-9px;top:0;width:18px;height:18px;border-radius:50%;background:#F5F2EC"></div><div style="position:absolute;right:-9px;top:0;width:18px;height:18px;border-radius:50%;background:#F5F2EC"></div></div>
+    <div style="padding:6px 12px;display:flex;flex-direction:column;align-items:center;gap:2px">
+      <span style="font-size:14px;font-weight:600;letter-spacing:6px;color:#6E675A">取件码</span>
+      <div style="font-size:58px;line-height:75px;font-weight:800;letter-spacing:1px;font-variant-numeric:tabular-nums;white-space:nowrap">3-3-06006</div>
+      <div style="font-size:58px;line-height:75px;font-weight:800;letter-spacing:1px;font-variant-numeric:tabular-nums;white-space:nowrap">8-5-06003</div>
+    </div>
+    <div style="padding:2px 24px;font-size:15px;line-height:22px;color:#6E675A;text-align:center">【菜鸟驿站】您的包裹已到幸福小区南门店，货码为3-3-06006，8-5-06003，请凭码取件。</div>
+    <div style="padding-top:4px;font-size:12px;line-height:20px;color:rgba(110,103,90,.75);text-align:center">识别依据：「货码」</div>
+    <div style="display:flex;gap:10px;padding:12px 16px 16px">
+      <div style="flex:1;height:54px;border-radius:16px;background:#F5F2EC;display:flex;align-items:center;justify-content:center;gap:7px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#221D15" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg><span style="font-size:18px;font-weight:600">查看短信</span></div>
+      <div style="flex:1.35;height:54px;border-radius:16px;background:#1E7A3C;display:flex;align-items:center;justify-content:center;gap:7px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#fff" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:18px;font-weight:600;color:#fff">我已取到</span></div>
+    </div>
+  </div>
+  <div style="background:#fff;border-radius:24px;box-shadow:0 1px 3px rgba(0,0,0,.14);overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px 10px">
+      <div style="display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;background:#FFE3D2"><svg width="15" height="15" viewBox="0 0 24 24"><path fill="#A93307" d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/></svg><span style="font-size:14px;font-weight:700;color:#A93307">未取件</span></div>
+      <span style="font-size:15px;font-weight:600;color:#6E675A">今天 09:15</span>
+    </div>
+    <div style="position:relative;height:18px"><div style="position:absolute;left:14px;right:14px;top:8px;border-top:2px dashed #ECE6DB"></div><div style="position:absolute;left:-9px;top:0;width:18px;height:18px;border-radius:50%;background:#F5F2EC"></div><div style="position:absolute;right:-9px;top:0;width:18px;height:18px;border-radius:50%;background:#F5F2EC"></div></div>
+    <div style="padding:6px 12px;display:flex;flex-direction:column;align-items:center;gap:2px">
+      <span style="font-size:14px;font-weight:600;letter-spacing:6px;color:#6E675A">取件码</span>
+      <div style="font-size:72px;line-height:94px;font-weight:800;letter-spacing:1px;font-variant-numeric:tabular-nums;white-space:nowrap">27017</div>
+    </div>
+  </div>
+</div>
+</x-import>
+</div>
+
+<!-- ── 首页 · 全部包裹 + 撤销提示条 ── -->
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font:600 13px 'Noto Sans SC',sans-serif;color:#221D15">B · 首页 · 全部包裹（含已取件 + 撤销提示条）</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ w }}" height="{{ h }}" hint-size="430px,932px">
+<div data-screen-label="现状-全部包裹" style="background:#F5F2EC;min-height:100%;padding:8px 16px 32px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box;position:relative">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:38px;height:38px;border-radius:12px;background:#D2400E;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#fff" d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/></svg></div>
+      <div style="font-size:22px;font-weight:700;line-height:28px">取件码助手</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;padding:12px 18px;border-radius:999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.14)"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#221D15" d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg><span style="font-size:18px;font-weight:600">设置</span></div>
+  </div>
+  <div style="background:#fff;border-radius:24px;box-shadow:0 1px 3px rgba(0,0,0,.14);padding:16px 22px;display:flex;flex-direction:column;gap:2px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:15px;font-weight:600;color:#6E675A">包裹待取</span>
+      <div style="display:flex;align-items:center;gap:2px;padding:8px 8px 8px 14px;border-radius:999px;background:#FBEADF;border:1.5px solid #D2400E"><span style="font-size:18px;font-weight:600;color:#A93307">最近 3 天</span><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#A93307" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:72px;line-height:78px;font-weight:800;color:#D2400E;font-variant-numeric:tabular-nums">1</span><span style="font-size:24px;font-weight:700">个包裹待取</span></div>
+    <div style="font-size:15px;color:#6E675A;line-height:22px">已自动读取本机短信 · 全程离线</div>
+  </div>
+  <div style="background:#fff;border-radius:18px;box-shadow:0 1px 3px rgba(0,0,0,.14);padding:5px;display:flex;gap:5px">
+    <div style="flex:1;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center"><span style="font-size:18px;font-weight:700;color:#6E675A">待取包裹</span></div>
+    <div style="flex:1;height:52px;border-radius:14px;background:#D2400E;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#fff" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:18px;font-weight:700;color:#fff">全部包裹</span></div>
+  </div>
+  <div style="background:#fff;border-radius:24px;box-shadow:0 1px 3px rgba(0,0,0,.14);overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px 10px">
+      <div style="display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;background:#FFE3D2"><svg width="15" height="15" viewBox="0 0 24 24"><path fill="#A93307" d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/></svg><span style="font-size:14px;font-weight:700;color:#A93307">未取件</span></div>
+      <span style="font-size:15px;font-weight:600;color:#6E675A">今天 09:15</span>
+    </div>
+    <div style="position:relative;height:18px"><div style="position:absolute;left:14px;right:14px;top:8px;border-top:2px dashed #ECE6DB"></div><div style="position:absolute;left:-9px;top:0;width:18px;height:18px;border-radius:50%;background:#F5F2EC"></div><div style="position:absolute;right:-9px;top:0;width:18px;height:18px;border-radius:50%;background:#F5F2EC"></div></div>
+    <div style="padding:6px 12px;display:flex;flex-direction:column;align-items:center;gap:2px">
+      <span style="font-size:14px;font-weight:600;letter-spacing:6px;color:#6E675A">取件码</span>
+      <div style="font-size:72px;line-height:94px;font-weight:800;letter-spacing:1px;font-variant-numeric:tabular-nums;white-space:nowrap">27017</div>
+    </div>
+    <div style="padding:2px 24px;font-size:15px;line-height:22px;color:#6E675A;text-align:center">【兔喜生活】您的快递已到兔喜快递超市，取件码27017，请及时取件。</div>
+    <div style="padding-top:4px;font-size:12px;line-height:20px;color:rgba(110,103,90,.75);text-align:center">识别依据：「取件码」</div>
+    <div style="display:flex;gap:10px;padding:12px 16px 16px">
+      <div style="flex:1;height:54px;border-radius:16px;background:#F5F2EC;display:flex;align-items:center;justify-content:center;gap:7px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#221D15" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg><span style="font-size:18px;font-weight:600">查看短信</span></div>
+      <div style="flex:1.35;height:54px;border-radius:16px;background:#1E7A3C;display:flex;align-items:center;justify-content:center;gap:7px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#fff" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:18px;font-weight:600;color:#fff">我已取到</span></div>
+    </div>
+  </div>
+  <div style="background:#fff;border-radius:24px;box-shadow:0 1px 3px rgba(0,0,0,.14);overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px 10px">
+      <div style="display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;background:#E4F3E8"><svg width="15" height="15" viewBox="0 0 24 24"><path fill="#166030" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg><span style="font-size:14px;font-weight:700;color:#166030">已取件</span></div>
+      <span style="font-size:15px;font-weight:600;color:#6E675A">昨天 18:40</span>
+    </div>
+    <div style="position:relative;height:18px"><div style="position:absolute;left:14px;right:14px;top:8px;border-top:2px dashed #ECE6DB"></div><div style="position:absolute;left:-9px;top:0;width:18px;height:18px;border-radius:50%;background:#F5F2EC"></div><div style="position:absolute;right:-9px;top:0;width:18px;height:18px;border-radius:50%;background:#F5F2EC"></div></div>
+    <div style="padding:6px 12px;display:flex;flex-direction:column;align-items:center;gap:2px">
+      <span style="font-size:14px;font-weight:600;letter-spacing:6px;color:#6E675A">取件码</span>
+      <div style="font-size:64px;line-height:83px;font-weight:800;letter-spacing:1px;font-variant-numeric:tabular-nums;white-space:nowrap;color:#6E675A">1-3-27017</div>
+    </div>
+    <div style="padding:2px 24px;font-size:15px;line-height:22px;color:#6E675A;text-align:center">【菜鸟驿站】包裹已到幸福小区南门店，凭“1-3-27017”取件，营业至21:00。</div>
+    <div style="padding-top:4px;font-size:12px;line-height:20px;color:rgba(110,103,90,.75);text-align:center">识别依据：「凭」</div>
+    <div style="display:flex;gap:10px;padding:12px 16px 16px">
+      <div style="flex:1;height:54px;border-radius:16px;background:#F5F2EC;display:flex;align-items:center;justify-content:center;gap:7px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#221D15" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg><span style="font-size:18px;font-weight:600">查看短信</span></div>
+      <div style="flex:1.35;height:54px;border-radius:16px;background:#FBEADF;display:flex;align-items:center;justify-content:center;gap:7px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#A93307" d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg><span style="font-size:18px;font-weight:600;color:#A93307">恢复未取</span></div>
+    </div>
+  </div>
+  <div style="position:absolute;left:16px;right:16px;bottom:16px;background:#322F2A;color:#F5F2EC;border-radius:4px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 3px 8px rgba(0,0,0,.3)"><span style="flex:1;font-size:14px;line-height:20px">已把「3-3-06006、8-5-06003」标记为已取到</span><span style="font-size:14px;font-weight:600;color:#FFB694;padding:0 4px">撤销</span></div>
+</div>
+</x-import>
+</div>
+
+<!-- ── 时间范围面板 ── -->
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font:600 13px 'Noto Sans SC',sans-serif;color:#221D15">C · 时间范围面板（ModalBottomSheet）</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ w }}" height="{{ h }}" hint-size="430px,932px">
+<div data-screen-label="现状-时间面板" style="background:#F5F2EC;min-height:100%;position:relative;box-sizing:border-box">
+  <div style="padding:8px 16px 0;display:flex;flex-direction:column;gap:14px;opacity:1">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px">
+      <div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:38px;border-radius:12px;background:#D2400E"></div><div style="font-size:22px;font-weight:700">取件码助手</div></div>
+      <div style="padding:12px 18px;border-radius:999px;background:#fff;font-size:18px;font-weight:600">设置</div>
+    </div>
+    <div style="background:#fff;border-radius:24px;padding:16px 22px;height:110px"></div>
+  </div>
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.32)"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:28px 28px 0 0;padding:0 20px 20px;display:flex;flex-direction:column;gap:10px">
+    <div style="width:44px;height:5px;border-radius:999px;background:#ECE6DB;margin:8px auto 0"></div>
+    <div style="font-size:22px;font-weight:700;line-height:30px;padding-top:6px">选择时间范围</div>
+    <div style="font-size:15px;color:#6E675A;line-height:22px;padding-bottom:4px">选好后立刻重新读取短信</div>
+    <div style="height:60px;border-radius:18px;background:#D2400E;display:flex;align-items:center;gap:14px;padding:0 16px"><div style="width:26px;height:26px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#D2400E" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div><span style="font-size:19px;font-weight:700;color:#fff">最近 12 小时</span></div>
+    <div style="height:60px;border-radius:18px;background:#F5F2EC;display:flex;align-items:center;gap:14px;padding:0 16px"><div style="width:26px;height:26px;border-radius:50%;border:2.5px solid #8A8171;box-sizing:border-box"></div><span style="font-size:19px;font-weight:700">最近 1 天</span></div>
+    <div style="height:60px;border-radius:18px;background:#F5F2EC;display:flex;align-items:center;gap:14px;padding:0 16px"><div style="width:26px;height:26px;border-radius:50%;border:2.5px solid #8A8171;box-sizing:border-box"></div><span style="font-size:19px;font-weight:700">最近 2 天</span></div>
+    <div style="height:60px;border-radius:18px;background:#F5F2EC;display:flex;align-items:center;gap:14px;padding:0 16px"><div style="width:26px;height:26px;border-radius:50%;border:2.5px solid #8A8171;box-sizing:border-box"></div><span style="font-size:19px;font-weight:700">最近 3 天</span></div>
+    <div style="height:60px;border-radius:18px;background:#F5F2EC;display:flex;align-items:center;gap:14px;padding:0 16px"><div style="width:26px;height:26px;border-radius:50%;border:2.5px solid #8A8171;box-sizing:border-box"></div><span style="font-size:19px;font-weight:700">最近 5 天</span></div>
+    <div style="height:60px;border-radius:18px;background:#F5F2EC;display:flex;align-items:center;gap:14px;padding:0 16px"><div style="width:26px;height:26px;border-radius:50%;border:2.5px solid #8A8171;box-sizing:border-box"></div><span style="font-size:19px;font-weight:700">最近 7 天</span></div>
+    <div style="height:60px;border-radius:18px;background:#F5F2EC;display:flex;align-items:center;gap:14px;padding:0 16px"><div style="width:26px;height:26px;border-radius:50%;border:2.5px solid #8A8171;box-sizing:border-box"></div><span style="font-size:19px;font-weight:700">最近 14 天</span></div>
+    <div style="height:56px;border-radius:18px;background:#F5F2EC;display:flex;align-items:center;justify-content:center;margin-top:4px"><span style="font-size:18px;font-weight:600;color:#6E675A">取消</span></div>
+  </div>
+</div>
+</x-import>
+</div>
+
+<!-- ── 设置页 ── -->
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font:600 13px 'Noto Sans SC',sans-serif;color:#221D15">D · 设置页（全屏 · 底部固定保存）</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ w }}" height="{{ h }}" hint-size="430px,932px">
+<div data-screen-label="现状-设置" style="background:#F5F2EC;height:100%;display:flex;flex-direction:column;box-sizing:border-box">
+  <div style="position:relative;padding:6px 8px;display:flex;align-items:center;justify-content:center;height:60px;box-sizing:border-box">
+    <div style="position:absolute;left:8px;display:flex;align-items:center;gap:4px;padding:12px;border-radius:999px"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#A93307" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg><span style="font-size:18px;font-weight:600;color:#A93307">返回</span></div>
+    <span style="font-size:21px;font-weight:700">设置</span>
+  </div>
+  <div style="flex:1;overflow:hidden;padding:4px 16px 16px;display:flex;flex-direction:column;gap:14px">
+    <div style="background:#fff;border-radius:22px;box-shadow:0 1px 3px rgba(0,0,0,.14);padding:18px;display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:19px;font-weight:600;line-height:26px">识别提示词</div>
+      <div style="font-size:15px;line-height:22px;color:#6E675A">应用会在这些词后面自动寻找取件码，比如「取件码」「货码」「凭」。点选下方常用词即可添加。</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:5px;padding:10px 15px;border-radius:999px;background:#FFE3D2"><svg width="15" height="15" viewBox="0 0 24 24"><path fill="#A93307" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:15px;font-weight:600;color:#A93307">取件码</span></div>
+        <div style="display:flex;align-items:center;gap:5px;padding:10px 15px;border-radius:999px;background:#FFE3D2"><svg width="15" height="15" viewBox="0 0 24 24"><path fill="#A93307" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:15px;font-weight:600;color:#A93307">提货码</span></div>
+        <div style="display:flex;align-items:center;gap:5px;padding:10px 15px;border-radius:999px;background:#FFE3D2"><svg width="15" height="15" viewBox="0 0 24 24"><path fill="#A93307" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:15px;font-weight:600;color:#A93307">货码</span></div>
+        <div style="display:flex;align-items:center;gap:5px;padding:10px 15px;border-radius:999px;background:#FFE3D2"><svg width="15" height="15" viewBox="0 0 24 24"><path fill="#A93307" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:15px;font-weight:600;color:#A93307">驿站码</span></div>
+        <div style="display:flex;align-items:center;gap:5px;padding:10px 15px;border-radius:999px;background:#FFE3D2"><svg width="15" height="15" viewBox="0 0 24 24"><path fill="#A93307" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:15px;font-weight:600;color:#A93307">凭</span></div>
+      </div>
+      <div><div style="background:#F5F2EC;border-radius:14px 14px 0 0;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;height:56px;box-sizing:border-box"><div><div style="font-size:12px;color:#6E675A;line-height:16px">提示词 1</div><div style="font-size:17px;line-height:24px">取件码</div></div><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#6E675A" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></div><div style="font-size:12px;color:#6E675A;padding:4px 16px 0;line-height:16px">例如：取件码、货码、凭</div></div>
+      <div><div style="background:#F5F2EC;border-radius:14px 14px 0 0;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;height:56px;box-sizing:border-box"><div><div style="font-size:12px;color:#6E675A;line-height:16px">提示词 2</div><div style="font-size:17px;line-height:24px">提货码</div></div><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#6E675A" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></div><div style="font-size:12px;color:#6E675A;padding:4px 16px 0;line-height:16px">例如：取件码、货码、凭</div></div>
+      <div><div style="background:#F5F2EC;border-radius:14px 14px 0 0;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;height:56px;box-sizing:border-box"><div><div style="font-size:12px;color:#6E675A;line-height:16px">提示词 3</div><div style="font-size:17px;line-height:24px">货码</div></div><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#6E675A" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></div><div style="font-size:12px;color:#6E675A;padding:4px 16px 0;line-height:16px">例如：取件码、货码、凭</div></div>
+      <div style="height:52px;border-radius:14px;background:#F5F2EC;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#A93307" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg><span style="font-size:16px;font-weight:600;color:#A93307">新增提示词</span></div>
+    </div>
+    <div style="background:#fff;border-radius:22px;box-shadow:0 1px 3px rgba(0,0,0,.14);padding:18px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:19px;font-weight:600;line-height:26px">高级规则</span><span style="font-size:14px;font-weight:600;color:#6E675A">选填 · 特殊平台才需要</span></div>
+      <div style="font-size:15px;line-height:22px;color:#6E675A">只有遇到个别平台的特殊写法时，再补充正则规则。规则有语法错误时不能保存。</div>
+      <div style="height:52px;border-radius:14px;background:#F5F2EC;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#A93307" d="M16.54 11L13 7.46l1.41-1.41 2.12 2.12 4.24-4.24L22.18 5.34 16.54 11zM11 7H2v2h9V7zm10 6.41L19.59 12 17 14.59 14.41 12 13 13.41 15.59 16 13 18.59 14.41 20 17 17.41 19.59 20 21 18.59 18.41 16 21 13.41zM11 15H2v2h9v-2z"/></svg><span style="font-size:16px;font-weight:600;color:#A93307">新增高级规则</span></div>
+    </div>
+  </div>
+  <div style="padding:8px 16px 16px"><div style="height:60px;border-radius:18px;background:#D2400E;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#fff" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:19px;font-weight:600;color:#fff">保存并刷新</span></div></div>
+</div>
+</x-import>
+</div>
+
+<!-- ── 设置页（下半部分） ── -->
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font:600 13px 'Noto Sans SC',sans-serif;color:#221D15">E · 设置页（滚动到底部：桌面角标 / 恢复默认 / 关于）</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ w }}" height="{{ h }}" hint-size="430px,932px">
+<div data-screen-label="现状-设置-底部" style="background:#F5F2EC;height:100%;display:flex;flex-direction:column;box-sizing:border-box">
+  <div style="position:relative;padding:6px 8px;display:flex;align-items:center;justify-content:center;height:60px;box-sizing:border-box">
+    <div style="position:absolute;left:8px;display:flex;align-items:center;gap:4px;padding:12px;border-radius:999px"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#A93307" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg><span style="font-size:18px;font-weight:600;color:#A93307">返回</span></div>
+    <span style="font-size:21px;font-weight:700">设置</span>
+  </div>
+  <div style="flex:1;overflow:hidden;padding:4px 16px 16px;display:flex;flex-direction:column;gap:14px;justify-content:flex-end">
+    <div style="background:#fff;border-radius:22px;box-shadow:0 1px 3px rgba(0,0,0,.14);padding:18px;display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:19px;font-weight:600;line-height:26px">桌面角标</div>
+      <div style="font-size:15px;line-height:22px;color:#6E675A">桌面图标会显示待取数量，按以下频率自动刷新。数字角标依赖系统桌面与通知权限支持。</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:5px;padding:10px 15px;border-radius:999px;background:#FFE3D2"><svg width="15" height="15" viewBox="0 0 24 24"><path fill="#A93307" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:15px;font-weight:600;color:#A93307">5分钟</span></div>
+        <div style="padding:10px 15px;border-radius:999px;background:#F5F2EC"><span style="font-size:15px;font-weight:600">10分钟</span></div>
+        <div style="padding:10px 15px;border-radius:999px;background:#F5F2EC"><span style="font-size:15px;font-weight:600">15分钟</span></div>
+        <div style="padding:10px 15px;border-radius:999px;background:#F5F2EC"><span style="font-size:15px;font-weight:600">30分钟</span></div>
+      </div>
+      <div><div style="background:#F5F2EC;border-radius:14px 14px 0 0;padding:8px 16px;height:56px;box-sizing:border-box"><div style="font-size:12px;color:#6E675A;line-height:16px">角标刷新频率（分钟）</div><div style="font-size:17px;line-height:24px">5</div></div><div style="font-size:12px;color:#6E675A;padding:4px 16px 0;line-height:16px">默认 5 分钟，也可以直接点上方常用频率</div></div>
+      <div style="height:54px;border-radius:14px;background:#FBEADF;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#A93307" d="M7.58 4.08L6.15 2.65C3.75 4.48 2.17 7.3 2.03 10.5h2c.15-2.65 1.51-4.97 3.55-6.42zm12.39 6.42h2c-.15-3.2-1.73-6.02-4.12-7.85l-1.42 1.43c2.02 1.45 3.39 3.77 3.54 6.42zM18 11c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2v-5zm-6 11c.14 0 .27-.01.4-.04.65-.14 1.18-.58 1.44-1.18.1-.24.15-.5.15-.78h-4c.01 1.1.9 2 2.01 2z"/></svg><span style="font-size:16px;font-weight:600;color:#A93307">开启通知权限，角标才能显示</span></div>
+    </div>
+    <div style="background:#fff;border-radius:22px;box-shadow:0 1px 3px rgba(0,0,0,.14);padding:18px;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;padding:16px 2px"><span style="flex:1;font-size:17px;font-weight:600">恢复默认设置</span><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#6E675A" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+      <div style="height:1px;background:#ECE6DB"></div>
+      <div style="display:flex;align-items:center;padding:16px 2px;gap:0"><span style="flex:1;font-size:17px;font-weight:600">关于取件码助手</span><span style="font-size:15px;color:#6E675A">1.3.1</span><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#6E675A" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+    </div>
+  </div>
+  <div style="padding:8px 16px 16px"><div style="height:60px;border-radius:18px;background:#D2400E;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#fff" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:19px;font-weight:600;color:#fff">保存并刷新</span></div></div>
+</div>
+</x-import>
+</div>
+
+<!-- ── 状态卡 ── -->
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font:600 13px 'Noto Sans SC',sans-serif;color:#221D15">F · 权限引导 / 空状态 / 关于弹窗（StateCard）</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ w }}" height="{{ h }}" hint-size="430px,932px">
+<div data-screen-label="现状-状态卡" style="background:#F5F2EC;min-height:100%;padding:8px 16px 32px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box;position:relative">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px">
+    <div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:38px;border-radius:12px;background:#D2400E;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#fff" d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/></svg></div><div style="font-size:22px;font-weight:700">取件码助手</div></div>
+    <div style="display:flex;align-items:center;gap:6px;padding:12px 18px;border-radius:999px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.14)"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#221D15" d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg><span style="font-size:18px;font-weight:600">设置</span></div>
+  </div>
+  <div style="background:#fff;border-radius:24px;box-shadow:0 1px 3px rgba(0,0,0,.14);padding:16px 22px;display:flex;flex-direction:column;gap:2px">
+    <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:15px;font-weight:600;color:#6E675A">包裹待取</span><div style="display:flex;align-items:center;gap:2px;padding:8px 8px 8px 14px;border-radius:999px;background:#FBEADF;border:1.5px solid #D2400E"><span style="font-size:18px;font-weight:600;color:#A93307">最近 12 小时</span><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#A93307" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div></div>
+    <div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:72px;line-height:78px;font-weight:800;color:#1E7A3C">0</span><span style="font-size:24px;font-weight:700">个包裹待取</span></div>
+    <div style="font-size:15px;color:#6E675A;line-height:22px">等待授权后开始读取</div>
+  </div>
+  <div style="background:#fff;border-radius:18px;box-shadow:0 1px 3px rgba(0,0,0,.14);padding:5px;display:flex;gap:5px">
+    <div style="flex:1;height:52px;border-radius:14px;background:#D2400E;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#fff" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:18px;font-weight:700;color:#fff">待取包裹</span></div>
+    <div style="flex:1;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center"><span style="font-size:18px;font-weight:700;color:rgba(110,103,90,.45)">全部包裹</span></div>
+  </div>
+  <div style="background:#fff;border-radius:24px;box-shadow:0 1px 3px rgba(0,0,0,.14);padding:28px 24px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+    <div style="width:84px;height:84px;border-radius:28px;background:#FBEADF;display:flex;align-items:center;justify-content:center;margin-bottom:6px"><svg width="44" height="44" viewBox="0 0 24 24"><path fill="#D2400E" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg></div>
+    <div style="font-size:22px;font-weight:700;line-height:30px">需要允许读取短信<br>才能帮您找取件码</div>
+    <div style="font-size:17px;line-height:26px;color:#6E675A">应用不联网、不上传、不发送短信，只在这台手机上帮您查找取件码。</div>
+    <div style="width:100%;height:60px;border-radius:18px;background:#D2400E;display:flex;align-items:center;justify-content:center;margin-top:8px"><span style="font-size:19px;font-weight:600;color:#fff">允许读取短信</span></div>
+  </div>
+  <div style="background:#fff;border-radius:24px;box-shadow:0 1px 3px rgba(0,0,0,.14);padding:28px 24px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+    <div style="width:84px;height:84px;border-radius:28px;background:#E4F3E8;display:flex;align-items:center;justify-content:center;margin-bottom:6px"><svg width="44" height="44" viewBox="0 0 24 24"><path fill="#1E7A3C" d="M22 5.18L10.59 16.6l-4.24-4.24 1.41-1.41 2.83 2.83 10-10L22 5.18zM12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8c1.57 0 3.04.46 4.28 1.25l1.45-1.45C16.1 2.67 14.13 2 12 2 6.48 2 2 6.48 2 12s4.48 10 10 10c1.73 0 3.36-.44 4.78-1.22l-1.5-1.5c-1 .46-2.11.72-3.28.72zm7-5h-3v2h3v3h2v-3h3v-2h-3v-3h-2v3z"/></svg></div>
+    <div style="font-size:22px;font-weight:700;line-height:30px">包裹都取完了</div>
+    <div style="font-size:17px;line-height:26px;color:#6E675A">最近 12 小时内没有待取的取件码。想查看更早的短信，可以换个时间范围。</div>
+    <div style="width:100%;height:56px;border-radius:16px;background:#F5F2EC;display:flex;align-items:center;justify-content:center;margin-top:8px"><span style="font-size:18px;font-weight:600">看更早的短信</span></div>
+  </div>
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.32);display:flex;align-items:center;justify-content:center;padding:40px"><div style="background:#F5F2EC;border-radius:28px;padding:24px;width:100%;display:flex;flex-direction:column;gap:16px"><div style="font-size:24px;line-height:32px;font-weight:400">关于取件码助手</div><div style="font-size:14px;line-height:20px;color:#6E675A">当前版本：1.3.1</div><div style="align-self:flex-end;padding:10px 12px;font-size:14px;font-weight:500;color:#D2400E">知道了</div></div></div>
+</div>
+</x-import>
+</div>
+
+</div>
+<div style="max-width:760px;background:#fff;border-radius:12px;padding:22px 24px;border:1px solid rgba(0,0,0,.08)">
+<div style="font:700 15px 'Noto Sans SC',sans-serif;margin-bottom:10px">调研发现 · 现状 6 处待改进（将在 02 方案中逐条回应）</div>
+<ol style="margin:0;padding-left:20px;font:400 14px/1.7 'Noto Sans SC',sans-serif;color:#221D15">
+<li><b>首屏仍有两层重复信息</b>：顶栏「取件码助手」+ 英雄卡「包裹待取 / N 个包裹待取」两次说「待取」，但第一张卡的操作按钮往往被挤出屏幕。</li>
+<li><b>「查看短信」与「我已取到」并排等权</b>：老人常点错；且「查看短信」跳出应用后不易返回。</li>
+<li><b>取件码之外的短信正文（15sp 灰字，3 行）在老人场景里几乎不被读</b>，却占据高度并造成视觉噪音；「识别依据」12sp 低于适老最小字号。</li>
+<li><b>状态标签 14sp、时间 15sp、胶囊 18sp、正文 15sp</b>——多处字号低于 Type.kt 自己宣布的「正文 ≥17sp」原则。</li>
+<li><b>已取件卡在「全部包裹」中与未取件几乎同貌</b>，仅靠标签色区分，扫读成本高。</li>
+<li><b>设置页对老人过于技术化</b>（正则、提示词 N、supportingText 12sp），且「保存并刷新」的必要性不直观——普通用户不应看到高级规则。</li>
+</ol>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() { return { w: 430, h: 932 }; }
+}
+</script>
+</body>
+</html>

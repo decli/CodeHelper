@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="design_doc_mode" content="canvas"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800;900&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet"><style>body{margin:0;background:#e9e5dd;font-family:Roboto,"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;color:#221D15}a{color:#A93307}a:hover{color:#D2400E}.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}.dv-opt:target .dv-oid{background:#D2400E;color:#fff}</style></helmet>
+<section id="t1" style="padding:40px 44px 60px;display:flex;flex-direction:column;gap:28px">
+<div style="max-width:820px;display:flex;flex-direction:column;gap:8px">
+<div style="font:600 11px ui-monospace,Menlo,monospace;letter-spacing:1px;color:#6E675A">02 · 视觉方向对比 · 首页（待取列表）</div>
+<h1 style="margin:0;font:800 28px/1.2 'Noto Sans SC',sans-serif">三个方向 · 同一份数据、同一套语义色</h1>
+<p style="margin:0;font:400 15px/1.7 'Noto Sans SC',sans-serif;color:#6E675A">共同前提（来自调研）：① 用户是老人，首屏只回答「几个包裹、码是多少」；② 柿橙=待办、松绿=完成 的语义不变；③ 「更大更少」——去掉短信正文、识别依据等次级信息，取件码成为卡片唯一主角；④ 每张卡只有一个主按钮，其余动作降级为文字按钮；⑤ 新增：点码放大出示 / 复制 / 播报，按驿站分组。<br>三个方向的差异在「首屏结构」与「材质感」，而不是配色。</p>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start">
+
+<!-- 1a -->
+<div class="dv-opt" id="1a" style="display:flex;flex-direction:column;gap:10px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:8px"><a class="dv-oid" href="#1a">1a</a><span style="font:600 13px 'Noto Sans SC',sans-serif">小票进化 · 沿用柿柿如意（推荐）</span></div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ w }}" height="{{ h }}" hint-size="430px,932px">
+<div data-screen-label="1a 小票进化" style="background:#F5F2EC;min-height:100%;padding:6px 20px 32px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:20px;font-weight:700;letter-spacing:.5px">取件码助手</span>
+    <div style="width:48px;height:48px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.12)"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#221D15" d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:4px 2px 0">
+    <div>
+      <div style="font-size:18px;font-weight:600;color:#6E675A;line-height:24px">待取包裹</div>
+      <div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:104px;line-height:104px;font-weight:900;color:#D2400E;font-variant-numeric:tabular-nums;letter-spacing:-2px">3</span><span style="font-size:26px;font-weight:700">个</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:4px;height:48px;padding:0 10px 0 16px;border-radius:999px;border:2px solid #D2400E;background:#FBEADF"><span style="font-size:18px;font-weight:700;color:#A93307">最近 12 小时</span><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#A93307" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+  </div>
+  <div style="background:#fff;border-radius:20px;padding:5px;display:flex;gap:5px;box-shadow:0 1px 3px rgba(0,0,0,.12)">
+    <div style="flex:1;height:56px;border-radius:16px;background:#D2400E;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#fff" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:19px;font-weight:700;color:#fff">待取</span></div>
+    <div style="flex:1;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center"><span style="font-size:19px;font-weight:700;color:#6E675A">全部包裹</span></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;padding:2px 2px 0"><span style="font-size:17px;font-weight:700;color:#6E675A">菜鸟驿站 · 幸福小区南门店</span><span style="flex:1;height:1px;background:#D9D2C4"></span><span style="font-size:16px;font-weight:600;color:#6E675A">2 件</span></div>
+  <div style="background:#fff;border-radius:24px;box-shadow:0 2px 6px rgba(34,29,21,.08);overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px 8px">
+      <span style="font-size:17px;font-weight:600;color:#6E675A">今天 14:32</span>
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#FFE3D2"><span style="width:10px;height:10px;border-radius:50%;background:#D2400E"></span><span style="font-size:16px;font-weight:700;color:#A93307">未取件</span></div>
+    </div>
+    <div style="padding:4px 16px 8px;display:flex;flex-direction:column;align-items:center;gap:0">
+      <div style="font-size:64px;line-height:80px;font-weight:900;letter-spacing:2px;font-variant-numeric:tabular-nums;white-space:nowrap">3-3-06006</div>
+      <div style="font-size:64px;line-height:80px;font-weight:900;letter-spacing:2px;font-variant-numeric:tabular-nums;white-space:nowrap">8-5-06003</div>
+      <div style="font-size:16px;color:#6E675A;line-height:22px;margin-top:2px">点一下取件码可放大出示</div>
+    </div>
+    <div style="position:relative;height:20px"><div style="position:absolute;left:16px;right:16px;top:9px;border-top:2px dashed #ECE6DB"></div><div style="position:absolute;left:-10px;top:0;width:20px;height:20px;border-radius:50%;background:#F5F2EC"></div><div style="position:absolute;right:-10px;top:0;width:20px;height:20px;border-radius:50%;background:#F5F2EC"></div></div>
+    <div style="padding:8px 16px 16px;display:flex;flex-direction:column;gap:6px">
+      <div style="height:60px;border-radius:18px;background:#1E7A3C;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#fff" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:20px;font-weight:700;color:#fff">我已取到</span></div>
+      <div style="display:flex;height:48px">
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#A93307" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg><span style="font-size:17px;font-weight:600;color:#A93307">看短信</span></div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#A93307" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg><span style="font-size:17px;font-weight:600;color:#A93307">复制</span></div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#A93307" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg><span style="font-size:17px;font-weight:600;color:#A93307">读给我听</span></div>
+      </div>
+    </div>
+  </div>
+  <div style="background:#fff;border-radius:24px;box-shadow:0 2px 6px rgba(34,29,21,.08);overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px 8px">
+      <span style="font-size:17px;font-weight:600;color:#6E675A">今天 09:15</span>
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#FFE3D2"><span style="width:10px;height:10px;border-radius:50%;background:#D2400E"></span><span style="font-size:16px;font-weight:700;color:#A93307">未取件</span></div>
+    </div>
+    <div style="padding:4px 16px 8px;display:flex;flex-direction:column;align-items:center"><div style="font-size:88px;line-height:104px;font-weight:900;letter-spacing:4px;font-variant-numeric:tabular-nums;white-space:nowrap">27017</div></div>
+  </div>
+</div>
+</x-import>
+<div style="width:430px;font:400 13px/1.6 'Noto Sans SC',sans-serif;color:#6E675A">保守：令牌零改动（仅新增 900 字重 + 1 个 104sp 字阶）。英雄区去卡片化，数字直接落在纸面上省 ~70dp；分组标题按驿站；卡内只留一个绿色主按钮，其余降为文字按钮。<br><b>风险</b>：与现版差异小，用户感知升级弱。</div>
+</div>
+
+<!-- 1b -->
+<div class="dv-opt" id="1b" style="display:flex;flex-direction:column;gap:10px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:8px"><a class="dv-oid" href="#1b">1b</a><span style="font:600 13px 'Noto Sans SC',sans-serif">墨与朱 · 高对比新方向</span></div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ w }}" height="{{ h }}" dark="{{ true }}" hint-size="430px,932px">
+<div data-screen-label="1b 墨与朱" style="background:#F5F2EC;min-height:100%;display:flex;flex-direction:column;box-sizing:border-box">
+  <div style="background:#221D15;padding:4px 20px 26px;border-radius:0 0 32px 32px;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:20px;font-weight:700;color:#EFE8DB;letter-spacing:.5px">取件码助手</span>
+      <div style="width:48px;height:48px;border-radius:50%;border:2px solid #5C523F;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#EFE8DB" d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:120px;line-height:112px;font-weight:900;color:#FF8A50;font-variant-numeric:tabular-nums;letter-spacing:-4px">3</span><span style="font-size:28px;font-weight:700;color:#EFE8DB;line-height:36px">个包裹<br>待取</span></div>
+      <div style="display:flex;align-items:center;gap:4px;height:48px;padding:0 10px 0 16px;border-radius:999px;border:2px solid #FF8A50"><span style="font-size:18px;font-weight:700;color:#FFB694">12 小时内</span><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#FFB694" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+    </div>
+  </div>
+  <div style="padding:18px 20px 32px;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;gap:10px">
+      <div style="height:52px;padding:0 22px;border-radius:999px;background:#221D15;display:flex;align-items:center;gap:6px"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#FF8A50" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:19px;font-weight:700;color:#EFE8DB">待取</span></div>
+      <div style="height:52px;padding:0 22px;border-radius:999px;border:2px solid #8A8171;display:flex;align-items:center;box-sizing:border-box"><span style="font-size:19px;font-weight:700;color:#221D15">全部包裹</span></div>
+    </div>
+    <div style="background:#fff;border-radius:10px;border:2px solid #221D15;overflow:hidden">
+      <div style="background:#221D15;display:flex;justify-content:space-between;align-items:center;padding:12px 18px">
+        <span style="font-size:17px;font-weight:700;color:#EFE8DB">菜鸟驿站 · 幸福小区南门店</span>
+        <span style="font-size:16px;font-weight:600;color:#A79C8A">今天 14:32</span>
+      </div>
+      <div style="padding:18px 16px 6px;display:flex;flex-direction:column;align-items:center">
+        <div style="font-size:64px;line-height:76px;font-weight:900;letter-spacing:2px;font-variant-numeric:tabular-nums;white-space:nowrap;color:#221D15">3-3-06006</div>
+        <div style="font-size:64px;line-height:76px;font-weight:900;letter-spacing:2px;font-variant-numeric:tabular-nums;white-space:nowrap;color:#221D15">8-5-06003</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:6px 18px 14px"><span style="flex:1;height:2px;background:#221D15;opacity:.15"></span><span style="font-size:15px;font-weight:700;color:#A93307;letter-spacing:4px">凭码取件</span><span style="flex:1;height:2px;background:#221D15;opacity:.15"></span></div>
+      <div style="padding:0 14px 14px;display:flex;flex-direction:column;gap:8px">
+        <div style="height:64px;border-radius:8px;background:#1E7A3C;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="26" height="26" viewBox="0 0 24 24"><path fill="#fff" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:21px;font-weight:800;color:#fff">我已取到</span></div>
+        <div style="display:flex;height:48px;border:2px solid #ECE6DB;border-radius:8px">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;border-right:2px solid #ECE6DB"><span style="font-size:17px;font-weight:700;color:#221D15">看短信</span></div>
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;border-right:2px solid #ECE6DB"><span style="font-size:17px;font-weight:700;color:#221D15">复制</span></div>
+          <div style="flex:1;display:flex;align-items:center;justify-content:center"><span style="font-size:17px;font-weight:700;color:#221D15">读给我听</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:10px;border:2px solid #221D15;overflow:hidden">
+      <div style="background:#221D15;display:flex;justify-content:space-between;align-items:center;padding:12px 18px">
+        <span style="font-size:17px;font-weight:700;color:#EFE8DB">兔喜快递超市</span>
+        <span style="font-size:16px;font-weight:600;color:#A79C8A">今天 09:15</span>
+      </div>
+      <div style="padding:18px 16px 6px;display:flex;flex-direction:column;align-items:center"><div style="font-size:92px;line-height:100px;font-weight:900;letter-spacing:6px;font-variant-numeric:tabular-nums;white-space:nowrap;color:#221D15">27017</div></div>
+    </div>
+  </div>
+</div>
+</x-import>
+<div style="width:430px;font:400 13px/1.6 'Noto Sans SC',sans-serif;color:#6E675A">大胆：浓墨顶带 + 朱橙数字（对比度 8.9:1），卡片改用 2dp 墨线 + 直角小票，像打印出来的取件凭证。所有色值仍来自 Color.kt（Ink / PersimmonBright / DarkInk）。<br><b>风险</b>：深色顶带在强光驿站环境下可能反光；风格更「年轻」，需验证老人接受度。</div>
+</div>
+
+<!-- 1c -->
+<div class="dv-opt" id="1c" style="display:flex;flex-direction:column;gap:10px;scroll-margin-top:16px">
+<div style="display:flex;align-items:baseline;gap:8px"><a class="dv-oid" href="#1c">1c</a><span style="font:600 13px 'Noto Sans SC',sans-serif">一码一屏 · 横向翻页新方向</span></div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ w }}" height="{{ h }}" hint-size="430px,932px">
+<div data-screen-label="1c 一码一屏" style="background:#FBEADF;min-height:100%;display:flex;flex-direction:column;box-sizing:border-box;position:relative;overflow:hidden">
+  <div style="padding:6px 20px 0;display:flex;justify-content:space-between;align-items:center">
+    <div style="display:flex;align-items:baseline;gap:6px"><span style="font-size:44px;line-height:48px;font-weight:900;color:#D2400E;font-variant-numeric:tabular-nums">3</span><span style="font-size:20px;font-weight:700;color:#221D15">个包裹待取</span></div>
+    <div style="display:flex;gap:8px">
+      <div style="display:flex;align-items:center;gap:2px;height:48px;padding:0 8px 0 14px;border-radius:999px;background:#fff;border:2px solid #D2400E"><span style="font-size:17px;font-weight:700;color:#A93307">12 小时</span><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#A93307" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+      <div style="width:48px;height:48px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#221D15" d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg></div>
+    </div>
+  </div>
+  <div style="padding:14px 20px 0;display:flex;gap:6px">
+    <div style="height:44px;padding:0 18px;border-radius:999px;background:#D2400E;display:flex;align-items:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#fff" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:17px;font-weight:700;color:#fff">待取</span></div>
+    <div style="height:44px;padding:0 18px;border-radius:999px;display:flex;align-items:center"><span style="font-size:17px;font-weight:700;color:#6E675A">全部包裹</span></div>
+  </div>
+  <div style="position:relative;flex:1;margin-top:18px">
+    <div style="position:absolute;left:20px;right:44px;top:0;bottom:70px;background:#fff;border-radius:32px;box-shadow:0 8px 28px rgba(210,64,14,.14);display:flex;flex-direction:column;overflow:hidden">
+      <div style="padding:22px 24px 0;display:flex;flex-direction:column;gap:4px">
+        <div style="font-size:15px;font-weight:700;color:#A93307;letter-spacing:3px">第 1 件 · 菜鸟驿站</div>
+        <div style="font-size:19px;font-weight:600;color:#221D15;line-height:26px">幸福小区南门店</div>
+        <div style="font-size:16px;color:#6E675A">今天 14:32 到店</div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0 12px">
+        <div style="font-size:16px;font-weight:600;letter-spacing:8px;color:#6E675A">取件码</div>
+        <div style="font-size:66px;line-height:80px;font-weight:900;letter-spacing:2px;font-variant-numeric:tabular-nums;white-space:nowrap">3-3-06006</div>
+        <div style="font-size:66px;line-height:80px;font-weight:900;letter-spacing:2px;font-variant-numeric:tabular-nums;white-space:nowrap">8-5-06003</div>
+      </div>
+      <div style="position:relative;height:24px"><div style="position:absolute;left:20px;right:20px;top:11px;border-top:2px dashed #ECE6DB"></div><div style="position:absolute;left:-12px;top:0;width:24px;height:24px;border-radius:50%;background:#FBEADF"></div><div style="position:absolute;right:-12px;top:0;width:24px;height:24px;border-radius:50%;background:#FBEADF"></div></div>
+      <div style="padding:8px 18px 20px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;gap:8px">
+          <div style="flex:1;height:52px;border-radius:16px;background:#F5F2EC;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#221D15" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg><span style="font-size:17px;font-weight:600">复制</span></div>
+          <div style="flex:1;height:52px;border-radius:16px;background:#F5F2EC;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#221D15" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg><span style="font-size:17px;font-weight:600">读给我听</span></div>
+        </div>
+        <div style="height:68px;border-radius:20px;background:#1E7A3C;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="26" height="26" viewBox="0 0 24 24"><path fill="#fff" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:22px;font-weight:800;color:#fff">我已取到</span></div>
+      </div>
+    </div>
+    <div style="position:absolute;right:-380px;width:400px;top:0;bottom:70px;background:#fff;border-radius:32px;box-shadow:0 8px 28px rgba(210,64,14,.14);opacity:.9"></div>
+    <div style="position:absolute;left:0;right:0;bottom:22px;display:flex;flex-direction:column;align-items:center;gap:10px">
+      <div style="display:flex;gap:8px"><span style="width:28px;height:10px;border-radius:5px;background:#D2400E"></span><span style="width:10px;height:10px;border-radius:5px;background:rgba(210,64,14,.3)"></span><span style="width:10px;height:10px;border-radius:5px;background:rgba(210,64,14,.3)"></span></div>
+      <span style="font-size:16px;font-weight:600;color:#6E675A">向左滑，看下一个包裹</span>
+    </div>
+  </div>
+</div>
+</x-import>
+<div style="width:430px;font:400 13px/1.6 'Noto Sans SC',sans-serif;color:#6E675A">最激进的「更大更少」：一屏只出示一个包裹，像登机牌一样左右翻。取件码可到 66–110sp，主按钮 68dp。柿霜底色让白卡片更突出。<br><b>风险</b>：横滑手势对老人不友好（需保留左右箭头按钮替身）；多包裹时总览能力弱，依赖顶部数字。</div>
+</div>
+
+</div>
+
+<div style="max-width:1000px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+<div style="background:#fff;border-radius:12px;padding:20px 22px;border:1px solid rgba(0,0,0,.08)"><div style="font:700 14px 'Noto Sans SC',sans-serif;margin-bottom:8px">共同的信息架构改动</div><ul style="margin:0;padding-left:18px;font:400 13px/1.7 'Noto Sans SC',sans-serif;color:#221D15"><li>删：短信正文摘要、识别依据、顶栏「设置」文字（改 48dp 圆形图标按钮）</li><li>并：英雄卡 → 纯排版数字，节省一张卡片高度</li><li>分组：按驿站 / 发件方分节标题，同店多件一眼可见</li><li>动作层级：绿色「我已取到」唯一主按钮；看短信 / 复制 / 读给我听 为文字按钮</li><li>点取件码 → 全屏放大出示页（含复制、播报、亮度拉满）</li></ul></div>
+<div style="background:#fff;border-radius:12px;padding:20px 22px;border:1px solid rgba(0,0,0,.08)"><div style="font:700 14px 'Noto Sans SC',sans-serif;margin-bottom:8px">推荐与理由</div><p style="margin:0;font:400 13px/1.7 'Noto Sans SC',sans-serif;color:#221D15">推荐以 <a class="dv-oid" href="#1a">1a</a> 为基底落地，吸收 <a class="dv-oid" href="#1b">1b</a> 的「驿站名进卡头」与 <a class="dv-oid" href="#1c">1c</a> 的全屏出示页。理由：老人用户对熟悉度极敏感，1a 与 v1.3 保持同一心智模型且工程改动最小（无新令牌）；1b 的高对比可作为「深色模式 / 强光模式」的来源；1c 适合作为「出示模式」而非首页。03 原型据此实现。</p></div>
+<div style="background:#fff;border-radius:12px;padding:20px 22px;border:1px solid rgba(0,0,0,.08)"><div style="font:700 14px 'Noto Sans SC',sans-serif;margin-bottom:8px">下一步可以说</div><p style="margin:0;font:400 13px/1.7 'Noto Sans SC',sans-serif;color:#6E675A">「原型改用 1b 的墨色顶带」· 「1a 卡头加驿站名」· 「1c 做成出示模式的翻页」· 「三个方向都出深色版」</p></div>
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() { return { w: 430, h: 932 }; }
+}
+</script>
+</body>
+</html>

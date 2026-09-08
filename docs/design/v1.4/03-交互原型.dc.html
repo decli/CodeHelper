@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800;900&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet"><style>body{margin:0;background:#e9e5dd;font-family:Roboto,"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;color:#221D15}a{color:#A93307}a:hover{color:#D2400E}@keyframes chPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.25);opacity:.6}}@keyframes chUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}@keyframes chSpin{to{transform:rotate(360deg)}}</style></helmet>
+<div style="padding:32px 40px 60px;display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start;justify-content:center">
+
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ w }}" height="{{ h }}" dark="{{ isDark }}" hint-size="430px,932px">
+<div style="{{ themeStyle }}" data-screen-label="原型">
+<div style="background:var(--bg);color:var(--ink);height:100%;min-height:852px;position:relative;box-sizing:border-box;display:flex;flex-direction:column">
+
+<!-- ═══ 首次启动引导 ═══ -->
+<sc-if value="{{ isOnboard }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="引导" style="flex:1;display:flex;flex-direction:column;padding:24px 28px 28px;box-sizing:border-box">
+  <div style="display:flex;gap:8px;justify-content:center"><span style="width:{{ obDot0 }}px;height:10px;border-radius:5px;background:var(--pri);transition:width .25s"></span><span style="width:{{ obDot1 }}px;height:10px;border-radius:5px;background:var(--pri);opacity:{{ obOp1 }};transition:width .25s"></span><span style="width:{{ obDot2 }}px;height:10px;border-radius:5px;background:var(--pri);opacity:{{ obOp2 }};transition:width .25s"></span></div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px">
+    <div style="width:132px;height:132px;border-radius:44px;background:var(--prit);display:flex;align-items:center;justify-content:center"><svg width="72" height="72" viewBox="0 0 24 24"><path fill="var(--pri)" d="{{ obIcon }}"/></svg></div>
+    <div style="font-size:30px;font-weight:800;line-height:40px;text-wrap:balance">{{ obTitle }}</div>
+    <div style="font-size:19px;line-height:30px;color:var(--muted);max-width:330px;text-wrap:pretty">{{ obDesc }}</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div onClick="{{ obNext }}" style="height:64px;border-radius:20px;background:var(--pri);display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="font-size:21px;font-weight:700;color:var(--onpri)">{{ obPrimary }}</span></div>
+    <sc-if value="{{ obHasSkip }}" hint-placeholder-val="{{ false }}"><div onClick="{{ obSkip }}" style="height:56px;display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="font-size:18px;font-weight:600;color:var(--muted)">{{ obSkipLabel }}</span></div></sc-if>
+  </div>
+</div>
+</sc-if>
+
+<!-- ═══ 首页 ═══ -->
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="首页" style="flex:1;overflow:auto;padding:6px 20px 120px;display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:max-content;align-content:start;gap:16px;box-sizing:border-box">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:20px;font-weight:700;letter-spacing:.5px">取件码助手</span>
+    <div onClick="{{ openSettings }}" role="button" aria-label="设置" style="width:48px;height:48px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.12);cursor:pointer"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="var(--ink)" d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:2px 2px 0">
+    <div>
+      <div style="font-size:18px;font-weight:600;color:var(--muted);line-height:24px">{{ heroLabel }}</div>
+      <div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:104px;line-height:104px;font-weight:900;color:{{ heroColor }};font-variant-numeric:tabular-nums;letter-spacing:-2px;transition:color .3s">{{ pendingCount }}</span><span style="font-size:26px;font-weight:700">个</span></div>
+    </div>
+    <div onClick="{{ openSheet }}" role="button" style="display:flex;align-items:center;gap:4px;height:48px;padding:0 10px 0 16px;border-radius:999px;border:2px solid var(--pri);background:var(--prit);cursor:pointer;margin-bottom:6px"><span style="font-size:18px;font-weight:700;color:var(--prid);white-space:nowrap">{{ rangeLabel }}</span><svg width="22" height="22" viewBox="0 0 24 24"><path fill="var(--prid)" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+  </div>
+  <div style="background:var(--card);border-radius:20px;padding:5px;display:flex;gap:5px;box-shadow:0 1px 3px rgba(0,0,0,.12)">
+    <div onClick="{{ tabPending }}" role="tab" style="flex:1;height:56px;border-radius:16px;background:{{ tabPendBg }};display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:background .2s"><sc-if value="{{ isPendingTab }}" hint-placeholder-val="{{ true }}"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="var(--onpri)" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></sc-if><span style="font-size:19px;font-weight:700;color:{{ tabPendFg }}">待取</span></div>
+    <div onClick="{{ tabAll }}" role="tab" style="flex:1;height:56px;border-radius:16px;background:{{ tabAllBg }};display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:background .2s"><sc-if value="{{ isAllTab }}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="var(--onpri)" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></sc-if><span style="font-size:19px;font-weight:700;color:{{ tabAllFg }}">全部包裹</span></div>
+  </div>
+
+  <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+  <div style="background:var(--card);border-radius:24px;padding:36px 24px;display:flex;flex-direction:column;align-items:center;gap:14px;box-shadow:0 2px 6px rgba(34,29,21,.08)">
+    <div style="width:48px;height:48px;border-radius:50%;border:5px solid var(--prit);border-top-color:var(--pri);animation:chSpin .9s linear infinite"></div>
+    <div style="font-size:22px;font-weight:700">正在读取短信</div>
+    <div style="font-size:17px;color:var(--muted);text-align:center">马上就好，只在这台手机上查找</div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ showEmpty }}" hint-placeholder-val="{{ false }}">
+  <div style="background:var(--card);border-radius:24px;padding:32px 24px 24px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;box-shadow:0 2px 6px rgba(34,29,21,.08)">
+    <div style="width:96px;height:96px;border-radius:32px;background:var(--pinet);display:flex;align-items:center;justify-content:center"><svg width="52" height="52" viewBox="0 0 24 24"><path fill="var(--pine)" d="M22 5.18L10.59 16.6l-4.24-4.24 1.41-1.41 2.83 2.83 10-10L22 5.18zM12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8c1.57 0 3.04.46 4.28 1.25l1.45-1.45C16.1 2.67 14.13 2 12 2 6.48 2 2 6.48 2 12s4.48 10 10 10c1.73 0 3.36-.44 4.78-1.22l-1.5-1.5c-1 .46-2.11.72-3.28.72zm7-5h-3v2h3v3h2v-3h3v-2h-3v-3h-2v3z"/></svg></div>
+    <div style="font-size:26px;font-weight:800;line-height:34px">{{ emptyTitle }}</div>
+    <div style="font-size:18px;line-height:28px;color:var(--muted);text-wrap:pretty">{{ emptyDesc }}</div>
+    <div onClick="{{ openSheet }}" style="width:100%;height:60px;border-radius:18px;background:var(--tonal);display:flex;align-items:center;justify-content:center;margin-top:6px;cursor:pointer;box-sizing:border-box"><span style="font-size:19px;font-weight:700">看更早的短信</span></div>
+  </div>
+  </sc-if>
+
+  <sc-for list="{{ groups }}" as="g" hint-placeholder-count="1">
+    <sc-if value="{{ g.showHeader }}" hint-placeholder-val="{{ true }}"><div style="display:flex;align-items:center;gap:10px;padding:4px 2px 0;margin-bottom:-4px"><span style="font-size:17px;font-weight:700;color:var(--muted);white-space:nowrap;flex:none">{{ g.name }}</span><span style="flex:1;min-width:16px;height:1px;background:var(--line2);opacity:.5"></span><span style="font-size:16px;font-weight:600;color:var(--muted);white-space:nowrap">{{ g.countLabel }}</span></div></sc-if>
+    <sc-for list="{{ g.items }}" as="item" hint-placeholder-count="2">
+      <sc-if value="{{ item.pending }}" hint-placeholder-val="{{ true }}">
+      <div style="background:var(--card);border-radius:24px;box-shadow:0 2px 6px rgba(34,29,21,.08);overflow:hidden;animation:chUp .3s ease-out">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px 6px">
+          <span style="font-size:17px;font-weight:600;color:var(--muted);white-space:nowrap">{{ item.senderShort }} · {{ item.time }}</span>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--pric)"><span style="width:10px;height:10px;border-radius:50%;background:var(--pri)"></span><span style="font-size:16px;font-weight:700;color:var(--prid)">未取件</span></div>
+        </div>
+        <div onClick="{{ item.show }}" role="button" aria-label="放大出示取件码" style="padding:2px 16px 6px;display:flex;flex-direction:column;align-items:center;cursor:pointer">
+          <sc-for list="{{ item.codes }}" as="code" hint-placeholder-count="1"><div style="font-size:{{ item.codeSize }}px;line-height:{{ item.codeLine }}px;font-weight:900;letter-spacing:2px;font-variant-numeric:tabular-nums;white-space:nowrap">{{ code }}</div></sc-for>
+          <div style="font-size:16px;color:var(--muted);line-height:22px;margin-top:2px">点一下取件码可放大出示</div>
+        </div>
+        <div style="position:relative;height:20px"><div style="position:absolute;left:16px;right:16px;top:9px;border-top:2px dashed var(--line)"></div><div style="position:absolute;left:-10px;top:0;width:20px;height:20px;border-radius:50%;background:var(--bg)"></div><div style="position:absolute;right:-10px;top:0;width:20px;height:20px;border-radius:50%;background:var(--bg)"></div></div>
+        <div style="padding:6px 16px 14px;display:flex;flex-direction:column;gap:4px">
+          <div onClick="{{ item.mark }}" role="button" style="height:60px;border-radius:18px;background:var(--pine);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer" style-active="transform:scale(.98)"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="var(--onpine)" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:20px;font-weight:700;color:var(--onpine)">我已取到</span></div>
+          <div style="display:flex;height:48px">
+            <div onClick="{{ item.openSms }}" role="button" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;border-radius:12px" style-hover="background:var(--tonal)"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="var(--prid)" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg><span style="font-size:17px;font-weight:600;color:var(--prid)">看短信</span></div>
+            <div onClick="{{ item.copy }}" role="button" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;border-radius:12px" style-hover="background:var(--tonal)"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="var(--prid)" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg><span style="font-size:17px;font-weight:600;color:var(--prid)">复制</span></div>
+            <div onClick="{{ item.speak }}" role="button" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;border-radius:12px" style-hover="background:var(--tonal)"><svg width="20" height="20" viewBox="0 0 24 24" style="animation:{{ item.speakAnim }}"><path fill="var(--prid)" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg><span style="font-size:17px;font-weight:600;color:var(--prid)">{{ item.speakLabel }}</span></div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+      <sc-if value="{{ item.picked }}" hint-placeholder-val="{{ false }}">
+      <div style="background:var(--card);border-radius:20px;box-shadow:0 1px 3px rgba(34,29,21,.06);padding:14px 12px 14px 18px;display:flex;align-items:center;gap:14px;animation:chUp .3s ease-out">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--pinet);display:flex;align-items:center;justify-content:center;flex:none"><svg width="26" height="26" viewBox="0 0 24 24"><path fill="var(--pine)" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+        <div style="flex:1;min-width:0"><div style="font-size:28px;line-height:34px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums;letter-spacing:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ item.codeJoined }}</div><div style="font-size:16px;line-height:22px;color:var(--muted)">已取 · {{ item.senderShort }} · {{ item.time }}</div></div>
+        <div onClick="{{ item.restore }}" role="button" style="height:48px;padding:0 14px;border-radius:14px;display:flex;align-items:center;gap:4px;cursor:pointer;flex:none" style-hover="background:var(--tonal)"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="var(--prid)" d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg><span style="font-size:17px;font-weight:700;color:var(--prid)">恢复</span></div>
+      </div>
+      </sc-if>
+    </sc-for>
+  </sc-for>
+</div>
+</sc-if>
+
+<!-- ═══ 设置 ═══ -->
+<sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="设置" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+  <div style="position:relative;height:64px;display:flex;align-items:center;justify-content:center;flex:none">
+    <div onClick="{{ goHome }}" role="button" style="position:absolute;left:8px;height:48px;display:flex;align-items:center;gap:4px;padding:0 14px 0 10px;border-radius:999px;cursor:pointer" style-hover="background:var(--tonal)"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="var(--prid)" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg><span style="font-size:18px;font-weight:700;color:var(--prid)">返回</span></div>
+    <span style="font-size:22px;font-weight:700">设置</span>
+  </div>
+  <div style="flex:1;overflow:auto;padding:4px 20px 40px;display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:max-content;align-content:start;gap:16px">
+    <div style="background:var(--card);border-radius:22px;padding:18px 18px 8px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+      <div style="font-size:16px;font-weight:700;color:var(--muted);letter-spacing:1px">显示</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;min-height:56px"><span style="font-size:19px;font-weight:600">取件码字号</span>
+        <div style="display:flex;background:var(--tonal);border-radius:14px;padding:4px;gap:4px">
+          <div onClick="{{ setStd }}" style="height:44px;padding:0 16px;border-radius:11px;background:{{ stdBg }};display:flex;align-items:center;cursor:pointer;transition:background .2s"><span style="font-size:17px;font-weight:700;color:{{ stdFg }}">标准</span></div>
+          <div onClick="{{ setLarge }}" style="height:44px;padding:0 16px;border-radius:11px;background:{{ largeBg }};display:flex;align-items:center;cursor:pointer;transition:background .2s"><span style="font-size:17px;font-weight:700;color:{{ largeFg }}">特大</span></div>
+        </div>
+      </div>
+      <div style="height:1px;background:var(--line)"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;min-height:56px"><span style="font-size:19px;font-weight:600">外观</span>
+        <div style="display:flex;background:var(--tonal);border-radius:14px;padding:4px;gap:4px">
+          <div onClick="{{ setLight }}" style="height:44px;padding:0 16px;border-radius:11px;background:{{ lightBg }};display:flex;align-items:center;cursor:pointer;transition:background .2s"><span style="font-size:17px;font-weight:700;color:{{ lightFg }}">浅色</span></div>
+          <div onClick="{{ setDark }}" style="height:44px;padding:0 16px;border-radius:11px;background:{{ darkBg }};display:flex;align-items:center;cursor:pointer;transition:background .2s"><span style="font-size:17px;font-weight:700;color:{{ darkFg }}">深色</span></div>
+        </div>
+      </div>
+      <div style="height:1px;background:var(--line)"></div>
+      <div onClick="{{ toggleGroup }}" role="switch" style="display:flex;align-items:center;justify-content:space-between;min-height:56px;cursor:pointer"><div><div style="font-size:19px;font-weight:600">按驿站分组</div><div style="font-size:15px;color:var(--muted);line-height:20px">同一家店的包裹放在一起</div></div>
+        <div style="width:64px;height:36px;border-radius:18px;background:{{ swBg }};position:relative;transition:background .2s;flex:none"><div style="position:absolute;top:4px;left:{{ swKnob }}px;width:28px;height:28px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .2s"></div></div>
+      </div>
+    </div>
+
+    <div style="background:var(--card);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+      <div style="font-size:16px;font-weight:700;color:var(--muted);letter-spacing:1px">识别提示词</div>
+      <div style="font-size:17px;line-height:26px;color:var(--ink)">短信里出现这些词，后面的数字就会被当作取件码。点一下可以关闭或开启。</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <sc-for list="{{ keywords }}" as="k" hint-placeholder-count="5">
+          <div onClick="{{ k.toggle }}" role="checkbox" style="height:48px;display:flex;align-items:center;gap:6px;padding:0 16px;border-radius:999px;background:{{ k.bg }};border:2px solid {{ k.border }};cursor:pointer;box-sizing:border-box;transition:background .2s"><sc-if value="{{ k.on }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="var(--prid)" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></sc-if><span style="font-size:17px;font-weight:700;color:{{ k.fg }}">{{ k.text }}</span></div>
+        </sc-for>
+        <div onClick="{{ addKeyword }}" style="height:48px;display:flex;align-items:center;gap:4px;padding:0 16px;border-radius:999px;border:2px dashed var(--line2);cursor:pointer;box-sizing:border-box"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="var(--prid)" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg><span style="font-size:17px;font-weight:700;color:var(--prid)">新增</span></div>
+      </div>
+    </div>
+
+    <div style="background:var(--card);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+      <div style="font-size:16px;font-weight:700;color:var(--muted);letter-spacing:1px">桌面角标</div>
+      <div style="font-size:17px;line-height:26px">桌面图标上显示待取数量，每隔一段时间自动更新。</div>
+      <div style="display:flex;gap:8px">
+        <sc-for list="{{ badgeOpts }}" as="b" hint-placeholder-count="4"><div onClick="{{ b.pick }}" style="flex:1;height:52px;border-radius:14px;background:{{ b.bg }};display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s"><span style="font-size:17px;font-weight:700;color:{{ b.fg }}">{{ b.label }}</span></div></sc-for>
+      </div>
+      <sc-if value="{{ needNotif }}" hint-placeholder-val="{{ true }}"><div onClick="{{ grantNotif }}" style="height:56px;border-radius:16px;background:var(--prit);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="var(--prid)" d="M7.58 4.08L6.15 2.65C3.75 4.48 2.17 7.3 2.03 10.5h2c.15-2.65 1.51-4.97 3.55-6.42zm12.39 6.42h2c-.15-3.2-1.73-6.02-4.12-7.85l-1.42 1.43c2.02 1.45 3.39 3.77 3.54 6.42zM18 11c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2v-5zm-6 11c.14 0 .27-.01.4-.04.65-.14 1.18-.58 1.44-1.18.1-.24.15-.5.15-.78h-4c.01 1.1.9 2 2.01 2z"/></svg><span style="font-size:17px;font-weight:700;color:var(--prid)">开启通知，角标才能显示</span></div></sc-if>
+      <sc-if value="{{ hasNotif }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:8px;padding:4px 2px"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="var(--pine)" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg><span style="font-size:16px;font-weight:600;color:var(--pined)">通知已开启，角标正常显示</span></div></sc-if>
+    </div>
+
+    <div style="background:var(--card);border-radius:22px;padding:4px 18px;display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+      <div onClick="{{ toggleAdv }}" role="button" style="display:flex;align-items:center;min-height:60px;cursor:pointer"><div style="flex:1"><div style="font-size:18px;font-weight:600">高级规则</div><div style="font-size:15px;color:var(--muted)">给懂正则的家人用，一般不需要</div></div><svg width="24" height="24" viewBox="0 0 24 24" style="transform:rotate({{ advRot }}deg);transition:transform .2s"><path fill="var(--muted)" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+      <sc-if value="{{ advOpen }}" hint-placeholder-val="{{ false }}"><div style="padding:0 0 14px;display:flex;flex-direction:column;gap:8px"><div style="background:var(--tonal);border-radius:14px;padding:10px 14px;border:2px solid var(--line2)"><div style="font-size:13px;color:var(--muted)">高级规则 1</div><div style="font-size:17px;font-family:ui-monospace,Menlo,monospace">货码[：:\s]*([A-Za-z0-9-]+)</div></div><div style="font-size:14px;color:var(--muted)">语法错误时会用红色提示，且不会生效。</div><div style="height:48px;border-radius:12px;background:var(--tonal);display:flex;align-items:center;justify-content:center"><span style="font-size:16px;font-weight:700;color:var(--prid)">＋ 新增规则</span></div></div></sc-if>
+      <div style="height:1px;background:var(--line)"></div>
+      <div onClick="{{ restoreDefaults }}" role="button" style="display:flex;align-items:center;min-height:60px;cursor:pointer"><span style="flex:1;font-size:18px;font-weight:600">恢复默认设置</span><svg width="24" height="24" viewBox="0 0 24 24"><path fill="var(--muted)" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+      <div style="height:1px;background:var(--line)"></div>
+      <div onClick="{{ openAbout }}" role="button" style="display:flex;align-items:center;min-height:60px;cursor:pointer"><span style="flex:1;font-size:18px;font-weight:600">关于取件码助手</span><span style="font-size:16px;color:var(--muted);margin-right:4px">1.4.0</span><svg width="24" height="24" viewBox="0 0 24 24"><path fill="var(--muted)" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+    </div>
+    <div style="font-size:15px;color:var(--muted);text-align:center;line-height:22px">改动会自动保存，不需要再点「保存」</div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ═══ 全屏出示 ═══ -->
+<sc-if value="{{ isShow }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="出示" style="position:absolute;inset:0;background:var(--card);display:flex;flex-direction:column;padding:8px 20px 24px;box-sizing:border-box;animation:chUp .25s ease-out">
+  <div style="display:flex;align-items:center;justify-content:space-between;height:56px"><span style="font-size:18px;font-weight:700;color:var(--muted)">出示给驿站工作人员</span><div onClick="{{ closeShow }}" role="button" aria-label="关闭" style="width:48px;height:48px;border-radius:50%;background:var(--tonal);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="26" height="26" viewBox="0 0 24 24"><path fill="var(--ink)" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></div></div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center">
+    <div style="font-size:20px;font-weight:700;line-height:28px">{{ showSender }}</div>
+    <div style="font-size:17px;color:var(--muted)">{{ showTime }} 到店</div>
+    <div style="font-size:17px;font-weight:600;letter-spacing:8px;color:var(--muted);margin-top:18px">取件码</div>
+    <sc-for list="{{ showCodes }}" as="code" hint-placeholder-count="1"><div style="font-size:{{ showSize }}px;line-height:{{ showLine }}px;font-weight:900;letter-spacing:3px;font-variant-numeric:tabular-nums;white-space:nowrap">{{ code }}</div></sc-for>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:14px;padding:8px 14px;border-radius:999px;background:var(--tonal)"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="var(--muted)" d="M20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69zM12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg><span style="font-size:15px;font-weight:600;color:var(--muted)">已临时调到最亮</span></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;gap:10px">
+      <div onClick="{{ showCopy }}" style="flex:1;height:56px;border-radius:16px;background:var(--tonal);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="var(--ink)" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg><span style="font-size:18px;font-weight:700">复制</span></div>
+      <div onClick="{{ showSpeak }}" style="flex:1;height:56px;border-radius:16px;background:var(--tonal);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="var(--ink)" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg><span style="font-size:18px;font-weight:700">读给我听</span></div>
+    </div>
+    <div onClick="{{ showMark }}" style="height:68px;border-radius:20px;background:var(--pine);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer"><svg width="26" height="26" viewBox="0 0 24 24"><path fill="var(--onpine)" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font-size:22px;font-weight:800;color:var(--onpine)">我已取到</span></div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ═══ 时间范围面板 ═══ -->
+<sc-if value="{{ sheet }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(0,0,0,.4)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;background:var(--card);border-radius:28px 28px 0 0;padding:0 20px 20px;display:flex;flex-direction:column;gap:10px;animation:chUp .25s ease-out">
+  <div style="width:44px;height:5px;border-radius:999px;background:var(--line2);margin:10px auto 0"></div>
+  <div style="font-size:24px;font-weight:800;line-height:32px;padding-top:6px">选择时间范围</div>
+  <div style="font-size:17px;color:var(--muted);line-height:24px;padding-bottom:4px">选好后立刻重新读取短信</div>
+  <sc-for list="{{ rangeOpts }}" as="r" hint-placeholder-count="7">
+    <div onClick="{{ r.pick }}" role="radio" style="height:60px;border-radius:18px;background:{{ r.bg }};display:flex;align-items:center;gap:14px;padding:0 16px;cursor:pointer;transition:background .15s">
+      <div style="width:28px;height:28px;border-radius:50%;background:{{ r.dotBg }};border:2.5px solid {{ r.dotBorder }};box-sizing:border-box;display:flex;align-items:center;justify-content:center"><sc-if value="{{ r.on }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="var(--pri)" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></sc-if></div>
+      <span style="flex:1;font-size:20px;font-weight:700;color:{{ r.fg }}">{{ r.label }}</span>
+      <span style="font-size:16px;font-weight:600;color:{{ r.fg }};opacity:.8">{{ r.count }}</span>
+    </div>
+  </sc-for>
+  <div onClick="{{ closeSheet }}" style="height:56px;border-radius:18px;background:var(--tonal);display:flex;align-items:center;justify-content:center;margin-top:4px;cursor:pointer"><span style="font-size:18px;font-weight:700;color:var(--muted)">取消</span></div>
+</div>
+</sc-if>
+
+<!-- ═══ 关于 ═══ -->
+<sc-if value="{{ about }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeAbout }}" style="position:absolute;inset:0;background:rgba(0,0,0,.4)"></div>
+<div style="position:absolute;left:24px;right:24px;top:50%;transform:translateY(-50%);background:var(--card);border-radius:28px;padding:28px 24px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;animation:chUp .25s ease-out">
+  <div style="width:72px;height:72px;border-radius:22px;background:var(--pri);display:flex;align-items:center;justify-content:center"><svg width="40" height="40" viewBox="0 0 24 24"><path fill="var(--onpri)" d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/></svg></div>
+  <div style="font-size:24px;font-weight:800;line-height:32px">取件码助手</div>
+  <div style="font-size:17px;color:var(--muted);line-height:26px">版本 1.4.0<br>不联网 · 不上传 · 只读取本机短信</div>
+  <div onClick="{{ closeAbout }}" style="width:100%;height:56px;border-radius:16px;background:var(--pri);display:flex;align-items:center;justify-content:center;margin-top:10px;cursor:pointer"><span style="font-size:19px;font-weight:700;color:var(--onpri)">知道了</span></div>
+</div>
+</sc-if>
+
+<!-- ═══ 提示条 ═══ -->
+<sc-if value="{{ snack }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:16px;right:16px;bottom:20px;background:var(--snbg);color:var(--snfg);border-radius:18px;padding:10px 10px 10px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 6px 20px rgba(0,0,0,.3);animation:chUp .25s ease-out">
+  <span style="flex:1;font-size:17px;line-height:24px;font-weight:600">{{ snackText }}</span>
+  <sc-if value="{{ snackUndo }}" hint-placeholder-val="{{ false }}"><div onClick="{{ undo }}" role="button" style="height:48px;padding:0 16px;border-radius:12px;background:var(--pri);display:flex;align-items:center;gap:4px;cursor:pointer;flex:none"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="var(--onpri)" d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg><span style="font-size:17px;font-weight:700;color:var(--onpri)">撤销</span></div></sc-if>
+</div>
+</sc-if>
+
+</div></div>
+</x-import>
+
+<!-- ═══ 旁注 / 演示导航 ═══ -->
+<div style="width:380px;max-width:100%;display:flex;flex-direction:column;gap:14px">
+  <div style="font:600 11px ui-monospace,Menlo,monospace;letter-spacing:1px;color:#6E675A">03 · 可点击原型 · 基于方向 1a</div>
+  <h1 style="margin:0;font:800 24px/1.25 'Noto Sans SC',sans-serif">取件码助手 v1.4 原型</h1>
+  <p style="margin:0;font:400 14px/1.7 'Noto Sans SC',sans-serif;color:#6E675A">所有控件可点。左侧手机为 430×932（6.9″ 2608×1200 @3x）。右上 Tweaks 可切换外观 / 字号 / 分组 / 起始页。</p>
+  <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid rgba(0,0,0,.08);display:flex;flex-direction:column;gap:8px">
+    <div style="font:700 13px 'Noto Sans SC',sans-serif">跳到场景</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      <div onClick="{{ demoOnboard }}" style="padding:8px 12px;border-radius:8px;background:#F5F2EC;font:600 13px 'Noto Sans SC',sans-serif;cursor:pointer">首次启动引导</div>
+      <div onClick="{{ demoHome }}" style="padding:8px 12px;border-radius:8px;background:#F5F2EC;font:600 13px 'Noto Sans SC',sans-serif;cursor:pointer">首页·待取</div>
+      <div onClick="{{ demoAll }}" style="padding:8px 12px;border-radius:8px;background:#F5F2EC;font:600 13px 'Noto Sans SC',sans-serif;cursor:pointer">全部包裹（3 天）</div>
+      <div onClick="{{ demoSheet }}" style="padding:8px 12px;border-radius:8px;background:#F5F2EC;font:600 13px 'Noto Sans SC',sans-serif;cursor:pointer">时间面板</div>
+      <div onClick="{{ demoShow }}" style="padding:8px 12px;border-radius:8px;background:#F5F2EC;font:600 13px 'Noto Sans SC',sans-serif;cursor:pointer">全屏出示</div>
+      <div onClick="{{ demoEmpty }}" style="padding:8px 12px;border-radius:8px;background:#F5F2EC;font:600 13px 'Noto Sans SC',sans-serif;cursor:pointer">空状态（全取完）</div>
+      <div onClick="{{ demoLoading }}" style="padding:8px 12px;border-radius:8px;background:#F5F2EC;font:600 13px 'Noto Sans SC',sans-serif;cursor:pointer">加载中</div>
+      <div onClick="{{ openSettings }}" style="padding:8px 12px;border-radius:8px;background:#F5F2EC;font:600 13px 'Noto Sans SC',sans-serif;cursor:pointer">设置</div>
+      <div onClick="{{ demoAbout }}" style="padding:8px 12px;border-radius:8px;background:#F5F2EC;font:600 13px 'Noto Sans SC',sans-serif;cursor:pointer">关于弹窗</div>
+      <div onClick="{{ toggleTheme }}" style="padding:8px 12px;border-radius:8px;background:#221D15;color:#EFE8DB;font:600 13px 'Noto Sans SC',sans-serif;cursor:pointer">切换深/浅色</div>
+      <div onClick="{{ demoReset }}" style="padding:8px 12px;border-radius:8px;border:1px solid rgba(0,0,0,.15);font:600 13px 'Noto Sans SC',sans-serif;cursor:pointer">重置数据</div>
+    </div>
+  </div>
+  <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid rgba(0,0,0,.08);font:400 13px/1.7 'Noto Sans SC',sans-serif;color:#221D15">
+    <div style="font:700 13px 'Noto Sans SC',sans-serif;margin-bottom:6px">相对 v1.3.1 的关键改动</div>
+    <ul style="margin:0;padding-left:18px">
+      <li><b>新增首次启动引导</b>（3 步，每步一个动作，可跳过），权限申请前先解释「为什么」。</li>
+      <li><b>英雄区去卡片化</b>：104sp 数字直接落纸面，节省一张卡高度；数字为 0 时变松绿。</li>
+      <li><b>卡片只留一个主按钮</b>「我已取到」（60dp 松绿）；看短信 / 复制 / 读给我听 降为 48dp 文字按钮。删去短信正文与识别依据。</li>
+      <li><b>点取件码 → 全屏出示</b>：最大 150sp、临时提亮、复制 / 播报 / 标记一步到位。</li>
+      <li><b>读给我听</b>：按字逐个朗读（「3 杠 3 杠 0 6 0 0 6」），真机接 TTS；此处调用浏览器语音。</li>
+      <li><b>已取件降为一行摘要</b>（松绿对勾 + 灰码 + 恢复），扫读时不与待取混淆。</li>
+      <li><b>时间面板带件数预览</b>，老人不必反复试档。</li>
+      <li><b>设置自动保存</b>，去掉「保存并刷新」；字号 / 外观 / 分组进设置；高级规则折叠，默认不打扰。</li>
+      <li>所有文字 ≥15sp（次级）/ ≥17sp（正文），触控目标 ≥48dp；撤销条 6 秒内可一步恢复。</li>
+    </ul>
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;外观&quot;},&quot;codeScale&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;标准&quot;,&quot;特大&quot;],&quot;default&quot;:&quot;标准&quot;,&quot;tsType&quot;:&quot;'标准'|'特大'&quot;,&quot;section&quot;:&quot;外观&quot;},&quot;grouping&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;首页&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;首页&quot;,&quot;引导&quot;],&quot;default&quot;:&quot;首页&quot;,&quot;tsType&quot;:&quot;'首页'|'引导'&quot;,&quot;section&quot;:&quot;首页&quot;}}">
+const LIGHT = {bg:'#F5F2EC',card:'#FFFFFF',ink:'#221D15',muted:'#6E675A',line:'#ECE6DB',line2:'#8A8171',pri:'#D2400E',prid:'#A93307',prit:'#FBEADF',pric:'#FFE3D2',onpri:'#FFFFFF',pine:'#1E7A3C',pined:'#166030',pinet:'#E4F3E8',onpine:'#FFFFFF',tonal:'#F5F2EC',snbg:'#322F2A',snfg:'#F5F2EC'};
+const DARK = {bg:'#17130D',card:'#221C13',ink:'#EFE8DB',muted:'#A79C8A',line:'#3A3223',line2:'#5C523F',pri:'#FF8A50',prid:'#FFB694',prit:'#3A2412',pric:'#3A2412',onpri:'#3A1503',pine:'#6FC98A',pined:'#A8E0B5',pinet:'#1C2E1F',onpine:'#0A2913',tonal:'#2E2718',snbg:'#EFE8DB',snfg:'#17130D'};
+const RANGES = [{label:'最近 12 小时',hours:12},{label:'最近 1 天',hours:24},{label:'最近 2 天',hours:48},{label:'最近 3 天',hours:72},{label:'最近 5 天',hours:120},{label:'最近 7 天',hours:168},{label:'最近 14 天',hours:336}];
+const DATA = () => [
+  {id:'a',sender:'菜鸟驿站 · 幸福小区南门店',senderShort:'菜鸟驿站',codes:['3-3-06006','8-5-06003'],time:'今天 14:32',hoursAgo:2,picked:false},
+  {id:'b',sender:'兔喜快递超市',senderShort:'兔喜快递',codes:['27017'],time:'今天 09:15',hoursAgo:7,picked:false},
+  {id:'c',sender:'菜鸟驿站 · 幸福小区南门店',senderShort:'菜鸟驿站',codes:['1-3-27017'],time:'昨天 18:40',hoursAgo:21,picked:true},
+  {id:'d',sender:'京东快递',senderShort:'京东快递',codes:['B-2-1188'],time:'昨天 10:02',hoursAgo:29,picked:false},
+  {id:'e',sender:'菜鸟驿站 · 幸福小区南门店',senderShort:'菜鸟驿站',codes:['6-1-00412'],time:'9月5日 16:20',hoursAgo:70,picked:true},
+];
+const OB = [
+  {icon:'M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z',title:'取件码，一眼看到',desc:'自动从短信里找出取件码，用最大的字显示出来。不联网、不上传，只在这台手机上工作。',primary:'开始使用',skip:null},
+  {icon:'M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z',title:'需要允许读取短信',desc:'取件码都在短信里。接下来系统会弹出询问，请选择「允许」。我们不会发送或修改任何短信。',primary:'允许读取短信',skip:'以后再说'},
+  {icon:'M7.58 4.08L6.15 2.65C3.75 4.48 2.17 7.3 2.03 10.5h2c.15-2.65 1.51-4.97 3.55-6.42zm12.39 6.42h2c-.15-3.2-1.73-6.02-4.12-7.85l-1.42 1.43c2.02 1.45 3.39 3.77 3.54 6.42zM18 11c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2v-5zm-6 11c.14 0 .27-.01.4-.04.65-.14 1.18-.58 1.44-1.18.1-.24.15-.5.15-.78h-4c.01 1.1.9 2 2.01 2z',title:'桌面图标显示待取数量',desc:'开启通知后，桌面图标角标会显示还有几个包裹没取。不会打扰您，没有声音。',primary:'开启通知',skip:'暂不开启'},
+];
+const KW = ['取件码','提货码','货码','驿站码','凭'];
+
+class Component extends DCLogic {
+  state = { screen:null, ob:0, tab:'pending', range:0, sheet:false, about:false, show:null, snack:null, loading:false, speaking:null, items:DATA(), theme:null, codeScale:null, grouping:null, advOpen:false, badgeMin:5, kwOff:{}, notif:false };
+  timers = {};
+
+  theme() { return this.state.theme ?? this.props.theme ?? 'light'; }
+  scale() { return this.state.codeScale ?? this.props.codeScale ?? '标准'; }
+  grouping() { return this.state.grouping ?? this.props.grouping ?? true; }
+  screen() { return this.state.screen ?? ((this.props.startScreen ?? '首页') === '引导' ? 'onboard' : 'home'); }
+
+  codeSize(codes, width, max) {
+    const len = Math.max(...codes.map(c => c.length));
+    let px = Math.floor(width / (len * 0.66));
+    if (this.scale() === '特大') max *= 1.15;
+    return Math.min(px, Math.round(max));
+  }
+  toast(text, undoId) {
+    clearTimeout(this.timers.snack);
+    this.setState({ snack: { text, undoId } });
+    this.timers.snack = setTimeout(() => this.setState({ snack: null }), undoId ? 6000 : 2500);
+  }
+  setItem(id, patch) { this.setState(s => ({ items: s.items.map(i => i.id === id ? { ...i, ...patch } : i) })); }
+  mark(item) { this.setItem(item.id, { picked: true }); this.setState({ show: null }); this.toast(`「${item.codes.join('、')}」已标记为取到`, item.id); }
+  restore(item) { this.setItem(item.id, { picked: false }); this.toast(`「${item.codes.join('、')}」已恢复为待取`); }
+  copy(item) { try { navigator.clipboard && navigator.clipboard.writeText(item.codes.join(' ')); } catch (e) {} this.toast(`已复制 ${item.codes.join('、')}`); }
+  speak(item) {
+    const spoken = item.codes.map(c => c.split('').map(ch => ch === '-' ? '杠' : ch).join(' ')).join('，下一个，');
+    const text = `${item.senderShort}，取件码，${spoken}`;
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text); u.lang = 'zh-CN'; u.rate = 0.75;
+      u.onend = () => this.setState({ speaking: null });
+      window.speechSynthesis.speak(u);
+    } else { setTimeout(() => this.setState({ speaking: null }), 3000); }
+    this.setState({ speaking: item.id }); this.toast('正在朗读：' + spoken);
+  }
+  reload(patch) {
+    clearTimeout(this.timers.load);
+    this.setState({ ...patch, loading: true, sheet: false });
+    this.timers.load = setTimeout(() => this.setState({ loading: false }), 700);
+  }
+  componentWillUnmount() { Object.values(this.timers).forEach(clearTimeout); }
+
+  renderVals() {
+    const s = this.state, t = this.theme() === 'dark' ? DARK : LIGHT, isDark = this.theme() === 'dark';
+    const themeStyle = {}; Object.entries(t).forEach(([k, v]) => themeStyle['--' + k] = v);
+    themeStyle.height = '100%';
+    const screen = this.screen();
+    const hours = RANGES[s.range].hours;
+    const inRange = s.items.filter(i => i.hoursAgo < hours);
+    const pendingItems = inRange.filter(i => !i.picked).sort((a, b) => a.hoursAgo - b.hoursAgo);
+    const pickedItems = inRange.filter(i => i.picked).sort((a, b) => a.hoursAgo - b.hoursAgo);
+    const pendingCount = pendingItems.reduce((n, i) => n + i.codes.length, 0);
+    const deco = i => ({
+      ...i, pending: !i.picked, codeJoined: i.codes.join('  '),
+      codeSize: this.codeSize(i.codes, 356, 92), codeLine: Math.round(this.codeSize(i.codes, 356, 92) * 1.22),
+      speakLabel: s.speaking === i.id ? '正在读…' : '读给我听', speakAnim: s.speaking === i.id ? 'chPulse .8s ease-in-out infinite' : 'none',
+      show: () => this.setState({ show: i.id }), mark: () => this.mark(i), restore: () => this.restore(i), copy: () => this.copy(i), speak: () => this.speak(i),
+      openSms: () => this.toast('已在系统短信中打开这条消息'),
+    });
+    let groups = [];
+    if (!s.loading) {
+      if (this.grouping()) {
+        const map = new Map();
+        pendingItems.forEach(i => { if (!map.has(i.sender)) map.set(i.sender, []); map.get(i.sender).push(i); });
+        groups = [...map.entries()].map(([name, items]) => ({ name, showHeader: true, countLabel: `${items.reduce((n, i) => n + i.codes.length, 0)} 件`, items: items.map(deco) }));
+      } else if (pendingItems.length) groups = [{ name: '', showHeader: false, countLabel: '', items: pendingItems.map(deco) }];
+      if (s.tab === 'all' && pickedItems.length) groups.push({ name: '已取件', showHeader: true, countLabel: `${pickedItems.length} 件`, items: pickedItems.map(deco) });
+    }
+    const showItem = s.items.find(i => i.id === s.show);
+    const showSize = showItem ? this.codeSize(showItem.codes, 386, 150) : 0;
+    const ob = OB[s.ob];
+    const showEmpty = !s.loading && screen === 'home' && groups.length === 0;
+    const seg = on => ({ bg: on ? t.pri : 'transparent', fg: on ? t.onpri : t.muted });
+    const showEmptyAll = s.tab === 'all';
+    return {
+      w: 430, h: 932, isDark, themeStyle,
+      isOnboard: screen === 'onboard', isHome: screen === 'home', isSettings: screen === 'settings', isShow: !!showItem,
+      obDot0: s.ob === 0 ? 28 : 10, obDot1: s.ob === 1 ? 28 : 10, obDot2: s.ob === 2 ? 28 : 10, obOp1: s.ob >= 1 ? 1 : .3, obOp2: s.ob >= 2 ? 1 : .3,
+      obIcon: ob.icon, obTitle: ob.title, obDesc: ob.desc, obPrimary: ob.primary, obHasSkip: !!ob.skip, obSkipLabel: ob.skip || '',
+      obNext: () => { if (s.ob === 2) { this.setState({ notif: true }); this.reload({ screen: 'home' }); } else this.setState({ ob: s.ob + 1 }); },
+      obSkip: () => { if (s.ob === 2) this.reload({ screen: 'home' }); else this.setState({ ob: s.ob + 1 }); },
+      heroLabel: s.loading ? '正在读取短信…' : '待取包裹', pendingCount, heroColor: pendingCount === 0 ? t.pine : t.pri,
+      rangeLabel: RANGES[s.range].label,
+      isPendingTab: s.tab === 'pending', isAllTab: s.tab === 'all',
+      tabPendBg: s.tab === 'pending' ? t.pri : 'transparent', tabPendFg: s.tab === 'pending' ? t.onpri : t.muted,
+      tabAllBg: s.tab === 'all' ? t.pri : 'transparent', tabAllFg: s.tab === 'all' ? t.onpri : t.muted,
+      tabPending: () => this.setState({ tab: 'pending' }), tabAll: () => this.reload({ tab: 'all' }),
+      loading: s.loading, showEmpty, groups,
+      emptyTitle: showEmptyAll ? '这段时间没有取件码' : '包裹都取完了',
+      emptyDesc: showEmptyAll ? '可以换个时间范围，或到「设置」检查识别提示词。' : `${RANGES[s.range].label}内没有待取的包裹。想看更早的，可以换个时间范围。`,
+      openSheet: () => this.setState({ sheet: true }), closeSheet: () => this.setState({ sheet: false }), sheet: s.sheet,
+      rangeOpts: RANGES.map((r, idx) => { const on = idx === s.range; const n = s.items.filter(i => i.hoursAgo < r.hours && !i.picked).reduce((k, i) => k + i.codes.length, 0); return { label: r.label, on, bg: on ? t.pri : t.tonal, fg: on ? t.onpri : t.ink, dotBg: on ? t.onpri : 'transparent', dotBorder: on ? t.onpri : t.line2, count: n ? `${n} 件待取` : '无待取', pick: () => this.reload({ range: idx }) }; }),
+      openSettings: () => this.setState({ screen: 'settings' }), goHome: () => this.setState({ screen: 'home' }),
+      setStd: () => this.setState({ codeScale: '标准' }), setLarge: () => this.setState({ codeScale: '特大' }),
+      stdBg: seg(this.scale() === '标准').bg, stdFg: seg(this.scale() === '标准').fg, largeBg: seg(this.scale() === '特大').bg, largeFg: seg(this.scale() === '特大').fg,
+      setLight: () => this.setState({ theme: 'light' }), setDark: () => this.setState({ theme: 'dark' }),
+      lightBg: seg(!isDark).bg, lightFg: seg(!isDark).fg, darkBg: seg(isDark).bg, darkFg: seg(isDark).fg,
+      toggleGroup: () => this.setState({ grouping: !this.grouping() }), swBg: this.grouping() ? t.pri : t.line2, swKnob: this.grouping() ? 32 : 4,
+      keywords: KW.map(k => { const on = !s.kwOff[k]; return { text: k, on, bg: on ? t.pric : 'transparent', border: on ? t.pric : t.line2, fg: on ? t.prid : t.ink, toggle: () => this.setState(st => ({ kwOff: { ...st.kwOff, [k]: !st.kwOff[k] } })) }; }),
+      addKeyword: () => this.toast('真机中弹出大字号输入框'),
+      badgeOpts: [5, 10, 15, 30].map(m => { const on = s.badgeMin === m; return { label: `${m} 分钟`, bg: on ? t.pri : t.tonal, fg: on ? t.onpri : t.ink, pick: () => this.setState({ badgeMin: m }) }; }),
+      needNotif: !s.notif, hasNotif: s.notif, grantNotif: () => { this.setState({ notif: true }); this.toast('通知已开启'); },
+      advOpen: s.advOpen, advRot: s.advOpen ? 180 : 0, toggleAdv: () => this.setState({ advOpen: !s.advOpen }),
+      restoreDefaults: () => { this.setState({ kwOff: {}, badgeMin: 5, codeScale: '标准', grouping: true, advOpen: false }); this.toast('已恢复默认设置'); },
+      about: s.about, openAbout: () => this.setState({ about: true }), closeAbout: () => this.setState({ about: false }),
+      showSender: showItem ? showItem.sender : '', showTime: showItem ? showItem.time : '', showCodes: showItem ? showItem.codes : [], showSize, showLine: Math.round(showSize * 1.2),
+      closeShow: () => this.setState({ show: null }), showCopy: () => showItem && this.copy(showItem), showSpeak: () => showItem && this.speak(showItem), showMark: () => showItem && this.mark(showItem),
+      snack: !!s.snack, snackText: s.snack ? s.snack.text : '', snackUndo: !!(s.snack && s.snack.undoId),
+      undo: () => { const it = s.items.find(i => i.id === s.snack.undoId); if (it) { this.setItem(it.id, { picked: false }); } clearTimeout(this.timers.snack); this.setState({ snack: null }); },
+      demoOnboard: () => this.setState({ screen: 'onboard', ob: 0, show: null, sheet: false, about: false }),
+      demoHome: () => this.setState({ screen: 'home', tab: 'pending', range: 0, show: null, sheet: false, about: false }),
+      demoAll: () => this.reload({ screen: 'home', tab: 'all', range: 3, show: null, about: false }),
+      demoSheet: () => this.setState({ screen: 'home', sheet: true, show: null, about: false }),
+      demoShow: () => this.setState({ screen: 'home', show: 'a', sheet: false, about: false }),
+      demoEmpty: () => this.setState({ screen: 'home', tab: 'pending', range: 0, show: null, sheet: false, items: s.items.map(i => i.hoursAgo < 12 ? { ...i, picked: true } : i) }),
+      demoLoading: () => this.reload({ screen: 'home', show: null, about: false }),
+      demoAbout: () => this.setState({ screen: 'settings', about: true, show: null }),
+      toggleTheme: () => this.setState({ theme: isDark ? 'light' : 'dark' }),
+      demoReset: () => this.setState({ items: DATA(), tab: 'pending', range: 0, screen: 'home', show: null, sheet: false, about: false, snack: null }),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -64,3 +64,11 @@ val PineBright = Color(0xFF6FC98A)
 val PineOnBright = Color(0xFF0A2913)
 val DarkPineTint = Color(0xFF1C2E1F)
 val PineTintBright = Color(0xFFA8E0B5)
+
+/** 提示条底色 · 浅色模式为深底浅字 */
+val InverseSurface = Color(0xFF322F2A)
+val InverseOnSurface = Color(0xFFF5F2EC)
+
+/** 提示条底色 · 深色模式反相为浅底深字，保证从深色卡片中跳出 */
+val DarkInverseSurface = Color(0xFFEFE8DB)
+val DarkInverseOnSurface = Color(0xFF17130D)

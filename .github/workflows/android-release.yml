@@ -58,6 +58,17 @@ jobs:
             - name: Ensure Gradle wrapper is executable
               run: chmod +x gradlew
 
+            - name: Run unit tests
+              run: |
+                  set -o pipefail
+                  ./gradlew testReleaseUnitTest --no-daemon 2>&1 | tee gradle-test.log
+
+            - name: Show unit test failure excerpt
+              if: failure()
+              run: |
+                  tail -n 120 gradle-test.log || true
+                  find app/build/reports/tests -name '*.html' -print 2>/dev/null | head -20 || true
+
             - name: Build release APK
               env:
                   RELEASE_KEYSTORE_PATH: ${{ github.workspace }}/release.keystore

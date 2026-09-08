@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800;900&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet"><style>body{margin:0;background:#F5F2EC;font-family:Roboto,"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;color:#221D15}a{color:#A93307}a:hover{color:#D2400E}</style></helmet>
+<div style="max-width:1040px;margin:0 auto;padding:40px 28px 80px;display:flex;flex-direction:column;gap:44px">
+
+<header style="display:flex;flex-direction:column;gap:10px">
+  <div style="font:600 11px ui-monospace,Menlo,monospace;letter-spacing:1px;color:#6E675A">04 · UI / 视觉 / 交互规范 · v1.4</div>
+  <h1 style="margin:0;font:900 34px/1.2 'Noto Sans SC',sans-serif;letter-spacing:-.5px">取件码助手 · 柿柿如意设计规范</h1>
+  <p style="margin:0;font:400 16px/1.7 'Noto Sans SC',sans-serif;color:#6E675A;max-width:760px;text-wrap:pretty">面向 60 岁以上、在驿站柜台前单手举着手机的用户。规范只回答三个问题：<b style="color:#221D15">能不能一眼看到码、能不能一下点对、点错了能不能改回来</b>。所有令牌与 Color.kt / Type.kt 保持一一对应，仅新增 3 个字阶与 1 个字重。</p>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
+    <span style="padding:6px 12px;border-radius:999px;background:#FFE3D2;color:#A93307;font:700 13px 'Noto Sans SC',sans-serif">柿橙 = 待办 / 主操作</span>
+    <span style="padding:6px 12px;border-radius:999px;background:#E4F3E8;color:#166030;font:700 13px 'Noto Sans SC',sans-serif">松绿 = 完成 / 确认</span>
+    <span style="padding:6px 12px;border-radius:999px;background:#fff;color:#221D15;border:1px solid #ECE6DB;font:700 13px 'Noto Sans SC',sans-serif">暖纸 = 页面 · 纯白 = 卡片</span>
+  </div>
+</header>
+
+<!-- ═══ 1 色彩 ═══ -->
+<section style="display:flex;flex-direction:column;gap:16px">
+  <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font:900 13px ui-monospace,Menlo,monospace;color:#D2400E;flex:none">01</span><h2 style="margin:0;font:800 24px/1.2 'Noto Sans SC',sans-serif;flex:none;white-space:nowrap">色彩令牌</h2><span style="font:400 14px 'Noto Sans SC',sans-serif;color:#6E675A">Color.kt 原值 · 括号内为与其常用底色的对比度</span></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">
+    <div style="border-radius:14px;overflow:hidden;background:#fff;border:1px solid #ECE6DB"><div style="height:72px;background:#D2400E"></div><div style="padding:10px 12px"><div style="font:700 14px 'Noto Sans SC',sans-serif">Persimmon 柿橙</div><div style="font:500 12px ui-monospace,Menlo,monospace;color:#6E675A">#D2400E · 白字 5.2:1</div></div></div>
+    <div style="border-radius:14px;overflow:hidden;background:#fff;border:1px solid #ECE6DB"><div style="height:72px;background:#A93307"></div><div style="padding:10px 12px"><div style="font:700 14px 'Noto Sans SC',sans-serif">PersimmonDeep</div><div style="font:500 12px ui-monospace,Menlo,monospace;color:#6E675A">#A93307 · 浅底文字 6.6:1</div></div></div>
+    <div style="border-radius:14px;overflow:hidden;background:#fff;border:1px solid #ECE6DB"><div style="height:72px;background:#FBEADF"></div><div style="padding:10px 12px"><div style="font:700 14px 'Noto Sans SC',sans-serif">PersimmonTint 柿霜</div><div style="font:500 12px ui-monospace,Menlo,monospace;color:#6E675A">#FBEADF · 胶囊 / 提示底</div></div></div>
+    <div style="border-radius:14px;overflow:hidden;background:#fff;border:1px solid #ECE6DB"><div style="height:72px;background:#FFE3D2"></div><div style="padding:10px 12px"><div style="font:700 14px 'Noto Sans SC',sans-serif">PersimmonChip</div><div style="font:500 12px ui-monospace,Menlo,monospace;color:#6E675A">#FFE3D2 · 未取件标签底</div></div></div>
+    <div style="border-radius:14px;overflow:hidden;background:#fff;border:1px solid #ECE6DB"><div style="height:72px;background:#1E7A3C"></div><div style="padding:10px 12px"><div style="font:700 14px 'Noto Sans SC',sans-serif">Pine 松绿</div><div style="font:500 12px ui-monospace,Menlo,monospace;color:#6E675A">#1E7A3C · 白字 5.6:1</div></div></div>
+    <div style="border-radius:14px;overflow:hidden;background:#fff;border:1px solid #ECE6DB"><div style="height:72px;background:#E4F3E8"></div><div style="padding:10px 12px"><div style="font:700 14px 'Noto Sans SC',sans-serif">PineTint</div><div style="font:500 12px ui-monospace,Menlo,monospace;color:#6E675A">#E4F3E8 · 已取件底 / #166030 字</div></div></div>
+    <div style="border-radius:14px;overflow:hidden;background:#fff;border:1px solid #ECE6DB"><div style="height:72px;background:#221D15"></div><div style="padding:10px 12px"><div style="font:700 14px 'Noto Sans SC',sans-serif">Ink 浓墨</div><div style="font:500 12px ui-monospace,Menlo,monospace;color:#6E675A">#221D15 · 纸底 15.4:1</div></div></div>
+    <div style="border-radius:14px;overflow:hidden;background:#fff;border:1px solid #ECE6DB"><div style="height:72px;background:#6E675A"></div><div style="padding:10px 12px"><div style="font:700 14px 'Noto Sans SC',sans-serif">InkMuted</div><div style="font:500 12px ui-monospace,Menlo,monospace;color:#6E675A">#6E675A · 白底 5.0:1 ✓</div></div></div>
+    <div style="border-radius:14px;overflow:hidden;background:#fff;border:1px solid #ECE6DB"><div style="height:72px;background:#F5F2EC"></div><div style="padding:10px 12px"><div style="font:700 14px 'Noto Sans SC',sans-serif">Paper 暖纸</div><div style="font:500 12px ui-monospace,Menlo,monospace;color:#6E675A">#F5F2EC · 页面 / 填充按钮</div></div></div>
+    <div style="border-radius:14px;overflow:hidden;background:#fff;border:1px solid #ECE6DB"><div style="height:72px;background:#ECE6DB"></div><div style="padding:10px 12px"><div style="font:700 14px 'Noto Sans SC',sans-serif">Outline</div><div style="font:500 12px ui-monospace,Menlo,monospace;color:#6E675A">#ECE6DB · 撕票线 / 分隔</div></div></div>
+    <div style="border-radius:14px;overflow:hidden;background:#fff;border:1px solid #ECE6DB"><div style="height:72px;background:#8A8171"></div><div style="padding:10px 12px"><div style="font:700 14px 'Noto Sans SC',sans-serif">OutlineStrong</div><div style="font:500 12px ui-monospace,Menlo,monospace;color:#6E675A">#8A8171 · 未选中描边 3.4:1</div></div></div>
+    <div style="border-radius:14px;overflow:hidden;background:#fff;border:1px solid #ECE6DB"><div style="height:72px;background:#B3261E"></div><div style="padding:10px 12px"><div style="font:700 14px 'Noto Sans SC',sans-serif">ErrorRed</div><div style="font:500 12px ui-monospace,Menlo,monospace;color:#6E675A">#B3261E · 仅表单校验</div></div></div>
+  </div>
+  <div style="background:#17130D;border-radius:18px;padding:20px 22px;display:flex;flex-direction:column;gap:12px">
+    <div style="font:700 15px 'Noto Sans SC',sans-serif;color:#EFE8DB">深色模式 · 同名令牌换值，语义不变</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <span style="padding:8px 12px;border-radius:10px;background:#221C13;color:#EFE8DB;font:600 13px ui-monospace,Menlo,monospace;border:1px solid #3A3223">Card #221C13</span>
+      <span style="padding:8px 12px;border-radius:10px;background:#FF8A50;color:#3A1503;font:600 13px ui-monospace,Menlo,monospace">Persimmon #FF8A50 / on #3A1503</span>
+      <span style="padding:8px 12px;border-radius:10px;background:#3A2412;color:#FFB694;font:600 13px ui-monospace,Menlo,monospace">Tint #3A2412 / #FFB694</span>
+      <span style="padding:8px 12px;border-radius:10px;background:#6FC98A;color:#0A2913;font:600 13px ui-monospace,Menlo,monospace">Pine #6FC98A / on #0A2913</span>
+      <span style="padding:8px 12px;border-radius:10px;background:#1C2E1F;color:#A8E0B5;font:600 13px ui-monospace,Menlo,monospace">PineTint #1C2E1F / #A8E0B5</span>
+      <span style="padding:8px 12px;border-radius:10px;background:#2E2718;color:#A79C8A;font:600 13px ui-monospace,Menlo,monospace">Tonal #2E2718 / Muted #A79C8A</span>
+    </div>
+    <div style="font:400 13px/1.6 'Noto Sans SC',sans-serif;color:#A79C8A">规则：深色下取件码仍用 DarkInk #EFE8DB 而非橙色——码是内容不是状态；橙色只留给数字「N 个」与选中态。提示条在深色下反相（浅底深字），保证从深卡片中跳出。</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">
+    <div style="background:#fff;border-radius:14px;padding:16px 18px;border:1px solid #ECE6DB;font:400 14px/1.7 'Noto Sans SC',sans-serif"><b>用色三条</b><br>① 一屏最多一个柿橙实心块（选中态或主数字）+ 一个松绿实心块（主按钮）。<br>② 灰字（InkMuted）只用于时间、说明、已取件码；从不用于可点击文字——可点击文字一律 PersimmonDeep。<br>③ 不用半透明降低文字对比；需要弱化就换令牌。</div>
+    <div style="background:#fff;border-radius:14px;padding:16px 18px;border:1px solid #ECE6DB;font:400 14px/1.7 'Noto Sans SC',sans-serif"><b>禁止</b><br>· 左侧彩色竖条卡片、渐变背景、玻璃拟态<br>· 用红色表示「未取」——红色只给表单错误<br>· 图标单独承担含义（每个图标必须带文字）<br>· 对取件码使用任何非 900 字重或非等宽数字</div>
+  </div>
+</section>
+
+<!-- ═══ 2 字阶 ═══ -->
+<section style="display:flex;flex-direction:column;gap:16px">
+  <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font:900 13px ui-monospace,Menlo,monospace;color:#D2400E;flex:none">02</span><h2 style="margin:0;font:800 24px/1.2 'Noto Sans SC',sans-serif;flex:none;white-space:nowrap">字阶</h2><span style="font:400 14px 'Noto Sans SC',sans-serif;color:#6E675A">系统字体（Roboto / Noto Sans CJK）· 单位 sp · 全部支持系统字号放大 1.3×</span></div>
+  <div style="background:#fff;border-radius:18px;border:1px solid #ECE6DB;overflow:hidden">
+    <div style="display:grid;grid-template-columns:minmax(0,1.4fr) 110px 80px minmax(0,1.6fr);gap:12px;padding:14px 22px;border-bottom:1px solid #ECE6DB;font:600 12px 'Noto Sans SC',sans-serif;color:#6E675A"><span>样例</span><span>令牌</span><span>规格</span><span>用途</span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1.4fr) 110px 80px minmax(0,1.6fr);gap:12px;padding:12px 22px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="font:900 104px/1 Roboto,sans-serif;color:#D2400E;letter-spacing:-2px;font-variant-numeric:tabular-nums">3</span><span style="font:600 13px ui-monospace,Menlo,monospace">heroNumber ★</span><span style="font:500 13px 'Noto Sans SC',sans-serif">104 / 900</span><span style="font:400 14px/1.6 'Noto Sans SC',sans-serif;color:#6E675A">首屏待取数量。0 时松绿。新增字阶。</span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1.4fr) 110px 80px minmax(0,1.6fr);gap:12px;padding:12px 22px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="font:900 clamp(28px,4.2vw,44px)/1.2 Roboto,sans-serif;letter-spacing:2px;font-variant-numeric:tabular-nums;white-space:nowrap">3-3-06006</span><span style="font:600 13px ui-monospace,Menlo,monospace">code</span><span style="font:500 13px 'Noto Sans SC',sans-serif">40–96 / 900</span><span style="font:400 14px/1.6 'Noto Sans SC',sans-serif;color:#6E675A">取件码。按卡宽实测取最大值，一码一行永不折行；「特大」模式上限 ×1.15。出示页上限 150。</span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1.4fr) 110px 80px minmax(0,1.6fr);gap:12px;padding:12px 22px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="font:800 30px/1.3 'Noto Sans SC',sans-serif">需要允许读取短信</span><span style="font:600 13px ui-monospace,Menlo,monospace">displaySmall ★</span><span style="font:500 13px 'Noto Sans SC',sans-serif">30 / 800</span><span style="font:400 14px/1.6 'Noto Sans SC',sans-serif;color:#6E675A">引导页、全屏状态标题。</span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1.4fr) 110px 80px minmax(0,1.6fr);gap:12px;padding:12px 22px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="font:800 24px/1.35 'Noto Sans SC',sans-serif">选择时间范围</span><span style="font:600 13px ui-monospace,Menlo,monospace">headlineMedium</span><span style="font:500 13px 'Noto Sans SC',sans-serif">24 / 800</span><span style="font:400 14px/1.6 'Noto Sans SC',sans-serif;color:#6E675A">面板标题、空状态标题、关于。</span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1.4fr) 110px 80px minmax(0,1.6fr);gap:12px;padding:12px 22px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="font:700 20px/1.4 'Noto Sans SC',sans-serif">我已取到</span><span style="font:600 13px ui-monospace,Menlo,monospace">buttonLarge ★</span><span style="font:500 13px 'Noto Sans SC',sans-serif">20–22 / 700</span><span style="font:400 14px/1.6 'Noto Sans SC',sans-serif;color:#6E675A">主按钮（60–68dp）。页面标题 20/700。</span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1.4fr) 110px 80px minmax(0,1.6fr);gap:12px;padding:12px 22px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="font:700 19px/1.4 'Noto Sans SC',sans-serif">待取 · 全部包裹</span><span style="font:600 13px ui-monospace,Menlo,monospace">titleMedium</span><span style="font:500 13px 'Noto Sans SC',sans-serif">19 / 700</span><span style="font:400 14px/1.6 'Noto Sans SC',sans-serif;color:#6E675A">分段控件、设置项标题、面板选项。</span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1.4fr) 110px 80px minmax(0,1.6fr);gap:12px;padding:12px 22px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="font:600 17px/1.5 'Noto Sans SC',sans-serif;color:#A93307">看短信 · 复制 · 读给我听</span><span style="font:600 13px ui-monospace,Menlo,monospace">labelLarge</span><span style="font:500 13px 'Noto Sans SC',sans-serif">17–18 / 600</span><span style="font:400 14px/1.6 'Noto Sans SC',sans-serif;color:#6E675A">文字按钮、胶囊、分组标题、卡头时间。</span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1.4fr) 110px 80px minmax(0,1.6fr);gap:12px;padding:12px 22px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="font:400 17px/1.55 'Noto Sans SC',sans-serif">自动从短信里找出取件码，用最大的字显示出来。</span><span style="font:600 13px ui-monospace,Menlo,monospace">bodyLarge</span><span style="font:500 13px 'Noto Sans SC',sans-serif">17 / 400</span><span style="font:400 14px/1.6 'Noto Sans SC',sans-serif;color:#6E675A">正文最小字号。引导页描述用 19。</span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1.4fr) 110px 80px minmax(0,1.6fr);gap:12px;padding:12px 22px;align-items:center"><span style="font:600 15px/1.5 'Noto Sans SC',sans-serif;color:#6E675A">改动会自动保存 · 已临时调到最亮</span><span style="font:600 13px ui-monospace,Menlo,monospace">caption</span><span style="font:500 13px 'Noto Sans SC',sans-serif">15 / 600</span><span style="font:400 14px/1.6 'Noto Sans SC',sans-serif;color:#6E675A">全应用最小字号；只用于非关键说明，从不承载操作或状态。</span></div>
+  </div>
+  <div style="font:400 13px/1.6 'Noto Sans SC',sans-serif;color:#6E675A">★ 新增。删除：labelMedium 14 与 12sp 识别依据——低于适老底线。数字一律 <code style="font:500 12px ui-monospace,Menlo,monospace;background:#fff;padding:2px 6px;border-radius:4px">tnum</code>；取件码字符间距 +2sp，5 位以下 +4sp。</div>
+</section>
+
+<!-- ═══ 3 间距·形状 ═══ -->
+<section style="display:flex;flex-direction:column;gap:16px">
+  <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font:900 13px ui-monospace,Menlo,monospace;color:#D2400E;flex:none">03</span><h2 style="margin:0;font:800 24px/1.2 'Noto Sans SC',sans-serif;flex:none;white-space:nowrap">间距 · 圆角 · 层级</h2></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">
+    <div style="background:#fff;border-radius:14px;padding:18px 20px;border:1px solid #ECE6DB;display:flex;flex-direction:column;gap:10px">
+      <div style="font:700 15px 'Noto Sans SC',sans-serif">间距刻度（dp）</div>
+      <div style="display:flex;align-items:flex-end;gap:10px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:4px;height:4px;background:#D2400E"></div><span style="font:500 11px ui-monospace,Menlo,monospace">4</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:8px;height:8px;background:#D2400E"></div><span style="font:500 11px ui-monospace,Menlo,monospace">8</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:12px;height:12px;background:#D2400E"></div><span style="font:500 11px ui-monospace,Menlo,monospace">12</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:16px;height:16px;background:#D2400E"></div><span style="font:500 11px ui-monospace,Menlo,monospace">16</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:20px;height:20px;background:#D2400E"></div><span style="font:500 11px ui-monospace,Menlo,monospace">20</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:28px;height:28px;background:#D2400E"></div><span style="font:500 11px ui-monospace,Menlo,monospace">28</span></div>
+      </div>
+      <div style="font:400 13px/1.7 'Noto Sans SC',sans-serif;color:#6E675A">页面左右 20 · 卡片间 16 · 卡内边 16–20 · 元素间 8/12 · 分组标题上方 4。屏幕底部为提示条预留 120。</div>
+    </div>
+    <div style="background:#fff;border-radius:14px;padding:18px 20px;border:1px solid #ECE6DB;display:flex;flex-direction:column;gap:10px">
+      <div style="font:700 15px 'Noto Sans SC',sans-serif">圆角（同心：外 − 内边距 = 内）</div>
+      <div style="display:flex;gap:10px;align-items:flex-end">
+        <div style="width:64px;height:48px;border-radius:24px;background:#F5F2EC;border:2px solid #8A8171;display:flex;align-items:center;justify-content:center;font:600 11px ui-monospace,Menlo,monospace">24</div>
+        <div style="width:64px;height:48px;border-radius:20px;background:#F5F2EC;border:2px solid #8A8171;display:flex;align-items:center;justify-content:center;font:600 11px ui-monospace,Menlo,monospace">20</div>
+        <div style="width:64px;height:48px;border-radius:18px;background:#F5F2EC;border:2px solid #8A8171;display:flex;align-items:center;justify-content:center;font:600 11px ui-monospace,Menlo,monospace">18</div>
+        <div style="width:64px;height:48px;border-radius:14px;background:#F5F2EC;border:2px solid #8A8171;display:flex;align-items:center;justify-content:center;font:600 11px ui-monospace,Menlo,monospace">14</div>
+        <div style="width:64px;height:48px;border-radius:999px;background:#F5F2EC;border:2px solid #8A8171;display:flex;align-items:center;justify-content:center;font:600 11px ui-monospace,Menlo,monospace">pill</div>
+      </div>
+      <div style="font:400 13px/1.7 'Noto Sans SC',sans-serif;color:#6E675A">卡片 24 · 出示页/面板 28 · 分段外框 20 / 内段 16 · 主按钮 18–20 · 次级按钮 14 · 胶囊/标签 pill。</div>
+    </div>
+    <div style="background:#fff;border-radius:14px;padding:18px 20px;border:1px solid #ECE6DB;display:flex;flex-direction:column;gap:10px">
+      <div style="font:700 15px 'Noto Sans SC',sans-serif">层级（只有三层）</div>
+      <div style="display:flex;gap:10px">
+        <div style="flex:1;height:56px;border-radius:12px;background:#F5F2EC;display:flex;align-items:center;justify-content:center;font:600 12px 'Noto Sans SC',sans-serif;color:#6E675A">0 · 纸面</div>
+        <div style="flex:1;height:56px;border-radius:12px;background:#fff;box-shadow:0 2px 6px rgba(34,29,21,.08);display:flex;align-items:center;justify-content:center;font:600 12px 'Noto Sans SC',sans-serif">1 · 卡片</div>
+        <div style="flex:1;height:56px;border-radius:12px;background:#fff;box-shadow:0 6px 20px rgba(34,29,21,.18);display:flex;align-items:center;justify-content:center;font:600 12px 'Noto Sans SC',sans-serif">2 · 面板/提示条</div>
+      </div>
+      <div style="font:400 13px/1.7 'Noto Sans SC',sans-serif;color:#6E675A">卡片阴影 0 2 6 / 8%；浮层 0 6 20 / 18% + 40% 遮罩。深色模式去阴影，改用 1dp Outline 描边。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4 组件 ═══ -->
+<section style="display:flex;flex-direction:column;gap:16px">
+  <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font:900 13px ui-monospace,Menlo,monospace;color:#D2400E;flex:none">04</span><h2 style="margin:0;font:800 24px/1.2 'Noto Sans SC',sans-serif;flex:none;white-space:nowrap">组件</h2><span style="font:400 14px 'Noto Sans SC',sans-serif;color:#6E675A">全部触控目标 ≥48dp；主按钮 60dp</span></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px">
+
+    <div style="background:#fff;border-radius:18px;padding:20px;border:1px solid #ECE6DB;display:flex;flex-direction:column;gap:12px">
+      <div style="font:700 15px 'Noto Sans SC',sans-serif">按钮 · 三级</div>
+      <div style="height:60px;border-radius:18px;background:#1E7A3C;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#fff" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font:700 20px 'Noto Sans SC',sans-serif;color:#fff">我已取到</span></div>
+      <div style="height:60px;border-radius:18px;background:#D2400E;display:flex;align-items:center;justify-content:center"><span style="font:700 20px 'Noto Sans SC',sans-serif;color:#fff">允许读取短信</span></div>
+      <div style="height:56px;border-radius:16px;background:#F5F2EC;display:flex;align-items:center;justify-content:center"><span style="font:700 18px 'Noto Sans SC',sans-serif;white-space:nowrap">看更早的短信</span></div>
+      <div style="display:flex;height:48px"><div style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font:600 17px 'Noto Sans SC',sans-serif;color:#A93307">看短信</span></div><div style="flex:1;display:flex;align-items:center;justify-content:center"><span style="font:600 17px 'Noto Sans SC',sans-serif;color:#A93307">复制</span></div><div style="flex:1;display:flex;align-items:center;justify-content:center"><span style="font:600 17px 'Noto Sans SC',sans-serif;color:#A93307">读给我听</span></div></div>
+      <div style="font:400 13px/1.7 'Noto Sans SC',sans-serif;color:#6E675A"><b>主按钮</b> 60dp / 20sp：完成类用松绿，前进类用柿橙；一屏一个。<b>填充按钮</b> 56dp 暖纸底。<b>文字按钮</b> 48dp 行高，PersimmonDeep，左图标 20。禁用态：50% 透明 + 不可点，但文字保持颜色。按下：scale .98，80ms。</div>
+    </div>
+
+    <div style="background:#fff;border-radius:18px;padding:20px;border:1px solid #ECE6DB;display:flex;flex-direction:column;gap:12px">
+      <div style="font:700 15px 'Noto Sans SC',sans-serif">选中语言 · 全应用唯一</div>
+      <div style="background:#F5F2EC;border-radius:20px;padding:5px;display:flex;gap:5px"><div style="flex:1;height:56px;border-radius:16px;background:#D2400E;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#fff" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font:700 19px 'Noto Sans SC',sans-serif;color:#fff">待取</span></div><div style="flex:1;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center"><span style="font:700 19px 'Noto Sans SC',sans-serif;color:#6E675A">全部包裹</span></div></div>
+      <div style="height:60px;border-radius:18px;background:#D2400E;display:flex;align-items:center;gap:14px;padding:0 16px"><div style="width:28px;height:28px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#D2400E" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div><span style="flex:1;font:700 20px 'Noto Sans SC',sans-serif;color:#fff;white-space:nowrap">最近 12 小时</span><span style="font:600 16px 'Noto Sans SC',sans-serif;color:rgba(255,255,255,.85)">3 件待取</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px"><div style="height:48px;display:flex;align-items:center;gap:6px;padding:0 16px;border-radius:999px;background:#FFE3D2"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#A93307" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span style="font:700 17px 'Noto Sans SC',sans-serif;color:#A93307">取件码</span></div><div style="height:48px;display:flex;align-items:center;padding:0 16px;border-radius:999px;border:2px solid #8A8171;box-sizing:border-box"><span style="font:700 17px 'Noto Sans SC',sans-serif">驿站码</span></div><div style="display:flex;align-items:center;gap:4px;height:48px;padding:0 10px 0 16px;border-radius:999px;border:2px solid #D2400E;background:#FBEADF"><span style="font:700 18px 'Noto Sans SC',sans-serif;color:#A93307;white-space:nowrap">最近 12 小时</span><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#A93307" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div></div>
+      <div style="font:400 13px/1.7 'Noto Sans SC',sans-serif;color:#6E675A">选中 = 柿橙实心 + 白对勾（分段、单选行）；多选芯片选中 = 柿橙浅底 + 对勾；未选中 = 2dp OutlineStrong 描边（不能只靠颜色）。带下拉箭头的胶囊表示「点开可换」。</div>
+    </div>
+
+    <div style="background:#fff;border-radius:18px;padding:20px;border:1px solid #ECE6DB;display:flex;flex-direction:column;gap:12px">
+      <div style="font:700 15px 'Noto Sans SC',sans-serif">取件卡 · 待取 / 已取</div>
+      <div style="background:#F5F2EC;border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px">
+        <div style="background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 2px 6px rgba(34,29,21,.08)">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px 4px"><span style="font:600 17px 'Noto Sans SC',sans-serif;color:#6E675A">菜鸟驿站 · 今天 14:32</span><div style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#FFE3D2"><span style="width:10px;height:10px;border-radius:50%;background:#D2400E"></span><span style="font:700 16px 'Noto Sans SC',sans-serif;color:#A93307">未取件</span></div></div>
+          <div style="text-align:center;font:900 56px/68px Roboto,sans-serif;letter-spacing:2px;font-variant-numeric:tabular-nums">27017</div>
+          <div style="position:relative;height:20px"><div style="position:absolute;left:16px;right:16px;top:9px;border-top:2px dashed #ECE6DB"></div><div style="position:absolute;left:-10px;top:0;width:20px;height:20px;border-radius:50%;background:#F5F2EC"></div><div style="position:absolute;right:-10px;top:0;width:20px;height:20px;border-radius:50%;background:#F5F2EC"></div></div>
+          <div style="padding:4px 14px 12px"><div style="height:52px;border-radius:16px;background:#1E7A3C;display:flex;align-items:center;justify-content:center"><span style="font:700 18px 'Noto Sans SC',sans-serif;color:#fff">我已取到</span></div></div>
+        </div>
+        <div style="background:#fff;border-radius:20px;padding:12px 10px 12px 16px;display:flex;align-items:center;gap:12px"><div style="width:44px;height:44px;border-radius:50%;background:#E4F3E8;display:flex;align-items:center;justify-content:center;flex:none"><svg width="26" height="26" viewBox="0 0 24 24"><path fill="#1E7A3C" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div><div style="flex:1;min-width:0"><div style="font:800 26px/32px Roboto,sans-serif;color:#6E675A;font-variant-numeric:tabular-nums">1-3-27017</div><div style="font:400 15px 'Noto Sans SC',sans-serif;color:#6E675A">已取 · 昨天 18:40</div></div><span style="font:700 17px 'Noto Sans SC',sans-serif;color:#A93307;padding:0 8px">恢复</span></div>
+      </div>
+      <div style="font:400 13px/1.7 'Noto Sans SC',sans-serif;color:#6E675A">卡头：发件方 + 时间（左，灰）、状态标签（右）。码区：可点 → 出示页。撕票线把「看」与「做」分开。已取件降为一行摘要，码用灰色但不划线（划线影响识读）。</div>
+    </div>
+
+    <div style="background:#fff;border-radius:18px;padding:20px;border:1px solid #ECE6DB;display:flex;flex-direction:column;gap:12px">
+      <div style="font:700 15px 'Noto Sans SC',sans-serif">提示条 · 空状态 · 开关</div>
+      <div style="background:#322F2A;color:#F5F2EC;border-radius:18px;padding:10px 10px 10px 18px;display:flex;align-items:center;gap:12px"><span style="flex:1;font:600 17px/24px 'Noto Sans SC',sans-serif">「27017」已标记为取到</span><div style="height:48px;padding:0 16px;border-radius:12px;background:#D2400E;display:flex;align-items:center;gap:4px"><span style="font:700 17px 'Noto Sans SC',sans-serif;color:#fff">撤销</span></div></div>
+      <div style="display:flex;align-items:center;gap:14px;padding:6px 0"><div style="width:72px;height:72px;border-radius:24px;background:#E4F3E8;display:flex;align-items:center;justify-content:center;flex:none"><svg width="40" height="40" viewBox="0 0 24 24"><path fill="#1E7A3C" d="M22 5.18L10.59 16.6l-4.24-4.24 1.41-1.41 2.83 2.83 10-10L22 5.18zM12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8c1.57 0 3.04.46 4.28 1.25l1.45-1.45C16.1 2.67 14.13 2 12 2 6.48 2 2 6.48 2 12s4.48 10 10 10c1.73 0 3.36-.44 4.78-1.22l-1.5-1.5c-1 .46-2.11.72-3.28.72zm7-5h-3v2h3v3h2v-3h3v-2h-3v-3h-2v3z"/></svg></div><div><div style="font:800 22px 'Noto Sans SC',sans-serif">包裹都取完了</div><div style="font:400 15px/1.5 'Noto Sans SC',sans-serif;color:#6E675A">标题说结果，正文说下一步，按钮给出口。</div></div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:600 19px 'Noto Sans SC',sans-serif">按驿站分组</span><div style="width:64px;height:36px;border-radius:18px;background:#D2400E;position:relative"><div style="position:absolute;top:4px;left:32px;width:28px;height:28px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25)"></div></div></div>
+      <div style="font:400 13px/1.7 'Noto Sans SC',sans-serif;color:#6E675A">提示条 17sp、圆角 18、带撤销时停留 6s，否则 2.5s；撤销按钮是 48dp 实心块而非文字。开关 64×36，柿橙=开。空状态图标 96 / 圆角 32，语义色跟状态（完成=松绿，缺权限=柿橙，无结果=灰）。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5 交互 ═══ -->
+<section style="display:flex;flex-direction:column;gap:16px">
+  <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font:900 13px ui-monospace,Menlo,monospace;color:#D2400E;flex:none">05</span><h2 style="margin:0;font:800 24px/1.2 'Noto Sans SC',sans-serif;flex:none;white-space:nowrap">交互规范</h2></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;font:400 14px/1.75 'Noto Sans SC',sans-serif">
+    <div style="background:#fff;border-radius:18px;padding:20px;border:1px solid #ECE6DB"><div style="font:700 15px 'Noto Sans SC',sans-serif;margin-bottom:8px">手势 · 每个手势都有按钮替身</div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 14px"><b>点取件码</b><span>全屏出示（替身：无需，即点即到）</span><b>左滑卡片</b><span>露出 132dp 抽屉「我已取到 / 恢复」；替身 = 卡内可见按钮</span><b>双击卡片</b><span>打开系统短信；替身 = 「看短信」</span><b>下拉列表</b><span>重新读取短信；替身 = 换时间范围自动刷新</span><b>系统返回</b><span>关闭浮层 → 返回首页；引导页第 1 步不可返回</span></div>
+      <div style="color:#6E675A;margin-top:8px">不使用：长按、双指、横向翻页作为唯一路径。</div></div>
+    <div style="background:#fff;border-radius:18px;padding:20px;border:1px solid #ECE6DB"><div style="font:700 15px 'Noto Sans SC',sans-serif;margin-bottom:8px">状态 · 首页四态</div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 14px"><b>未授权</b><span>数字 0（松绿）+ 权限卡，「全部包裹」禁用；先说为什么再弹系统框</span><b>读取中</b><span>数字保留旧值，副标题「正在读取短信…」，列表位放加载卡；&lt;300ms 不显示</span><b>空</b><span>待取空 = 「包裹都取完了」（松绿）；全部空 = 「这段时间没有取件码」（灰）；均给「看更早的短信」</span><b>有数据</b><span>待取按时间倒序、按驿站分组；已取件只在「全部」尾部出现</span></div></div>
+    <div style="background:#fff;border-radius:18px;padding:20px;border:1px solid #ECE6DB"><div style="font:700 15px 'Noto Sans SC',sans-serif;margin-bottom:8px">反馈 · 可逆优先</div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 14px"><b>我已取到</b><span>卡片 200ms 收起 → 数字减少 → 提示条带「撤销」6s；不弹确认框</span><b>恢复</b><span>立即恢复 + 提示条（无撤销）</span><b>复制</b><span>提示条「已复制 27017」+ 轻触振动</span><b>读给我听</b><span>图标脉冲；语速 0.75×，逐字读，连字符读「杠」；再点一次停止</span><b>换时间范围</b><span>面板关闭 → 加载 → 数字/列表同时更新，胶囊文字同步</span><b>设置</b><span>即改即存，页脚说明「不需要再点保存」；仅高级规则语法错误时红字阻止</span></div></div>
+    <div style="background:#fff;border-radius:18px;padding:20px;border:1px solid #ECE6DB"><div style="font:700 15px 'Noto Sans SC',sans-serif;margin-bottom:8px">动效 · 克制</div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 14px"><b>入场</b><span>浮层 / 卡片：上移 24dp + 淡入，250ms，ease-out</span><b>切换</b><span>分段 / 开关 / 颁色：200ms 底色过渡，不位移</span><b>按下</b><span>scale .98，80ms</span><b>数字</b><span>颜色 300ms 过渡；不做滚轮数字动画</span><b>加载</b><span>单环旋转 900ms；不做骨架屏闪烁</span><b>减少动效</b><span>系统开启时全部改为即时切换</span></div></div>
+  </div>
+</section>
+
+<!-- ═══ 6 无障碍 ═══ -->
+<section style="display:flex;flex-direction:column;gap:16px">
+  <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font:900 13px ui-monospace,Menlo,monospace;color:#D2400E;flex:none">06</span><h2 style="margin:0;font:800 24px/1.2 'Noto Sans SC',sans-serif;flex:none;white-space:nowrap">适老化 / 无障碍检查表</h2><span style="font:400 14px 'Noto Sans SC',sans-serif;color:#6E675A">每次发版前逐项打钩</span></div>
+  <div style="background:#fff;border-radius:18px;border:1px solid #ECE6DB;overflow:hidden;font:400 14px/1.6 'Noto Sans SC',sans-serif">
+    <div style="display:grid;grid-template-columns:28px minmax(0,1fr) 120px;gap:12px;padding:12px 20px;border-bottom:1px solid #ECE6DB;align-items:center;background:#F5F2EC;font:600 12px 'Noto Sans SC',sans-serif;color:#6E675A"><span></span><span>检查项</span><span>依据</span></div>
+    <div style="display:grid;grid-template-columns:28px minmax(0,1fr) 120px;gap:12px;padding:12px 20px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="width:22px;height:22px;border-radius:6px;background:#E4F3E8;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#1E7A3C" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span><span>所有文字 ≥15sp，正文 ≥17sp，可操作文字 ≥17sp；系统字号 1.3× 下无截断、无重叠</span><span style="color:#6E675A">工信部适老化 · WCAG 1.4.4</span></div>
+    <div style="display:grid;grid-template-columns:28px minmax(0,1fr) 120px;gap:12px;padding:12px 20px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="width:22px;height:22px;border-radius:6px;background:#E4F3E8;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#1E7A3C" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span><span>文字对比 ≥4.5:1（大字 ≥3:1）；不用透明度弱化文字；深色模式同样达标</span><span style="color:#6E675A">WCAG 1.4.3</span></div>
+    <div style="display:grid;grid-template-columns:28px minmax(0,1fr) 120px;gap:12px;padding:12px 20px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="width:22px;height:22px;border-radius:6px;background:#E4F3E8;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#1E7A3C" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span><span>触控目标 ≥48×48dp，相邻目标间距 ≥8dp；主按钮 ≥60dp</span><span style="color:#6E675A">WCAG 2.5.8 · M3</span></div>
+    <div style="display:grid;grid-template-columns:28px minmax(0,1fr) 120px;gap:12px;padding:12px 20px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="width:22px;height:22px;border-radius:6px;background:#E4F3E8;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#1E7A3C" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span><span>每个手势（左滑、双击、下拉）都有等价的可见按钮</span><span style="color:#6E675A">WCAG 2.5.1</span></div>
+    <div style="display:grid;grid-template-columns:28px minmax(0,1fr) 120px;gap:12px;padding:12px 20px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="width:22px;height:22px;border-radius:6px;background:#E4F3E8;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#1E7A3C" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span><span>状态不只靠颜色：选中带对勾、未选带描边、待取/已取带文字标签</span><span style="color:#6E675A">WCAG 1.4.1</span></div>
+    <div style="display:grid;grid-template-columns:28px minmax(0,1fr) 120px;gap:12px;padding:12px 20px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="width:22px;height:22px;border-radius:6px;background:#E4F3E8;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#1E7A3C" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span><span>破坏性 / 状态性操作可撤销（6s 提示条）或可恢复（恢复按钮），不用确认弹窗打断</span><span style="color:#6E675A">WCAG 3.3.4</span></div>
+    <div style="display:grid;grid-template-columns:28px minmax(0,1fr) 120px;gap:12px;padding:12px 20px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="width:22px;height:22px;border-radius:6px;background:#E4F3E8;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#1E7A3C" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span><span>图标一律配文字；contentDescription 完整（「放大出示取件码 27017」而非「按钮」）</span><span style="color:#6E675A">WCAG 1.1.1 · TalkBack</span></div>
+    <div style="display:grid;grid-template-columns:28px minmax(0,1fr) 120px;gap:12px;padding:12px 20px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="width:22px;height:22px;border-radius:6px;background:#E4F3E8;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#1E7A3C" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span><span>取件码逐字朗读（TalkBack 与「读给我听」一致），连字符读「杠」，不按整数读</span><span style="color:#6E675A">TTS 语义</span></div>
+    <div style="display:grid;grid-template-columns:28px minmax(0,1fr) 120px;gap:12px;padding:12px 20px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="width:22px;height:22px;border-radius:6px;background:#E4F3E8;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#1E7A3C" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span><span>取件码一码一行、永不折行、不省略；出示页强制不锁屏并临时提亮</span><span style="color:#6E675A">场景需求</span></div>
+    <div style="display:grid;grid-template-columns:28px minmax(0,1fr) 120px;gap:12px;padding:12px 20px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="width:22px;height:22px;border-radius:6px;background:#E4F3E8;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#1E7A3C" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span><span>文案口语化、无技术词进入普通用户路径（「正则」「规则 N」只在折叠的高级区）</span><span style="color:#6E675A">WCAG 3.1.5</span></div>
+    <div style="display:grid;grid-template-columns:28px minmax(0,1fr) 120px;gap:12px;padding:12px 20px;border-bottom:1px solid #ECE6DB;align-items:center"><span style="width:22px;height:22px;border-radius:6px;background:#E4F3E8;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#1E7A3C" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span><span>提示条自动消失前 ≥2.5s，且含操作时 ≥6s；无自动轮播、无闪烁</span><span style="color:#6E675A">WCAG 2.2.1</span></div>
+    <div style="display:grid;grid-template-columns:28px minmax(0,1fr) 120px;gap:12px;padding:12px 20px;align-items:center"><span style="width:22px;height:22px;border-radius:6px;background:#E4F3E8;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#1E7A3C" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span><span>尊重系统「减少动效」；焦点顺序 = 阅读顺序（数字 → 分段 → 卡 → 主按钮 → 次按钮）</span><span style="color:#6E675A">WCAG 2.3.3 · 2.4.3</span></div>
+  </div>
+</section>
+
+<footer style="display:flex;flex-wrap:wrap;gap:12px;font:400 13px/1.6 'Noto Sans SC',sans-serif;color:#6E675A">
+  <div style="flex:1;min-width:260px;background:#fff;border-radius:14px;padding:16px 18px;border:1px solid #ECE6DB"><b style="color:#221D15">工程落地映射</b><br>Color.kt 不变；Type.kt 新增 heroNumber 104/900、displaySmall 30/800、buttonLarge 20/700，删除 12sp 用法；HomeContent 去掉 HeroCard Surface；PickupCodeCardBody 删正文与识别依据；新增 ShowCodeScreen、OnboardingScreen、TTS 工具类；SettingsScreen 改即改即存并折叠高级规则。</div>
+  <div style="flex:1;min-width:260px;background:#fff;border-radius:14px;padding:16px 18px;border:1px solid #ECE6DB"><b style="color:#221D15">配套文件</b><br>01 现状复刻 · 02 视觉方向对比（1a/1b/1c）· 03 交互原型（可点击，含深色 / 特大字号 / 分组 Tweaks）· 04 本规范。建议下一步：用 3–5 位真实老年用户对 03 做 5 分钟任务测试（找码 → 出示 → 标记 → 撤销）。</div>
+</footer>
+</div>
+</x-dc>
+</body>
+</html>
