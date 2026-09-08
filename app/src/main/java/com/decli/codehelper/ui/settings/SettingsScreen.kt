@@ -85,6 +85,7 @@ import com.decli.codehelper.ui.components.AppCard
 import com.decli.codehelper.ui.components.SegmentedControl
 import com.decli.codehelper.ui.components.motionDuration
 import com.decli.codehelper.util.PickupCodeExtractor
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
@@ -93,6 +94,7 @@ import kotlinx.coroutines.flow.drop
  * 全屏设置页：即改即存。
  * 除高级规则输入框（停手 700ms 后落盘）外，所有开关 / 分段 / 芯片都立刻写入 DataStore。
  */
+@OptIn(FlowPreview::class)
 @Composable
 fun SettingsScreen(
     promptKeywords: List<String>,

@@ -288,7 +288,9 @@ class SmsRepository(
     }
 
     companion object {
-        private val MMS_PARTS_URI: Uri = Uri.parse("content://mms/part")
+        // 懒初始化：类初始化阶段不碰 android.net.Uri，
+        // 否则纯 JVM 单元测试一引用本类的静态方法就会抛 ExceptionInInitializerError。
+        private val MMS_PARTS_URI: Uri by lazy { Uri.parse("content://mms/part") }
         private const val MMS_FROM_ADDRESS_TYPE = 137
         private val mediaPrefixes = listOf("image/", "audio/", "video/")
         private val skippedContentTypes = setOf(

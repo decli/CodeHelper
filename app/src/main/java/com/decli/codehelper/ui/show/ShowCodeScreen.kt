@@ -25,11 +25,11 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.BrightnessAuto
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ContentCopy
-import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -247,7 +247,7 @@ fun ShowCodeScreen(
                         )
                         ActionButton(
                             text = if (isSpeaking) "正在读…" else "读给我听",
-                            icon = Icons.Rounded.VolumeUp,
+                            icon = Icons.AutoMirrored.Rounded.VolumeUp,
                             onClick = onSpeakCode,
                             modifier = Modifier.weight(1f),
                             containerColor = MaterialTheme.colorScheme.surfaceVariant,

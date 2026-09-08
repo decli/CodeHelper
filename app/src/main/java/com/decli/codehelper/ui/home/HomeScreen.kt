@@ -41,6 +41,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Undo
+import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.ChatBubbleOutline
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.ContentCopy
@@ -48,9 +50,7 @@ import androidx.compose.material.icons.rounded.Inventory2
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.TaskAlt
 import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material.icons.rounded.Undo
 import androidx.compose.material.icons.rounded.VerifiedUser
-import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -298,7 +298,7 @@ private fun HomeListRow(
 
         is HomeRow.PickedUp -> SwipeActionContainer(
             actionLabel = "恢复未取",
-            actionIcon = Icons.Rounded.Undo,
+            actionIcon = Icons.AutoMirrored.Rounded.Undo,
             actionBackground = MaterialTheme.colorScheme.primary,
             actionContentColor = MaterialTheme.colorScheme.onPrimary,
             cornerRadiusDp = 20,
@@ -637,7 +637,7 @@ private fun SpeakActionButton(
     }
     TextActionButton(
         text = if (isSpeaking) "正在读…" else "读给我听",
-        icon = Icons.Rounded.VolumeUp,
+        icon = Icons.AutoMirrored.Rounded.VolumeUp,
         onClick = onClick,
         modifier = modifier,
         iconScale = iconScale,
@@ -754,7 +754,7 @@ private fun PickedUpRow(
             }
             TextActionButton(
                 text = "恢复",
-                icon = Icons.Rounded.Undo,
+                icon = Icons.AutoMirrored.Rounded.Undo,
                 onClick = onRestorePending,
                 semanticsLabel = "恢复为待取",
             )

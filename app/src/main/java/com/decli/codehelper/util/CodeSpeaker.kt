@@ -56,6 +56,7 @@ class CodeSpeaker(
             }
             engine.setSpeechRate(SPEECH_RATE)
             engine.setOnUtteranceProgressListener(
+                @Suppress("OVERRIDE_DEPRECATION")
                 object : UtteranceProgressListener() {
                     override fun onStart(utteranceId: String?) = Unit
 
@@ -63,7 +64,6 @@ class CodeSpeaker(
                         mainHandler.post { notifyFinished() }
                     }
 
-                    @Deprecated("Deprecated in Java")
                     override fun onError(utteranceId: String?) {
                         mainHandler.post { notifyFinished() }
                     }

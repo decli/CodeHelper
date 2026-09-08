@@ -60,6 +60,13 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    testOptions {
+        unitTests {
+            // 纯 JVM 单元测试里未打桩的 android.* 调用返回默认值而不是抛异常
+            isReturnDefaultValues = true
+        }
+    }
 }
 
 dependencies {
