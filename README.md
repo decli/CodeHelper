@@ -75,7 +75,11 @@
 
 ## 构建发布
 
-本仓库正式交付以 GitHub Actions 为准：推送到 `main` 后会执行构建校验并上传 APK artifact；推送 `v*` 标签后会在 Releases 页面创建正式版本并附带可下载 APK。
+本仓库正式交付以 GitHub Actions 为准：
+
+- 推送到 `main`：跑单元测试 + 构建 Release APK，并以 `v{versionName}` 发布正式版本
+- 推送 `v*` 标签：在 Releases 页面创建对应正式版本并附带可下载 APK
+- 推送 `claude/**` 特性分支：同样跑单元测试与构建，并把 APK 作为 `v{versionName}-preview.{run}` **预览版**发布到 Releases 页面，供验收阶段直接下载；预览版标记为 prerelease，不占用正式版本号
 
 ## 发布签名配置（升级安装必读）
 

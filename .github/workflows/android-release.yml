@@ -122,6 +122,7 @@ jobs:
               id: appversion
               run: |
                   VERSION=$(grep -E 'versionName\s*=' app/build.gradle.kts | head -1 | sed -E 's/.*"([^"]+)".*/\1/')
+                  echo "version=$VERSION" >> "$GITHUB_OUTPUT"
                   echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
 
             - name: Publish tagged release
@@ -139,5 +140,27 @@ jobs:
                   tag_name: ${{ steps.appversion.outputs.tag }}
                   name: ${{ steps.appversion.outputs.tag }}
                   target_commitish: ${{ github.sha }}
+                  files: app/build/outputs/apk/release/*.apk
+                  fail_on_unmatched_files: true
+
+            # 特性分支：把构建好的 APK 作为「预览版」放到 Releases 页面，方便验收时直接下载。
+            # 预览版单独用 -preview.N 标签并标记为 prerelease，不会占用正式版本号；
+            # 正式版本仍然只在合并到 main 或推送 v* 标签时发布。
+            - name: Publish preview release from feature branch
+              if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/claude/')
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ steps.appversion.outputs.tag }}-preview.${{ github.run_number }}
+                  name: ${{ steps.appversion.outputs.tag }} 预览构建 · ${{ github.ref_name }}
+                  target_commitish: ${{ github.sha }}
+                  prerelease: true
+                  body: |
+                      来自特性分支 `${{ github.ref_name }}` 的构建产物，供验收阶段直接下载安装。
+
+                      - 应用版本：`${{ steps.appversion.outputs.version }}`
+                      - 提交：`${{ github.sha }}`
+                      - 正式版本会在合并到 `main` 后以 `${{ steps.appversion.outputs.tag }}` 标签发布
+
+                      未配置固定签名密钥时，预览版与正式版签名不同，覆盖安装可能需要先卸载旧版。
                   files: app/build/outputs/apk/release/*.apk
                   fail_on_unmatched_files: true
