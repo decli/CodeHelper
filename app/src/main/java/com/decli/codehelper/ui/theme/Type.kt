@@ -5,14 +5,20 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// 适老化字阶 v1.4.1：在 v1.4 规范基础上整体上调一档。
+// 适老化字阶 v1.4.2：在 v1.4 规范基础上整体上调一档。
 // 真机走查（6.9″ / 430dp）发现原字阶在老人手里仍偏小，故：
 // 正文最小 18sp，caption 最小 16sp，可操作文字 ≥19sp，数字一律 tnum。
 // 同时把正文字重从 400 提到 500——深色模式下细笔画会发虚，加粗一档明显更清楚。
 
-/** 首页待取数量大数字：104sp / 900，直接落在纸面上，不套卡片 */
+/**
+ * 首页待取数量大数字：104sp，直接落在纸面上，不套卡片。
+ *
+ * 字重用 ExtraBold(800) 而不是 Black(900)：系统中文字体多数没有真实的 900 字面，
+ * 请求 900 会触发合成加粗——笔画糊、字碗（0/3/8 的洞）被填小，深色模式下尤其明显，
+ * 老人反而更难认。真机对比后确认 800 比 900 清楚。
+ */
 val HeroNumber = TextStyle(
-    fontWeight = FontWeight.Black,
+    fontWeight = FontWeight.ExtraBold,
     fontSize = 104.sp,
     lineHeight = 104.sp,
     letterSpacing = (-2).sp,
@@ -36,14 +42,15 @@ val Caption = TextStyle(
 val CodeHelperTypography = Typography(
     // 保留给需要超大数字但非首页英雄区的场景
     displayLarge = TextStyle(
-        fontWeight = FontWeight.Black,
+        fontWeight = FontWeight.ExtraBold,
         fontSize = 72.sp,
         lineHeight = 78.sp,
         fontFeatureSettings = "tnum",
     ),
     // 取件码基准字号（实际字号按卡片宽度实测缩放，字间距按码长另行覆盖）
+    // 字重同 HeroNumber，保持 v1.3.1 的 ExtraBold：900 会被合成加粗，笔画糊且字面更宽
     displayMedium = TextStyle(
-        fontWeight = FontWeight.Black,
+        fontWeight = FontWeight.ExtraBold,
         fontSize = 44.sp,
         lineHeight = 54.sp,
         letterSpacing = 1.sp,

@@ -77,6 +77,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.AlignmentLine
+import androidx.compose.ui.layout.FirstBaseline
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -159,7 +162,8 @@ fun HomeScreen(
                 .align(Alignment.TopCenter)
                 .statusBarsPadding()
                 .navigationBarsPadding()
-                .padding(horizontal = 20.dp)
+                // 左右 16dp 而不是规范的 20dp：这 8dp 直接换成取件码的字号
+                .padding(horizontal = 16.dp)
                 .imePadding(),
             contentPadding = PaddingValues(top = 6.dp, bottom = 120.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -249,6 +253,7 @@ fun HomeScreen(
                         Box(modifier = Modifier.animateItem()) {
                             HomeListRow(
                                 row = row,
+                                showSender = !groupBySender,
                                 speakingKey = speakingKey,
                                 speechAvailable = speechAvailable,
                                 onMarkPickedUp = onMarkPickedUp,
@@ -269,6 +274,7 @@ fun HomeScreen(
 @Composable
 private fun HomeListRow(
     row: HomeRow,
+    showSender: Boolean,
     speakingKey: String?,
     speechAvailable: Boolean,
     onMarkPickedUp: (PickupCodeItem) -> Unit,
@@ -294,6 +300,7 @@ private fun HomeListRow(
         ) {
             PendingCodeCard(
                 item = row.item,
+                showSender = showSender,
                 isSpeaking = speakingKey == row.item.uniqueKey,
                 speechAvailable = speechAvailable,
                 onMarkPickedUp = { onMarkPickedUp(row.item) },
@@ -381,7 +388,8 @@ private fun HeroSection(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 2.dp),
+            .padding(horizontal = 2.dp)
+            .padding(bottom = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Bottom,
     ) {
@@ -395,7 +403,9 @@ private fun HeroSection(
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Row {
+            // 裁到基线：数字行的下边界正好落在数字的下沿（数字没有下伸部），
+            // 这样右侧胶囊按 Alignment.Bottom 排版时，下沿与数字下沿严丝合缝。
+            Row(modifier = Modifier.heightToBaseline()) {
                 Text(
                     text = "$pendingCount",
                     modifier = Modifier.alignByBaseline(),
@@ -416,7 +426,6 @@ private fun HeroSection(
         }
         RangeChip(
             label = rangeLabel,
-            modifier = Modifier.padding(bottom = 6.dp),
             onClick = onOpenTimeSheet,
         )
     }
@@ -500,6 +509,7 @@ private fun GroupHeaderRow(
 @Composable
 private fun PendingCodeCard(
     item: PickupCodeItem,
+    showSender: Boolean,
     isSpeaking: Boolean,
     speechAvailable: Boolean,
     onMarkPickedUp: () -> Unit,
@@ -526,15 +536,37 @@ private fun PendingCodeCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = "${item.senderShort} · ${formatSmsTime(item.receivedAtMillis)}",
+                // 驿站名可以省略号，时间不行——时间是老人判断「是哪个包裹」的依据。
+                // 分组打开时分组标题已经写了驿站名，卡头就只留时间，不重复也不挤。
+                Row(
                     modifier = Modifier.weight(1f, fill = false),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    softWrap = false,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (showSender) {
+                        Text(
+                            text = item.senderShort,
+                            modifier = Modifier.weight(1f, fill = false),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = " · ",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            softWrap = false,
+                            maxLines = 1,
+                        )
+                    }
+                    Text(
+                        text = formatSmsTime(item.receivedAtMillis),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        softWrap = false,
+                        maxLines = 1,
+                    )
+                }
                 PendingStatusChip()
             }
 
@@ -1130,3 +1162,18 @@ private fun TimeOptionRow(
         }
     }
 }
+
+/**
+ * 把元素的布局高度裁到它的第一条基线。
+ * 数字没有下伸部，基线就是视觉下沿——裁掉基线以下的字体下伸空间后，
+ * 兄弟元素按 Alignment.Bottom 排版即可与数字下沿对齐，不需要拍脑袋的偏移量。
+ */
+private fun Modifier.heightToBaseline(): Modifier =
+    layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints)
+        val baseline = placeable[FirstBaseline]
+        val height = if (baseline == AlignmentLine.Unspecified) placeable.height else baseline
+        layout(placeable.width, height) {
+            placeable.place(0, 0)
+        }
+    }

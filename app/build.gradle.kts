@@ -12,8 +12,8 @@ android {
         applicationId = "com.decli.codehelper"
         minSdk = 26
         targetSdk = 36
-        versionCode = 26
-        versionName = "1.4.1"
+        versionCode = 27
+        versionName = "1.4.2"
         vectorDrawables {
             useSupportLibrary = true
         }

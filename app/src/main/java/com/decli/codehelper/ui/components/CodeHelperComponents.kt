@@ -367,8 +367,7 @@ private fun Segment(
 
 // ─────────────────────────── 取件码自适应文本 ───────────────────────────
 
-/** 取件码自适应字号范围（sp）：常规下限 40、上限 104 */
-const val MIN_CODE_FONT_SP = 40
+/** 取件码自适应字号上限（sp）。下限见 [ABSOLUTE_MIN_CODE_FONT_SP]，常规不会触到 */
 const val MAX_CODE_FONT_SP = 104
 
 /**
@@ -405,7 +404,7 @@ fun AutoSizeCodeLines(
     modifier: Modifier = Modifier,
     maxFontSizeSp: Int = MAX_CODE_FONT_SP,
     scaleWithSetting: Boolean = true,
-    lineGap: Dp = 4.dp,
+    lineGap: Dp = 0.dp,
 ) {
     val codeScale = LocalCodeScale.current
     val effectiveMax = remember(maxFontSizeSp, scaleWithSetting, codeScale) {
@@ -450,7 +449,7 @@ fun AutoSizeCodeLines(
                     modifier = Modifier.fillMaxWidth(),
                     style = baseStyle.copy(
                         fontSize = fontSizeSp.sp,
-                        lineHeight = (fontSizeSp * 1.18f).sp,
+                        lineHeight = (fontSizeSp * 1.3f).sp,
                         letterSpacing = codeLetterSpacingSp(code).sp,
                     ),
                     color = color,
