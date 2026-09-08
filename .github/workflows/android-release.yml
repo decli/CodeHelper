@@ -4,6 +4,9 @@ on:
     push:
         branches:
             - main
+            # 特性分支只做构建校验（跑单测 + 出 APK artifact），不发布 Release：
+            # 下面两个 Publish 步骤仍然只在 main 或 v* 标签上执行。
+            - "claude/**"
         tags:
             - "v*"
     workflow_dispatch:
