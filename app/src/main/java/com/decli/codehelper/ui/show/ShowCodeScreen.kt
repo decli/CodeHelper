@@ -123,12 +123,13 @@ fun ShowCodeScreen(
                     .fillMaxSize()
                     .statusBarsPadding()
                     .navigationBarsPadding()
-                    .padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 24.dp),
+                    .padding(top = 8.dp, bottom = 24.dp),
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
+                        .height(56.dp)
+                        .padding(horizontal = 20.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -163,27 +164,20 @@ fun ShowCodeScreen(
                 ) {
                     Text(
                         text = item.senderShort,
-                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp),
+                        style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         textAlign = TextAlign.Center,
                     )
                     Text(
                         text = "${formatSmsTime(item.receivedAtMillis)} 到店",
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontSize = 17.sp,
-                            fontWeight = FontWeight.Normal,
-                        ),
+                        style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                     )
                     Spacer(modifier = Modifier.height(18.dp))
                     Text(
                         text = "取件码",
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontSize = 17.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 8.sp,
-                        ),
+                        style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 8.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                     )
@@ -193,6 +187,7 @@ fun ShowCodeScreen(
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(horizontal = 4.dp)
                             .semantics(mergeDescendants = true) {
                                 contentDescription = CodeSpeech.codeContentDescription(item.codes)
                             },
@@ -224,7 +219,9 @@ fun ShowCodeScreen(
                 }
 
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Row(
@@ -270,7 +267,7 @@ fun ShowCodeScreen(
                         contentColor = MaterialTheme.colorScheme.onTertiary,
                         height = 68.dp,
                         shape = RoundedCornerShape(20.dp),
-                        textStyle = MaterialTheme.typography.headlineSmall.copy(fontSize = 22.sp),
+                        textStyle = MaterialTheme.typography.headlineSmall,
                         iconSize = 26.dp,
                     )
                 }

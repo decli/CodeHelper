@@ -197,7 +197,7 @@ fun SettingsScreen(
                             segmentHeight = 44.dp,
                             segmentShape = RoundedCornerShape(11.dp),
                             textStyle = MaterialTheme.typography.labelLarge.copy(
-                                fontSize = 17.sp,
+                                fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                             ),
                             checkSize = 18.dp,
@@ -219,7 +219,7 @@ fun SettingsScreen(
                             segmentHeight = 44.dp,
                             segmentShape = RoundedCornerShape(11.dp),
                             textStyle = MaterialTheme.typography.labelLarge.copy(
-                                fontSize = 17.sp,
+                                fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                             ),
                             checkSize = 16.dp,
@@ -294,7 +294,7 @@ fun SettingsScreen(
                             )
                             Text(
                                 text = "通知已开启，角标正常显示",
-                                style = MaterialTheme.typography.labelLarge.copy(fontSize = 16.sp),
+                                style = MaterialTheme.typography.labelLarge.copy(fontSize = 17.sp),
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
                         }
@@ -309,7 +309,7 @@ fun SettingsScreen(
                             height = 56.dp,
                             shape = RoundedCornerShape(16.dp),
                             textStyle = MaterialTheme.typography.labelLarge.copy(
-                                fontSize = 17.sp,
+                                fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                             ),
                             iconSize = 20.dp,
@@ -352,7 +352,7 @@ fun SettingsScreen(
                                 contentColor = MaterialTheme.colorScheme.onSurface,
                                 height = 48.dp,
                                 shape = RoundedCornerShape(14.dp),
-                                textStyle = MaterialTheme.typography.labelLarge.copy(fontSize = 17.sp),
+                                textStyle = MaterialTheme.typography.labelLarge,
                             )
                             BadgeMinutesField(
                                 badgeRefreshMinutes = badgeRefreshMinutes,
@@ -430,7 +430,7 @@ private fun SettingsTopBar(
         Text(
             text = "设置",
             modifier = Modifier.align(Alignment.Center),
-            style = MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp),
+            style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
         )
     }
@@ -452,7 +452,7 @@ private fun SettingsGroup(
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelLarge.copy(
-                    fontSize = 16.sp,
+                    fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp,
                 ),
@@ -580,10 +580,7 @@ private fun KeywordChips(
                     }
                     Text(
                         text = keyword,
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontSize = 17.sp,
-                            fontWeight = FontWeight.Bold,
-                        ),
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                         color = if (enabled) {
                             MaterialTheme.colorScheme.onSecondaryContainer
                         } else {
@@ -614,10 +611,7 @@ private fun KeywordChips(
                 )
                 Text(
                     text = "新增",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                    ),
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
             }
@@ -658,10 +652,7 @@ private fun MinuteChip(
     ) {
         Text(
             text = "$minutes 分钟",
-            style = MaterialTheme.typography.labelLarge.copy(
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
-            ),
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
             color = if (selected) {
                 MaterialTheme.colorScheme.onPrimary
             } else {
@@ -727,7 +718,7 @@ private fun RuleField(
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = "高级规则 ${index + 1}",
-            style = MaterialTheme.typography.labelLarge.copy(fontSize = 17.sp),
+            style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         TextField(
@@ -778,7 +769,7 @@ private fun BadgeMinutesField(
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = "角标刷新间隔（5 到 120 分钟）",
-            style = MaterialTheme.typography.labelLarge.copy(fontSize = 17.sp),
+            style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         TextField(
@@ -842,7 +833,7 @@ private fun SettingsNavRow(
         if (value != null) {
             Text(
                 text = value,
-                style = MaterialTheme.typography.labelLarge.copy(fontSize = 16.sp),
+                style = MaterialTheme.typography.labelLarge.copy(fontSize = 17.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -905,7 +896,7 @@ private fun AboutDialog(
                         .padding(top = 4.dp),
                     height = 56.dp,
                     shape = RoundedCornerShape(16.dp),
-                    textStyle = MaterialTheme.typography.titleMedium.copy(fontSize = 19.sp),
+                    textStyle = MaterialTheme.typography.titleMedium,
                 )
             }
         }
@@ -946,14 +937,14 @@ private fun AddKeywordDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(focusRequester),
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 19.sp),
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
                     shape = RoundedCornerShape(14.dp),
                     colors = settingsFieldColors(),
                     singleLine = true,
                     placeholder = {
                         Text(
                             text = "例如：快递码",
-                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 19.sp),
+                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     },

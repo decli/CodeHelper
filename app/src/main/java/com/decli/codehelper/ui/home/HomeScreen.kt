@@ -407,7 +407,7 @@ private fun HeroSection(
                     text = "个",
                     modifier = Modifier.alignByBaseline(),
                     style = MaterialTheme.typography.titleLarge.copy(
-                        fontSize = 26.sp,
+                        fontSize = 30.sp,
                         fontWeight = FontWeight.Bold,
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
@@ -473,10 +473,7 @@ private fun GroupHeaderRow(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.labelLarge.copy(
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
-            ),
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             softWrap = false,
             maxLines = 1,
@@ -490,7 +487,7 @@ private fun GroupHeaderRow(
         )
         Text(
             text = "$codeCount 件",
-            style = MaterialTheme.typography.labelLarge.copy(fontSize = 16.sp),
+            style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
         )
@@ -532,10 +529,7 @@ private fun PendingCodeCard(
                 Text(
                     text = "${item.senderShort} · ${formatSmsTime(item.receivedAtMillis)}",
                     modifier = Modifier.weight(1f, fill = false),
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.SemiBold,
-                    ),
+                    style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     softWrap = false,
                     maxLines = 1,
@@ -551,7 +545,7 @@ private fun PendingCodeCard(
                         role = Role.Button,
                         onClick = onShowCode,
                     )
-                    .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 6.dp)
+                    .padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 6.dp)
                     .semantics(mergeDescendants = true) {
                         contentDescription = CodeSpeech.codeContentDescription(
                             codes = item.codes,
@@ -568,7 +562,7 @@ private fun PendingCodeCard(
                 )
                 Text(
                     text = "点一下取件码可放大出示",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
@@ -601,12 +595,16 @@ private fun PendingCodeCard(
                         icon = Icons.Rounded.ChatBubbleOutline,
                         onClick = onOpenSms,
                         modifier = Modifier.weight(1f),
+                        height = 64.dp,
+                        stacked = true,
                     )
                     TextActionButton(
                         text = "复制",
                         icon = Icons.Rounded.ContentCopy,
                         onClick = onCopyCode,
                         modifier = Modifier.weight(1f),
+                        height = 64.dp,
+                        stacked = true,
                     )
                     SpeakActionButton(
                         isSpeaking = isSpeaking,
@@ -644,12 +642,15 @@ private fun SpeakActionButton(
         1f
     }
     TextActionButton(
+        enabled = enabled,
         text = if (isSpeaking) "正在读…" else "读给我听",
         icon = Icons.AutoMirrored.Rounded.VolumeUp,
         onClick = onClick,
         modifier = modifier,
         iconScale = iconScale,
+        height = 64.dp,
         semanticsLabel = if (isSpeaking) "停止朗读" else "读给我听",
+        stacked = true,
     )
 }
 
@@ -672,10 +673,7 @@ private fun PendingStatusChip() {
             )
             Text(
                 text = "未取件",
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                ),
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                 maxLines = 1,
             )
@@ -743,8 +741,8 @@ private fun PickedUpRow(
                 Text(
                     text = item.codes.joinToString(separator = "  "),
                     style = MaterialTheme.typography.displayMedium.copy(
-                        fontSize = 28.sp,
-                        lineHeight = 34.sp,
+                        fontSize = 32.sp,
+                        lineHeight = 38.sp,
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 1.sp,
                     ),
@@ -754,7 +752,7 @@ private fun PickedUpRow(
                 )
                 Text(
                     text = "已取 · ${item.senderShort} · ${formatSmsTime(item.receivedAtMillis)}",
-                    style = MaterialTheme.typography.labelLarge.copy(fontSize = 16.sp),
+                    style = MaterialTheme.typography.labelLarge.copy(fontSize = 17.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -927,14 +925,14 @@ private fun StateCard(
                 style = if (titleIsLarge) {
                     MaterialTheme.typography.displaySmall
                 } else {
-                    MaterialTheme.typography.headlineMedium.copy(fontSize = 26.sp)
+                    MaterialTheme.typography.headlineMedium
                 },
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
             )
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 28.sp, fontSize = 18.sp),
+                style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 30.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
@@ -955,7 +953,7 @@ private fun StateCard(
                     MaterialTheme.colorScheme.onSurface
                 },
                 height = 60.dp,
-                textStyle = MaterialTheme.typography.titleMedium.copy(fontSize = 19.sp),
+                textStyle = MaterialTheme.typography.titleMedium,
             )
         }
     }
@@ -1005,10 +1003,7 @@ fun TimeFilterSheet(
             Text(
                 text = "选好后立刻重新读取短信",
                 modifier = Modifier.padding(bottom = 4.dp),
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Normal,
-                ),
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
@@ -1114,7 +1109,7 @@ private fun TimeOptionRow(
             Text(
                 text = rangeLabel(filter),
                 modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.titleMedium.copy(fontSize = 20.sp),
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 21.sp),
                 color = if (selected) {
                     MaterialTheme.colorScheme.onPrimary
                 } else {
@@ -1124,10 +1119,7 @@ private fun TimeOptionRow(
             )
             Text(
                 text = countLabel,
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                ),
+                style = MaterialTheme.typography.labelLarge.copy(fontSize = 17.sp),
                 color = if (selected) {
                     MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
                 } else {

@@ -5,9 +5,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// 适老化字阶（v1.4 规范 02 节）：
-// 正文最小 17sp，caption 最小 15sp/600，可操作文字 ≥17sp，数字一律 tnum。
-// 全应用不再出现 14sp 与 12sp 文字。
+// 适老化字阶 v1.4.1：在 v1.4 规范基础上整体上调一档。
+// 真机走查（6.9″ / 430dp）发现原字阶在老人手里仍偏小，故：
+// 正文最小 18sp，caption 最小 16sp，可操作文字 ≥19sp，数字一律 tnum。
+// 同时把正文字重从 400 提到 500——深色模式下细笔画会发虚，加粗一档明显更清楚。
 
 /** 首页待取数量大数字：104sp / 900，直接落在纸面上，不套卡片 */
 val HeroNumber = TextStyle(
@@ -21,15 +22,15 @@ val HeroNumber = TextStyle(
 /** 60–68dp 主按钮文字 */
 val ButtonLarge = TextStyle(
     fontWeight = FontWeight.Bold,
-    fontSize = 20.sp,
-    lineHeight = 28.sp,
+    fontSize = 22.sp,
+    lineHeight = 30.sp,
 )
 
 /** 全应用最小字号：只用于非关键说明，从不承载操作或状态 */
 val Caption = TextStyle(
     fontWeight = FontWeight.SemiBold,
-    fontSize = 15.sp,
-    lineHeight = 22.sp,
+    fontSize = 16.sp,
+    lineHeight = 24.sp,
 )
 
 val CodeHelperTypography = Typography(
@@ -40,60 +41,60 @@ val CodeHelperTypography = Typography(
         lineHeight = 78.sp,
         fontFeatureSettings = "tnum",
     ),
-    // 取件码基准字号（按卡片宽度实测缩放，字间距按码长另行覆盖）
+    // 取件码基准字号（实际字号按卡片宽度实测缩放，字间距按码长另行覆盖）
     displayMedium = TextStyle(
         fontWeight = FontWeight.Black,
-        fontSize = 40.sp,
-        lineHeight = 50.sp,
-        letterSpacing = 2.sp,
+        fontSize = 44.sp,
+        lineHeight = 54.sp,
+        letterSpacing = 1.sp,
         fontFeatureSettings = "tnum",
     ),
     // 引导页 / 全屏状态标题
     displaySmall = TextStyle(
         fontWeight = FontWeight.ExtraBold,
-        fontSize = 30.sp,
-        lineHeight = 40.sp,
+        fontSize = 32.sp,
+        lineHeight = 42.sp,
     ),
     // 面板标题、空状态标题、关于弹窗标题
     headlineMedium = TextStyle(
         fontWeight = FontWeight.ExtraBold,
-        fontSize = 24.sp,
-        lineHeight = 32.sp,
+        fontSize = 26.sp,
+        lineHeight = 34.sp,
     ),
     headlineSmall = TextStyle(
         fontWeight = FontWeight.ExtraBold,
-        fontSize = 22.sp,
-        lineHeight = 30.sp,
+        fontSize = 24.sp,
+        lineHeight = 32.sp,
     ),
     // 页面标题
     titleLarge = TextStyle(
         fontWeight = FontWeight.Bold,
-        fontSize = 20.sp,
-        lineHeight = 28.sp,
+        fontSize = 22.sp,
+        lineHeight = 30.sp,
         letterSpacing = 0.5.sp,
     ),
     // 分段控件、设置项标题、面板选项
     titleMedium = TextStyle(
         fontWeight = FontWeight.Bold,
-        fontSize = 19.sp,
-        lineHeight = 26.sp,
+        fontSize = 20.sp,
+        lineHeight = 28.sp,
     ),
-    // 正文最小字号
+    // 正文最小字号，字重 500：深色模式下 400 太细
     bodyLarge = TextStyle(
-        fontWeight = FontWeight.Normal,
-        fontSize = 17.sp,
-        lineHeight = 26.sp,
+        fontWeight = FontWeight.Medium,
+        fontSize = 18.sp,
+        lineHeight = 28.sp,
     ),
-    // 15sp 只允许 SemiBold 作 caption 用，禁止 400 字重 15sp 正文
+    // 16sp 只允许 SemiBold 作 caption 用，禁止 400 字重正文
     bodyMedium = TextStyle(
         fontWeight = FontWeight.SemiBold,
-        fontSize = 15.sp,
-        lineHeight = 22.sp,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
     ),
     // 文字按钮、胶囊、分组标题、卡头时间
     labelLarge = TextStyle(
         fontWeight = FontWeight.SemiBold,
-        fontSize = 18.sp,
-        lineHeight = 24.sp,
+        fontSize = 19.sp,
+        lineHeight = 26.sp,
     ),
 )

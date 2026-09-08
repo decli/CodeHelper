@@ -59,7 +59,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -397,10 +396,7 @@ private fun CodeSnackbar(
             Text(
                 text = data.visuals.message,
                 modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.SemiBold,
-                ),
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.inverseOnSurface,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
@@ -431,10 +427,7 @@ private fun CodeSnackbar(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = actionLabel,
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontSize = 17.sp,
-                            fontWeight = FontWeight.Bold,
-                        ),
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onPrimary,
                         maxLines = 1,
                     )

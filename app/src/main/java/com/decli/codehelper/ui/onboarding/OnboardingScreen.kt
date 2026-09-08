@@ -35,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -130,8 +129,8 @@ fun OnboardingScreen(
                     text = step.description,
                     modifier = Modifier.widthIn(max = 330.dp),
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = 19.sp,
-                        lineHeight = 30.sp,
+                        fontSize = 20.sp,
+                        lineHeight = 32.sp,
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -146,10 +145,7 @@ fun OnboardingScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 height = 64.dp,
                 shape = RoundedCornerShape(20.dp),
-                textStyle = MaterialTheme.typography.titleMedium.copy(
-                    fontSize = 21.sp,
-                    fontWeight = FontWeight.Bold,
-                ),
+                textStyle = MaterialTheme.typography.titleMedium.copy(fontSize = 22.sp),
             )
             if (step.skipAction != null) {
                 Spacer(modifier = Modifier.height(4.dp))
@@ -163,7 +159,7 @@ fun OnboardingScreen(
                         onClick = onSkip,
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         height = 56.dp,
-                        textStyle = MaterialTheme.typography.labelLarge.copy(fontSize = 18.sp),
+                        textStyle = MaterialTheme.typography.labelLarge,
                     )
                 }
             }

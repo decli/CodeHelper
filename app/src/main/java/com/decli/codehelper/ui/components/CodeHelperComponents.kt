@@ -178,6 +178,7 @@ fun TextActionButton(
     height: Dp = 48.dp,
     textStyle: TextStyle? = null,
     semanticsLabel: String? = null,
+    stacked: Boolean = false,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Box(
@@ -197,34 +198,58 @@ fun TextActionButton(
                     contentDescription = semanticsLabel
                 }
             }
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = 6.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+        val label: @Composable () -> Unit = {
+            Text(
+                text = text,
+                style = textStyle ?: MaterialTheme.typography.labelLarge,
+                color = contentColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+            )
+        }
+        val buttonIcon: @Composable () -> Unit = {
             if (icon != null) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
                     modifier = Modifier
-                        .size(20.dp)
+                        .size(22.dp)
                         .graphicsLayer {
                             scaleX = iconScale
                             scaleY = iconScale
                         },
                     tint = contentColor,
                 )
-                Spacer(modifier = Modifier.width(6.dp))
             }
-            Text(
-                text = text,
-                style = textStyle ?: MaterialTheme.typography.labelLarge.copy(fontSize = 17.sp),
-                color = contentColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+        }
+        if (stacked) {
+            // 图标在上、文字在下：三个按钮并排时也放得下完整文案，
+            // 系统字号放大到 1.3× 仍然不会把「读给我听」截断。
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                buttonIcon()
+                if (icon != null) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                }
+                label()
+            }
+        } else {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                buttonIcon()
+                if (icon != null) {
+                    Spacer(modifier = Modifier.width(6.dp))
+                }
+                label()
+            }
         }
     }
 }
@@ -342,9 +367,9 @@ private fun Segment(
 
 // ─────────────────────────── 取件码自适应文本 ───────────────────────────
 
-/** 取件码自适应字号范围（sp）：常规下限 40、上限 96 */
+/** 取件码自适应字号范围（sp）：常规下限 40、上限 104 */
 const val MIN_CODE_FONT_SP = 40
-const val MAX_CODE_FONT_SP = 96
+const val MAX_CODE_FONT_SP = 104
 
 /**
  * 极端长码时允许继续缩小到该下限：
@@ -353,8 +378,17 @@ const val MAX_CODE_FONT_SP = 96
  */
 private const val ABSOLUTE_MIN_CODE_FONT_SP = 22
 
-/** 5 位以下的短码放宽字间距，长码收紧，保证扫读节奏一致 */
-private fun codeLetterSpacingSp(code: String): Int = if (code.length <= 5) 4 else 2
+/**
+ * 字间距按码长分档：短码放宽到 4sp 更好数，长码收紧到 1sp。
+ * 取件码是按宽度实测放大的——字间距每多 1sp，10 位的码就要少掉约 1.5sp 字号，
+ * 而字号对老人的可读性远比字间距重要，所以长码优先让位给字号。
+ */
+private fun codeLetterSpacingSp(code: String): Int =
+    when {
+        code.length <= 5 -> 4
+        code.length <= 7 -> 2
+        else -> 1
+    }
 
 /**
  * 取件码专用自适应文本：每个码渲染成独立的单行 Text（一码一行、物理上不可能折行），
