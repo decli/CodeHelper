@@ -19,6 +19,7 @@
 | P1 | 设置页即改即存，去掉「保存并刷新」；新增「显示」分组（字号 / 外观 / 分组）；高级规则折叠 | `ui/settings/SettingsScreen.kt` |
 | P2 | 顶栏「设置」改 48dp 圆形图标按钮；分段文案改「待取 / 全部包裹」 | `ui/home/HomeScreen.kt` |
 | P2 | 提示条改造：17sp、圆角 18、撤销是 48dp 实心按钮、带撤销 6s / 纯提示 2.5s | `ui/CodeHelperApp.kt` |
+| P2 | 补上规范手势表里的下拉刷新（此前只有换时间范围一条路径） | `ui/home/HomeScreen.kt` |
 
 新增持久化字段（DataStore）：`onboardingDone`、`codeScale`、`groupBySender`、`themeMode`。
 `PickupCodeItem` 新增派生属性 `senderShort`。

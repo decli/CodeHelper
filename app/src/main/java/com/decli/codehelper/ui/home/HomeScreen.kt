@@ -57,6 +57,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -110,12 +111,14 @@ private enum class ListMode(val label: String) {
     All("全部包裹"),
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
     groupBySender: Boolean,
     speakingKey: String?,
     speechAvailable: Boolean,
+    onRefresh: () -> Unit,
     onOpenTimeSheet: () -> Unit,
     onSelectPending: () -> Unit,
     onSelectAll: () -> Unit,
@@ -143,7 +146,12 @@ fun HomeScreen(
         buildHomeRows(items = uiState.items, groupBySender = groupBySender)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    // 下拉刷新：老人熟悉的手势，替身是「换时间范围后自动重新读取」
+    PullToRefreshBox(
+        isRefreshing = uiState.isLoading,
+        onRefresh = onRefresh,
+        modifier = Modifier.fillMaxSize(),
+    ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()

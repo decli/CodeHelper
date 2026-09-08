@@ -354,6 +354,7 @@ fun CodeHelperApp(
                         groupBySender = displaySettings.groupBySender,
                         speakingKey = speakingKey,
                         speechAvailable = speaker.isAvailable,
+                        onRefresh = viewModel::reload,
                         onOpenTimeSheet = { showTimeSheet = true },
                         onSelectPending = viewModel::showPendingOnly,
                         onSelectAll = viewModel::forceRefreshAll,
