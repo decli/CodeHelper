@@ -1,0 +1,296 @@
+<title>取件码助手图标候选</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: a specimen sheet. A sticky phone on the left rail shows the chosen icon on a real home screen;
+   the right column lists the five candidates, each shown the way a launcher would render it. */
+:root {
+  --paper: #F5F2EC;   /* 暖纸 */
+  --card: #FFFFFF;
+  --ink: #221D15;     /* 浓墨 */
+  --muted: #6E675A;
+  --line: #ECE6DB;
+  --line-strong: #8A8171;
+  --accent: #D2400E;  /* 柿橙 */
+  --accent-ink: #A93307;
+  --accent-tint: #FBEADF;
+  --pine: #1E7A3C;    /* 松绿 */
+  --focus: #D2400E;
+
+  /* depicted device surfaces: the same in both page themes */
+  --wall-light: linear-gradient(160deg, #F4DCC6 0%, #EDE6F1 55%, #CFE1EC 100%);
+  --wall-dark: linear-gradient(160deg, #262B42 0%, #141824 55%, #2B1F1B 100%);
+  --themed-light-bg: #D9E3F7;
+  --themed-light-fg: #1D3B66;
+  --themed-dark-bg: #2A3140;
+  --themed-dark-fg: #BFD2F2;
+  --device: #151412;
+
+  --font-body: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --fs-cap: 13px;
+  --fs-body: 15px;
+  --fs-lead: 17px;
+  --fs-h2: 21px;
+  --fs-h1: clamp(26px, 4.4vw, 36px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #17130D; --card: #221C13; --ink: #EFE8DB; --muted: #A79C8A; --line: #3A3223; --line-strong: #5C523F;
+    --accent: #FF8A50; --accent-ink: #FFB694; --accent-tint: #3A2412; --pine: #6FC98A; --focus: #FF8A50;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #17130D; --card: #221C13; --ink: #EFE8DB; --muted: #A79C8A; --line: #3A3223; --line-strong: #5C523F;
+  --accent: #FF8A50; --accent-ink: #FFB694; --accent-tint: #3A2412; --pine: #6FC98A; --focus: #FF8A50;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 var(--fs-body)/1.7 var(--font-body);
+  padding-inline: 16px;
+  padding-block: 28px 56px;
+}
+.wrap { max-width: 1160px; margin-inline: auto; display: flex; flex-direction: column; gap: 32px; }
+h1, h2 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+code { font: 500 12px/1 var(--font-mono); color: var(--muted); }
+button, label { font: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* ── header ── */
+.top { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+.eyebrow { font: 700 var(--fs-cap)/1 var(--font-body); letter-spacing: .12em; color: var(--accent-ink); }
+.top h1 { font: 900 var(--fs-h1)/1.25 var(--font-body); letter-spacing: -.01em; }
+.lede { font-size: var(--fs-lead); color: var(--muted); max-width: 42em; }
+.now { display: flex; gap: 16px; align-items: center; padding: 14px 16px; border: 1px dashed var(--line-strong); border-radius: 16px; max-width: 46em; }
+.now p { min-width: 0; color: var(--muted); }
+.now b { color: var(--ink); font-weight: 700; }
+.rules { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.rules li { font-size: var(--fs-cap); padding: 4px 10px; border-radius: 999px; background: var(--accent-tint); color: var(--accent-ink); font-weight: 500; }
+
+/* ── icon primitive ── */
+.ic { width: var(--s, 56px); height: var(--s, 56px); flex: none; overflow: hidden; }
+.ic > svg { width: 100%; height: 100%; display: block; }
+.circle { border-radius: 50%; }
+.rounded { border-radius: 23%; }
+.squircle { clip-path: url(#sq); }
+
+/* ── layout ── */
+.grid { display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 960px) {
+  .grid { grid-template-columns: 340px minmax(0, 1fr); align-items: start; }
+  .stage { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 20px); }
+}
+
+/* ── phone mock ── */
+.stage { display: flex; flex-direction: column; gap: 16px; align-items: center; }
+.phone {
+  width: min(300px, 100%); aspect-ratio: 9 / 19; border-radius: 40px; border: 9px solid var(--device);
+  background: var(--wall-light); position: relative; overflow: hidden;
+  display: flex; flex-direction: column; padding: 10px 14px 16px; gap: 12px;
+  --label: #221D15; --label-shadow: none; --status: #221D15;
+  --th-bg: var(--themed-light-bg); --th-fg: var(--themed-light-fg);
+  box-shadow: 0 18px 40px -22px rgba(34, 29, 21, .55);
+}
+.phone[data-wall="dark"] {
+  background: var(--wall-dark); --label: #FFFFFF; --label-shadow: 0 1px 2px rgba(0,0,0,.6); --status: #FFFFFF;
+  --th-bg: var(--themed-dark-bg); --th-fg: var(--themed-dark-fg);
+}
+.status { display: flex; align-items: center; gap: 6px; color: var(--status); font: 500 12px/1 var(--font-body); }
+.status svg { width: 14px; height: 14px; }
+.status .sp { flex: 1; }
+.batt { width: 20px; height: 10px; border: 1.5px solid currentColor; border-radius: 3px; position: relative; }
+.batt::after { content: ""; position: absolute; inset: 1.5px; right: 5px; background: currentColor; border-radius: 1px; }
+.clockw { color: var(--label); text-shadow: var(--label-shadow); display: flex; flex-direction: column; padding: 18px 4px 6px; }
+.clockw b { font: 500 46px/1 var(--font-body); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.clockw span { font-size: 13px; }
+.apps, .dock { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 14px; justify-items: center; }
+.apps { margin-top: auto; }
+.dock { padding-top: 12px; }
+.dock .app > span { display: none; }
+.app { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; width: 100%; }
+.app > span { font-size: 11px; line-height: 1.2; color: var(--label); text-shadow: var(--label-shadow); white-space: nowrap; }
+.app.me > span { font-weight: 700; }
+.phone .ic { --s: clamp(38px, 13.5vw, 50px); }
+.phone[data-mask="circle"] .ic { border-radius: 50%; }
+.phone[data-mask="rounded"] .ic { border-radius: 23%; }
+.phone[data-mask="squircle"] .ic { clip-path: url(#sq); }
+.tile { background: var(--tile); color: #FFFFFF; display: grid; place-items: center; }
+.tile > svg { width: 56%; height: 56%; }
+.phone[data-themed="on"] .tile, .phone[data-themed="on"] .mine { background: var(--th-bg); color: var(--th-fg); }
+.icwrap { position: relative; }
+.badge {
+  position: absolute; top: -5px; right: -7px; min-width: 20px; height: 20px; padding-inline: 5px; border-radius: 10px;
+  background: #E5322D; color: #FFFFFF; font: 700 12px/20px var(--font-body); text-align: center; box-shadow: 0 0 0 2px rgba(255,255,255,.9);
+}
+
+.controls { width: min(340px, 100%); display: grid; gap: 10px; }
+fieldset { border: 0; margin: 0; padding: 0; display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 8px; }
+legend { float: left; font-size: var(--fs-cap); color: var(--muted); padding: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.chips label {
+  min-width: 40px; min-height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-strong);
+  display: inline-grid; place-items: center; cursor: pointer; font-size: 14px; font-weight: 500; line-height: 1;
+}
+.chips input:checked + label { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+.chips input:focus-visible + label { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* ── candidates ── */
+.list { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.cand { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 20px; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.cand.is-rec { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.cand-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.letter { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--ink); color: var(--paper); font: 900 16px/1 var(--font-body); }
+.cand h2 { font: 700 var(--fs-h2)/1.3 var(--font-body); }
+.rec { font: 700 12px/1 var(--font-body); padding: 5px 9px; border-radius: 999px; background: var(--accent); color: var(--paper); letter-spacing: .04em; }
+.try {
+  margin-left: auto; min-height: 40px; padding: 6px 14px; border-radius: 12px; border: 1px solid var(--line-strong);
+  background: transparent; color: var(--ink); cursor: pointer; font-size: 14px; font-weight: 500;
+}
+.try:hover { border-color: var(--accent); color: var(--accent-ink); }
+.try[aria-pressed="true"] { background: var(--accent-tint); border-color: var(--accent); color: var(--accent-ink); }
+.spec { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.shapes { display: flex; gap: 16px; flex-wrap: wrap; }
+.t { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.t figcaption { font-size: 12px; color: var(--muted); }
+.strips { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.strip { border-radius: 14px; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 14px; min-height: 76px; }
+.wall-light { background: var(--wall-light); }
+.wall-dark { background: var(--wall-dark); }
+.themed-light { background: #F3F5FB; color: var(--themed-light-fg); }
+.themed-light .mono { background: var(--themed-light-bg); }
+.themed-dark { background: #12151C; color: var(--themed-dark-fg); }
+.themed-dark .mono { background: var(--themed-dark-bg); }
+.strip > span { font-size: 12px; }
+.notif { background: #1E1E1E; color: #FFFFFF; justify-content: flex-start; grid-column: 1 / -1; }
+.notif .n { width: 22px; height: 22px; flex: none; }
+.notif div { display: flex; flex-direction: column; line-height: 1.4; min-width: 0; }
+.notif b { font-weight: 500; font-size: 14px; }
+.notif div span { font-size: 12px; color: #B9B4AA; }
+.notes { margin: 0; display: grid; gap: 10px; }
+.notes div { display: grid; grid-template-columns: 4.5em minmax(0, 1fr); gap: 8px; }
+.notes dt { font-weight: 700; color: var(--muted); font-size: 14px; }
+.notes dd { margin: 0; max-width: 40em; }
+.swatches { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: var(--fs-cap); color: var(--muted); }
+.swatches li { display: flex; align-items: center; gap: 6px; }
+.swatches i { width: 14px; height: 14px; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
+
+/* ── footer ── */
+.next { border-top: 1px solid var(--line); padding-top: 24px; display: grid; gap: 10px; max-width: 46em; }
+.next h2 { font: 700 var(--fs-h2)/1.3 var(--font-body); }
+.next ol { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; }
+.next p { color: var(--muted); }
+
+@media (max-width: 520px) {
+  .cand { padding: 16px; }
+  .spec { gap: 16px; }
+  .spec .hero { --s: 104px !important; }
+  .try { margin-left: 0; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .chips label, .try { transition: background-color .15s, border-color .15s, color .15s; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <clipPath id="sq" clipPathUnits="objectBoundingBox"><path d="M.5 0C.9 0 1 .1 1 .5S.9 1 .5 1 0 .9 0 .5.1 0 .5 0Z"/></clipPath>
+    {{DEFS}}
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">取件码助手 · 新图标</p>
+    <h1>五个图标方向，挑一个</h1>
+    <p class="lede">每个方向都只用应用里已有的颜色：柿橙代表待取，松绿代表已取到，底色是暖纸或浓墨。左边的手机会把你选中的图标放到真实桌面上，右上角带着待取数字角标。</p>
+    <div class="now">
+      {{NOW}}
+      <p><b>现在的图标</b>里有信封、气泡、三块红色码块、白色条框和绿色胶囊，缩到桌面大小后挤成一团，看不出是什么。米黄底配藏青，也不是应用里的柿橙和松绿。</p>
+    </div>
+    <ul class="rules" aria-label="五个方向共同遵守的规则">
+      <li>一个主体，缩小也认得出</li>
+      <li>主体落在 66dp 安全圆内，圆形遮罩不裁切</li>
+      <li>右上角留给数字角标</li>
+      <li>自带单色层，支持 Android 13 主题图标</li>
+      <li>通知栏小图标同步换新</li>
+    </ul>
+  </header>
+
+  <main class="grid">
+    <aside class="stage" id="stage" aria-label="桌面预览">
+      <div class="phone" id="phone" data-mask="circle" data-wall="light" data-themed="off" role="img" aria-label="手机桌面预览，取件码助手图标带 3 个待取角标">
+        <div class="status">
+          <span>18:52</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use id="sb-use" href="#notif-d"/></svg>
+          <span class="sp"></span>
+          <span>5G</span><span class="batt"></span>
+        </div>
+        <div class="clockw"><b>18:52</b><span>9月29日 星期二</span></div>
+        <div class="apps">{{APPS}}</div>
+        <div class="dock">{{DOCK}}</div>
+      </div>
+      <form class="controls" id="controls" aria-label="预览设置">{{CONTROLS}}</form>
+    </aside>
+
+    <section class="list" aria-label="候选图标">
+      {{CARDS}}
+    </section>
+  </main>
+
+  <footer class="next">
+    <h2>选好之后</h2>
+    <p>直接回复字母就行，比如「用 D」。也可以混搭，比如「B 的小票，换成 D 的配色」。</p>
+    <ol>
+      <li>替换启动图标的前景、背景色和单色层（<code>ic_launcher_foreground</code>、<code>ic_launcher_background</code>、<code>ic_launcher_monochrome</code>）</li>
+      <li>同步换掉通知栏和角标用的小图标（<code>ic_notification</code>）</li>
+      <li>全部是矢量图，不需要为每种屏幕密度导出 PNG</li>
+    </ol>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var phone = document.getElementById('phone');
+  var meUse = document.getElementById('me-use');
+  var sbUse = document.getElementById('sb-use');
+  var form = document.getElementById('controls');
+  var cards = document.querySelectorAll('.cand');
+  var tries = document.querySelectorAll('.try');
+
+  function val(name) { var el = form.querySelector('input[name="' + name + '"]:checked'); return el ? el.value : null; }
+
+  function render() {
+    var pick = val('pick');
+    var themed = val('themed') === 'on';
+    phone.dataset.mask = val('mask');
+    phone.dataset.wall = val('wall');
+    phone.dataset.themed = themed ? 'on' : 'off';
+    meUse.setAttribute('href', (themed ? '#mono-' : '#art-') + pick);
+    sbUse.setAttribute('href', '#notif-' + pick);
+    tries.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.pick === pick)); });
+  }
+
+  form.addEventListener('change', render);
+  tries.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var r = document.getElementById('pick-' + b.dataset.pick);
+      if (r) { r.checked = true; render(); }
+      var rect = phone.getBoundingClientRect();
+      if (rect.bottom < 0 || rect.top > window.innerHeight) {
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        document.getElementById('stage').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+      }
+    });
+  });
+  document.getElementById('cand-d').classList.add('is-rec');
+  render();
+})();
+</script>
