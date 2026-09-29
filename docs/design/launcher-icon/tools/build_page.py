@@ -6,7 +6,8 @@ from iconkit import Icon, P, to_d
 from designs import ICONS
 from placeholders import APPS
 
-RES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../../app/src/main/res/")
+# the icon that shipped before 1.4.3, kept for the "现在的图标" comparison
+RES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../previous/")
 
 
 def current_icon():
