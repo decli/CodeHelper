@@ -29,8 +29,13 @@ jobs:
                   java-version: 21
                   cache: gradle
 
+            # setup-android 默认安装 "tools platform-tools"，但旧版 SDK Tools（"tools"）已从
+            # Google 的 SDK 仓库下架，sdkmanager 找不到它会直接退出 1。这里只装 platform-tools，
+            # 编译需要的平台与 build-tools 由下一步显式安装。
             - name: Set up Android SDK
               uses: android-actions/setup-android@v3
+              with:
+                  packages: platform-tools
 
             - name: Install Android 16 build packages
               run: sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
