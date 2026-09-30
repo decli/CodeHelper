@@ -20,14 +20,8 @@ val InkMuted = Color(0xFF6E675A)
 /** 装饰性分隔线 / 小票撕边（浅） */
 val Outline = Color(0xFFECE6DB)
 
-/** 单选圈、开关等小图形的轮廓（控件本身不描边，见 [ControlFill]） */
+/** 控件描边（输入框、未选中芯片等，需要更高对比） */
 val OutlineStrong = Color(0xFF8A8171)
-
-/**
- * 次要控件底色：时间范围、设置按钮、看短信 / 复制、分段控件轨道、未选中的选项。
- * 在暖纸上明度差 7、在白卡上明度差 12，不描边也看得出是一块可点的东西；浓墨字 12.4:1。
- */
-val ControlFill = Color(0xFFE5DDCE)
 
 /** 主色 · 柿橙（待办状态、主按钮） */
 val Persimmon = Color(0xFFD2400E)
@@ -62,8 +56,6 @@ val DarkInkMuted = Color(0xFFA79C8A)
 val DarkOutline = Color(0xFF3A3223)
 val DarkOutlineStrong = Color(0xFF5C523F)
 val DarkSurfaceMuted = Color(0xFF2E2718)
-/** 深色控件底：在深纸上明度差 13、在深卡上明度差 8 */
-val DarkControlFill = Color(0xFF352D20)
 val PersimmonBright = Color(0xFFFF8A50)
 val PersimmonOnBright = Color(0xFF3A1503)
 val DarkPersimmonTint = Color(0xFF3A2412)

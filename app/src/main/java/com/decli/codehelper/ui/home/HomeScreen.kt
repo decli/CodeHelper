@@ -95,9 +95,8 @@ import com.decli.codehelper.ui.components.motionDuration
 import com.decli.codehelper.ui.formatSmsTime
 import com.decli.codehelper.ui.rangeLabel
 import com.decli.codehelper.ui.theme.HeroNumber
-import com.decli.codehelper.ui.theme.control
-import com.decli.codehelper.ui.theme.onSelected
-import com.decli.codehelper.ui.theme.selected
+import com.decli.codehelper.ui.theme.cardBorder
+import com.decli.codehelper.ui.theme.cardShadowElevation
 import com.decli.codehelper.util.CodeSpeech
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
@@ -331,7 +330,9 @@ private fun HomeHeader(
             onClick = onOpenSettings,
             modifier = Modifier.size(48.dp),
             shape = CircleShape,
-            color = MaterialTheme.colorScheme.control,
+            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = cardShadowElevation,
+            border = cardBorder,
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
@@ -413,7 +414,7 @@ private fun HeroSection(
 
 /**
  * 时间范围胶囊：显示当前档位，点击打开时间面板。
- * 它是筛选控件而不是「待取」本身，所以用次要控件的灰底浓墨字，不用柿橙、不描边。
+ * 和设置按钮、分段控件外框同一种白底浮起的样子，不描边——页面上只有这一种控件外观，不另加颜色。
  */
 @Composable
 private fun RangeChip(
@@ -425,7 +426,9 @@ private fun RangeChip(
         onClick = onClick,
         modifier = modifier.height(48.dp),
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.control,
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = cardShadowElevation,
+        border = cardBorder,
     ) {
         Row(
             modifier = Modifier.padding(start = 16.dp, end = 10.dp),
@@ -435,14 +438,14 @@ private fun RangeChip(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 maxLines = 1,
             )
             Icon(
                 imageVector = Icons.Rounded.KeyboardArrowDown,
                 contentDescription = "换时间范围",
                 modifier = Modifier.size(22.dp),
-                tint = MaterialTheme.colorScheme.onSurface,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
             )
         }
     }
@@ -597,7 +600,7 @@ private fun PendingCodeCard(
                     height = 60.dp,
                     shape = RoundedCornerShape(18.dp),
                 )
-                // 次要操作：灰底浓墨字的填充按钮，和时间范围、设置按钮同一种样子
+                // 次要操作：暖纸底填充按钮，只剩两个，图标文字横排
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -1019,9 +1022,9 @@ private fun TimeOptionRow(
             .clip(RoundedCornerShape(18.dp))
             .background(
                 if (selected) {
-                    MaterialTheme.colorScheme.selected
+                    MaterialTheme.colorScheme.primary
                 } else {
-                    MaterialTheme.colorScheme.control
+                    MaterialTheme.colorScheme.surfaceVariant
                 },
             )
             .clickable(
@@ -1052,14 +1055,14 @@ private fun TimeOptionRow(
                     modifier = Modifier
                         .size(28.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.onSelected),
+                        .background(MaterialTheme.colorScheme.onPrimary),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Check,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.selected,
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
             } else {
@@ -1078,7 +1081,7 @@ private fun TimeOptionRow(
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.titleMedium.copy(fontSize = 21.sp),
                 color = if (selected) {
-                    MaterialTheme.colorScheme.onSelected
+                    MaterialTheme.colorScheme.onPrimary
                 } else {
                     MaterialTheme.colorScheme.onSurface
                 },
@@ -1088,9 +1091,9 @@ private fun TimeOptionRow(
                 text = countLabel,
                 style = MaterialTheme.typography.labelLarge.copy(fontSize = 17.sp),
                 color = if (selected) {
-                    MaterialTheme.colorScheme.onSelected.copy(alpha = 0.85f)
+                    MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
                 } else {
-                    MaterialTheme.colorScheme.onSurface
+                    MaterialTheme.colorScheme.onSurfaceVariant
                 },
                 maxLines = 1,
             )

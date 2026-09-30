@@ -57,7 +57,6 @@ import com.decli.codehelper.ui.components.AutoSizeCodeLines
 import com.decli.codehelper.ui.components.SecondaryButton
 import com.decli.codehelper.ui.components.animationsEnabled
 import com.decli.codehelper.ui.formatSmsTime
-import com.decli.codehelper.ui.theme.control
 import com.decli.codehelper.util.CodeSpeech
 
 /** 出示页取件码字号上限：比卡片再放大一档，柜台上一米外也能看清 */
@@ -140,7 +139,7 @@ fun ShowCodeScreen(
                         onClick = onClose,
                         modifier = Modifier.size(48.dp),
                         shape = CircleShape,
-                        color = MaterialTheme.colorScheme.control,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
@@ -194,11 +193,10 @@ fun ShowCodeScreen(
                         lineGap = 8.dp,
                     )
                     Spacer(modifier = Modifier.height(18.dp))
-                    // 说明而不是「待取」状态，所以用灰底浓墨字，不用柿橙
                     Row(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.control)
+                            .background(MaterialTheme.colorScheme.primaryContainer)
                             .padding(horizontal = 14.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -207,12 +205,12 @@ fun ShowCodeScreen(
                             imageVector = Icons.Rounded.BrightnessAuto,
                             contentDescription = null,
                             modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.onSurface,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
                         Text(
                             text = "已临时调到最亮",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
                     }
                 }

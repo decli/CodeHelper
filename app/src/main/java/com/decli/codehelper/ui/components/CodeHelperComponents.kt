@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -55,9 +57,6 @@ import com.decli.codehelper.ui.theme.ButtonLarge
 import com.decli.codehelper.ui.theme.LocalCodeScale
 import com.decli.codehelper.ui.theme.cardBorder
 import com.decli.codehelper.ui.theme.cardShadowElevation
-import com.decli.codehelper.ui.theme.control
-import com.decli.codehelper.ui.theme.onSelected
-import com.decli.codehelper.ui.theme.selected
 
 // ─────────────────────────── 动效开关 ───────────────────────────
 
@@ -167,10 +166,7 @@ fun ActionButton(
     }
 }
 
-/**
- * 次要按钮：灰底浓墨字的填充按钮（看短信、复制、恢复、取消…）。
- * 与时间范围、设置按钮、分段控件轨道同一种底色：老人只需要认一种「可以点、但不是主操作」的样子。
- */
+/** 填充按钮：暖纸底浓墨字（看短信、复制、恢复），卡片上的次要操作 */
 @Composable
 fun SecondaryButton(
     text: String,
@@ -185,7 +181,7 @@ fun SecondaryButton(
         onClick = onClick,
         modifier = modifier,
         icon = icon,
-        containerColor = MaterialTheme.colorScheme.control,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurface,
         height = height,
         shape = RoundedCornerShape(16.dp),
@@ -195,7 +191,7 @@ fun SecondaryButton(
     )
 }
 
-/** 文字按钮（48dp 行高）：只用于不值得占一块底色的第四级操作，如引导页的「跳过」 */
+/** 文字按钮（48dp 行高，可点击文字一律 onPrimaryContainer） */
 @Composable
 fun TextActionButton(
     text: String,
@@ -256,11 +252,6 @@ fun TextActionButton(
 
 // ─────────────────────────── 分段控件（全应用唯一的选中语言） ───────────────────────────
 
-/**
- * 灰色轨道 + 浓墨选中块：轨道和其它次要控件同一个底色，选中与时间面板、角标档位同一种浓墨。
- * 不加阴影、不描边——阴影只留给卡片这类内容表面，控件靠填充区分。
- * 圆角同心：轨道圆角 = 选中块圆角 + 内边距。
- */
 @Composable
 fun <T> SegmentedControl(
     options: List<T>,
@@ -269,31 +260,42 @@ fun <T> SegmentedControl(
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
     enabledOf: (T) -> Boolean = { true },
-    containerPadding: Dp = 4.dp,
-    segmentGap: Dp = 4.dp,
-    segmentHeight: Dp = 52.dp,
-    segmentCornerRadius: Dp = 14.dp,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
+    containerShape: Shape = RoundedCornerShape(20.dp),
+    containerPadding: Dp = 5.dp,
+    segmentGap: Dp = 5.dp,
+    segmentHeight: Dp = 56.dp,
+    segmentShape: Shape = RoundedCornerShape(16.dp),
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    checkSize: Dp = 22.dp,
+    elevated: Boolean = true,
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(segmentCornerRadius + containerPadding))
-            .background(MaterialTheme.colorScheme.control)
-            .padding(containerPadding),
-        horizontalArrangement = Arrangement.spacedBy(segmentGap),
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = containerShape,
+        color = containerColor,
+        shadowElevation = if (elevated) cardShadowElevation else 0.dp,
+        border = if (elevated) cardBorder else null,
     ) {
-        options.forEach { option ->
-            Segment(
-                modifier = Modifier.weight(1f),
-                label = labelOf(option),
-                selected = option == selected,
-                enabled = enabledOf(option),
-                height = segmentHeight,
-                shape = RoundedCornerShape(segmentCornerRadius),
-                textStyle = textStyle,
-                onClick = { onSelect(option) },
-            )
+        Row(
+            modifier = Modifier.padding(containerPadding),
+            horizontalArrangement = Arrangement.spacedBy(segmentGap),
+        ) {
+            options.forEach { option ->
+                val isSelected = option == selected
+                val isEnabled = enabledOf(option)
+                Segment(
+                    modifier = Modifier.weight(1f),
+                    label = labelOf(option),
+                    selected = isSelected,
+                    enabled = isEnabled,
+                    height = segmentHeight,
+                    shape = segmentShape,
+                    textStyle = textStyle,
+                    checkSize = checkSize,
+                    onClick = { onSelect(option) },
+                )
+            }
         }
     }
 }
@@ -306,24 +308,21 @@ private fun Segment(
     height: Dp,
     shape: Shape,
     textStyle: TextStyle,
+    checkSize: Dp,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val duration = motionDuration(200)
     val background by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.selected else Color.Transparent,
+        targetValue = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
         animationSpec = tween(durationMillis = duration),
         label = "segmentBackground",
     )
-    val contentColor by animateColorAsState(
-        targetValue = if (selected) {
-            MaterialTheme.colorScheme.onSelected
-        } else {
-            MaterialTheme.colorScheme.onSurface
-        },
-        animationSpec = tween(durationMillis = duration),
-        label = "segmentContent",
-    )
+    val contentColor = if (selected) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
     Box(
         modifier = modifier
             .height(height)
@@ -338,15 +337,27 @@ private fun Segment(
             .semantics { this.contentDescription = if (selected) "$label，已选中" else label },
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = label,
-            style = textStyle.copy(
-                fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold,
-            ),
-            color = contentColor,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (selected) {
+                Icon(
+                    imageVector = Icons.Rounded.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(checkSize),
+                    tint = contentColor,
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+            }
+            Text(
+                text = label,
+                style = textStyle,
+                color = contentColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 }
 

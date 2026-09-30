@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -82,9 +83,6 @@ import com.decli.codehelper.ui.components.ActionButton
 import com.decli.codehelper.ui.components.AppCard
 import com.decli.codehelper.ui.components.SegmentedControl
 import com.decli.codehelper.ui.components.motionDuration
-import com.decli.codehelper.ui.theme.control
-import com.decli.codehelper.ui.theme.onSelected
-import com.decli.codehelper.ui.theme.selected
 import com.decli.codehelper.util.PickupCodeExtractor
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
@@ -191,9 +189,18 @@ fun SettingsScreen(
                             labelOf = { it.label },
                             onSelect = onCodeScaleChange,
                             modifier = Modifier.width(190.dp),
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            containerShape = RoundedCornerShape(14.dp),
+                            containerPadding = 4.dp,
+                            segmentGap = 4.dp,
                             segmentHeight = 44.dp,
-                            segmentCornerRadius = 10.dp,
-                            textStyle = MaterialTheme.typography.labelLarge.copy(fontSize = 18.sp),
+                            segmentShape = RoundedCornerShape(11.dp),
+                            textStyle = MaterialTheme.typography.labelLarge.copy(
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                            ),
+                            checkSize = 18.dp,
+                            elevated = false,
                         )
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -204,9 +211,18 @@ fun SettingsScreen(
                             labelOf = { if (it == ThemeMode.System) "跟随" else it.label },
                             onSelect = onThemeModeChange,
                             modifier = Modifier.width(230.dp),
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            containerShape = RoundedCornerShape(14.dp),
+                            containerPadding = 4.dp,
+                            segmentGap = 4.dp,
                             segmentHeight = 44.dp,
-                            segmentCornerRadius = 10.dp,
-                            textStyle = MaterialTheme.typography.labelLarge.copy(fontSize = 18.sp),
+                            segmentShape = RoundedCornerShape(11.dp),
+                            textStyle = MaterialTheme.typography.labelLarge.copy(
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                            ),
+                            checkSize = 16.dp,
+                            elevated = false,
                         )
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -287,8 +303,8 @@ fun SettingsScreen(
                             icon = Icons.Rounded.NotificationsActive,
                             onClick = onRequestNotificationPermission,
                             modifier = Modifier.fillMaxWidth(),
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                             height = 56.dp,
                             shape = RoundedCornerShape(16.dp),
                             textStyle = MaterialTheme.typography.labelLarge.copy(
@@ -500,9 +516,9 @@ private fun SettingsSwitchRow(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedTrackColor = MaterialTheme.colorScheme.selected,
-                checkedThumbColor = MaterialTheme.colorScheme.onSelected,
-                uncheckedTrackColor = MaterialTheme.colorScheme.control,
+                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
                 uncheckedThumbColor = MaterialTheme.colorScheme.outline,
                 uncheckedBorderColor = MaterialTheme.colorScheme.outline,
             ),
@@ -533,9 +549,16 @@ private fun KeywordChips(
                     .clip(CircleShape)
                     .background(
                         if (enabled) {
-                            MaterialTheme.colorScheme.selected
+                            MaterialTheme.colorScheme.secondaryContainer
                         } else {
-                            MaterialTheme.colorScheme.control
+                            Color.Transparent
+                        },
+                    )
+                    .then(
+                        if (enabled) {
+                            Modifier
+                        } else {
+                            Modifier.border(2.dp, MaterialTheme.colorScheme.outline, CircleShape)
                         },
                     )
                     .clickable(role = Role.Checkbox) { onToggle(keyword) }
@@ -551,14 +574,14 @@ private fun KeywordChips(
                             imageVector = Icons.Rounded.Check,
                             contentDescription = null,
                             modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.onSelected,
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
                         )
                     }
                     Text(
                         text = keyword,
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                         color = if (enabled) {
-                            MaterialTheme.colorScheme.onSelected
+                            MaterialTheme.colorScheme.onSecondaryContainer
                         } else {
                             MaterialTheme.colorScheme.onSurface
                         },
@@ -570,6 +593,7 @@ private fun KeywordChips(
             modifier = Modifier
                 .height(48.dp)
                 .clip(CircleShape)
+                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
                 .clickable(role = Role.Button, onClick = onAdd)
                 .padding(horizontal = 16.dp),
             contentAlignment = Alignment.Center,
@@ -578,11 +602,10 @@ private fun KeywordChips(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // 「新增」是文字级操作：不占底色，和已关闭的提示词（灰底）区分开
                 Icon(
                     imageVector = Icons.Rounded.Add,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
                 Text(
@@ -609,9 +632,9 @@ private fun MinuteChip(
             .clip(RoundedCornerShape(14.dp))
             .background(
                 if (selected) {
-                    MaterialTheme.colorScheme.selected
+                    MaterialTheme.colorScheme.primary
                 } else {
-                    MaterialTheme.colorScheme.control
+                    MaterialTheme.colorScheme.surfaceVariant
                 },
             )
             .clickable(
@@ -630,7 +653,7 @@ private fun MinuteChip(
             text = "$minutes 分钟",
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
             color = if (selected) {
-                MaterialTheme.colorScheme.onSelected
+                MaterialTheme.colorScheme.onPrimary
             } else {
                 MaterialTheme.colorScheme.onSurface
             },
