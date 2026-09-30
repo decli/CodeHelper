@@ -9,6 +9,7 @@ import android.text.Html
 import com.decli.codehelper.model.CodeFilterWindow
 import com.decli.codehelper.model.PickupCodeItem
 import com.decli.codehelper.util.PickupCodeExtractor
+import com.decli.codehelper.util.StationName
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 
@@ -26,6 +27,7 @@ class SmsRepository(
     ): List<PickupCodeItem> {
         val sinceMillis = nowMillis - (filterWindow.hours * 60L * 60L * 1000L)
         val results = mutableListOf<PickupCodeItem>()
+        val historySignatures = HashMap<String, String?>()
 
         results += loadSmsItems(
             sinceMillis = sinceMillis,
@@ -33,6 +35,7 @@ class SmsRepository(
             advancedRules = advancedRules,
             pickedUpKeys = pickedUpKeys,
             includePickedUp = includePickedUp,
+            historySignatures = historySignatures,
         )
         results += loadMmsItems(
             sinceMillis = sinceMillis,
@@ -40,6 +43,7 @@ class SmsRepository(
             advancedRules = advancedRules,
             pickedUpKeys = pickedUpKeys,
             includePickedUp = includePickedUp,
+            historySignatures = historySignatures,
         )
 
         return sortForDisplay(results)
@@ -51,6 +55,7 @@ class SmsRepository(
         advancedRules: List<String>,
         pickedUpKeys: Set<String>,
         includePickedUp: Boolean,
+        historySignatures: MutableMap<String, String?>,
     ): List<PickupCodeItem> {
         val results = mutableListOf<PickupCodeItem>()
         val projection = arrayOf(
@@ -74,7 +79,7 @@ class SmsRepository(
 
             while (cursor.moveToNext()) {
                 val smsId = cursor.getLong(idIndex)
-                val sender = cursor.getString(addressIndex).orEmpty().ifBlank { "短信" }
+                val sender = cursor.getString(addressIndex).orEmpty()
                 val body = cursor.getString(bodyIndex).orEmpty()
                 val receivedAt = cursor.getLong(dateIndex)
 
@@ -90,6 +95,7 @@ class SmsRepository(
                     advancedRules = advancedRules,
                     pickedUpKeys = pickedUpKeys,
                     includePickedUp = includePickedUp,
+                    historySignatures = historySignatures,
                 )
             }
         }
@@ -103,6 +109,7 @@ class SmsRepository(
         advancedRules: List<String>,
         pickedUpKeys: Set<String>,
         includePickedUp: Boolean,
+        historySignatures: MutableMap<String, String?>,
     ): List<PickupCodeItem> {
         val results = mutableListOf<PickupCodeItem>()
         val projection = arrayOf(
@@ -132,7 +139,7 @@ class SmsRepository(
                 val body = loadMmsBody(mmsId, subject)
                 if (body.isBlank()) continue
 
-                val sender = loadMmsSender(mmsId).ifBlank { "彩信" }
+                val sender = loadMmsSender(mmsId)
 
                 appendMatches(
                     results = results,
@@ -146,6 +153,7 @@ class SmsRepository(
                     advancedRules = advancedRules,
                     pickedUpKeys = pickedUpKeys,
                     includePickedUp = includePickedUp,
+                    historySignatures = historySignatures,
                 )
             }
         }
@@ -165,6 +173,7 @@ class SmsRepository(
         advancedRules: List<String>,
         pickedUpKeys: Set<String>,
         includePickedUp: Boolean,
+        historySignatures: MutableMap<String, String?>,
     ) {
         val extractedCodes = extractor.extract(
             body = body,
@@ -199,8 +208,45 @@ class SmsRepository(
                 receivedAtMillis = receivedAtMillis,
                 matchedRules = extractedCodes.map { it.matchedRule }.distinct(),
                 isPickedUp = isPickedUp,
+                station = StationName.resolve(
+                    body = body,
+                    address = sender,
+                    senderHistorySignature = { signatureFromSenderHistory(sender, historySignatures) },
+                ),
             )
         }
+    }
+
+    /**
+     * 同一号码最近几条短信里的【签名】。个别通知（如 5G 消息）正文不带签名，
+     * 但同一个号码发过的其他短信往往带着。每次读取按号码缓存，一个号码只查一次。
+     */
+    private fun signatureFromSenderHistory(
+        address: String,
+        cache: MutableMap<String, String?>,
+    ): String? {
+        if (address.isBlank()) return null
+        if (address in cache) return cache[address]
+        val signature = runCatching {
+            contentResolver.query(
+                Telephony.Sms.Inbox.CONTENT_URI,
+                arrayOf(Telephony.TextBasedSmsColumns.BODY),
+                "${Telephony.TextBasedSmsColumns.ADDRESS} = ?",
+                arrayOf(address),
+                "${Telephony.TextBasedSmsColumns.DATE} DESC",
+            )?.use { cursor ->
+                val bodyIndex = cursor.getColumnIndexOrThrow(Telephony.TextBasedSmsColumns.BODY)
+                var checked = 0
+                var found: String? = null
+                while (found == null && checked < SENDER_HISTORY_LIMIT && cursor.moveToNext()) {
+                    found = StationName.fromSignature(cursor.getString(bodyIndex).orEmpty())
+                    checked++
+                }
+                found
+            }
+        }.getOrNull()
+        cache[address] = signature
+        return signature
     }
 
     private fun loadMmsBody(mmsId: Long, subject: String): String {
@@ -292,6 +338,7 @@ class SmsRepository(
         // 否则纯 JVM 单元测试一引用本类的静态方法就会抛 ExceptionInInitializerError。
         private val MMS_PARTS_URI: Uri by lazy { Uri.parse("content://mms/part") }
         private const val MMS_FROM_ADDRESS_TYPE = 137
+        private const val SENDER_HISTORY_LIMIT = 30
         private val mediaPrefixes = listOf("image/", "audio/", "video/")
         private val skippedContentTypes = setOf(
             "application/smil",

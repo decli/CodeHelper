@@ -33,4 +33,22 @@ class PickupCodeItemTest {
     fun `falls back to a readable label for blank senders`() {
         assertEquals("短信", PickupCodeItem.shortenSender("   "))
     }
+
+    @Test
+    fun `labels the station instead of the sender number`() {
+        val item = PickupCodeItem(
+            uniqueKey = "sms:1",
+            smsId = 1,
+            codes = listOf("17-7-24040"),
+            sender = "1068474310000003825",
+            body = "",
+            preview = "",
+            receivedAtMillis = 0,
+            matchedRules = emptyList(),
+            isPickedUp = false,
+            station = "菜鸟驿站",
+        )
+        assertEquals("菜鸟驿站", item.senderShort)
+        assertEquals(PickupCodeItem.UNKNOWN_STATION, item.copy(station = "").senderShort)
+    }
 }

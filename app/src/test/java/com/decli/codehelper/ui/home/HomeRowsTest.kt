@@ -24,6 +24,7 @@ class HomeRowsTest {
         receivedAtMillis = receivedAtMillis,
         matchedRules = emptyList(),
         isPickedUp = isPickedUp,
+        station = sender,
     )
 
     @Test

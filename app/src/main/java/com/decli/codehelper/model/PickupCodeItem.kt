@@ -5,12 +5,15 @@ data class PickupCodeItem(
     val smsId: Long,
     val messageUri: String? = null,
     val codes: List<String>,
+    /** 发件号码，只用来打开短信会话；界面上显示的是 [station] */
     val sender: String,
     val body: String,
     val preview: String,
     val receivedAtMillis: Long,
     val matchedRules: List<String>,
     val isPickedUp: Boolean,
+    /** 从签名 / 正文认出的驿站名，如「菜鸟驿站」；认不出时为空，见 [com.decli.codehelper.util.StationName] */
+    val station: String = "",
 ) {
     val codeDisplay: String
         get() = codes.joinToString(separator = "\n")
@@ -18,11 +21,15 @@ data class PickupCodeItem(
     val codeCount: Int
         get() = codes.size
 
-    /** 卡头与分组标题用的短发件方，如「菜鸟驿站」「兔喜快递」 */
+    /**
+     * 卡头与分组标题用的驿站名，如「菜鸟驿站」「兔喜生活」。
+     * 认不出驿站时不退回发件号码：1068… 开头的平台号又长又没意义，还会把同一家驿站拆成好几组。
+     */
     val senderShort: String
-        get() = shortenSender(sender)
+        get() = if (station.isBlank()) UNKNOWN_STATION else shortenSender(station)
 
     companion object {
+        const val UNKNOWN_STATION = "未注明驿站"
         private const val MAX_SENDER_SHORT_LENGTH = 6
 
         /**
