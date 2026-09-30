@@ -2,6 +2,7 @@ package com.decli.codehelper.ui.theme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -31,7 +32,7 @@ private val LightColors = lightColorScheme(
     onBackground = Ink,
     surface = CardSurface,
     onSurface = Ink,
-    surfaceVariant = Paper,
+    surfaceVariant = ControlFill,
     onSurfaceVariant = InkMuted,
     outline = OutlineStrong,
     outlineVariant = Outline,
@@ -60,7 +61,7 @@ private val DarkColors = darkColorScheme(
     onBackground = DarkInk,
     surface = DarkCardSurface,
     onSurface = DarkInk,
-    surfaceVariant = DarkSurfaceMuted,
+    surfaceVariant = DarkControlFill,
     onSurfaceVariant = DarkInkMuted,
     outline = DarkOutlineStrong,
     outlineVariant = DarkOutline,
@@ -71,6 +72,21 @@ private val DarkColors = darkColorScheme(
     errorContainer = Color(0xFF8C1D18),
     onErrorContainer = Color(0xFFF9DEDC),
 )
+
+// ── 控件四级：用填充区分层级，控件一律不描边 ──
+// 1 主操作：实心松绿（完成类）/ 实心柿橙（前进类），一张卡或一屏最多一个
+// 2 状态：浅色调底 + 深色字（未取件、已取），只表达状态
+// 3 次要操作与可选项：[control] 底 + 浓墨字
+// 4 选中：浓墨实心（深色模式反相），颜色只留给语义，选中不借用柿橙 / 松绿
+
+/** 次要控件底色（= surfaceVariant） */
+val ColorScheme.control: Color get() = surfaceVariant
+
+/** 选中态底色：浅色模式浓墨、深色模式浅米（= inverseSurface） */
+val ColorScheme.selected: Color get() = inverseSurface
+
+/** 选中态文字 / 图标（= inverseOnSurface） */
+val ColorScheme.onSelected: Color get() = inverseOnSurface
 
 /** 取件码字号档位，供卡片与出示页的自适应字号读取 */
 val LocalCodeScale = staticCompositionLocalOf { CodeScale.Standard }

@@ -23,8 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -46,6 +44,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -56,6 +55,9 @@ import com.decli.codehelper.ui.theme.ButtonLarge
 import com.decli.codehelper.ui.theme.LocalCodeScale
 import com.decli.codehelper.ui.theme.cardBorder
 import com.decli.codehelper.ui.theme.cardShadowElevation
+import com.decli.codehelper.ui.theme.control
+import com.decli.codehelper.ui.theme.onSelected
+import com.decli.codehelper.ui.theme.selected
 
 // ─────────────────────────── 动效开关 ───────────────────────────
 
@@ -165,7 +167,35 @@ fun ActionButton(
     }
 }
 
-/** 文字按钮（默认 48dp 行高，可点击文字一律 onPrimaryContainer） */
+/**
+ * 次要按钮：灰底浓墨字的填充按钮（看短信、复制、恢复、取消…）。
+ * 与时间范围、设置按钮、分段控件轨道同一种底色：老人只需要认一种「可以点、但不是主操作」的样子。
+ */
+@Composable
+fun SecondaryButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    height: Dp = 56.dp,
+    semanticsLabel: String? = null,
+) {
+    ActionButton(
+        text = text,
+        onClick = onClick,
+        modifier = modifier,
+        icon = icon,
+        containerColor = MaterialTheme.colorScheme.control,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        height = height,
+        shape = RoundedCornerShape(16.dp),
+        textStyle = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+        iconSize = 22.dp,
+        semanticsLabel = semanticsLabel,
+    )
+}
+
+/** 文字按钮（48dp 行高）：只用于不值得占一块底色的第四级操作，如引导页的「跳过」 */
 @Composable
 fun TextActionButton(
     text: String,
@@ -174,11 +204,9 @@ fun TextActionButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
-    iconScale: Float = 1f,
     height: Dp = 48.dp,
     textStyle: TextStyle? = null,
     semanticsLabel: String? = null,
-    stacked: Boolean = false,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Box(
@@ -201,7 +229,19 @@ fun TextActionButton(
             .padding(horizontal = 6.dp),
         contentAlignment = Alignment.Center,
     ) {
-        val label: @Composable () -> Unit = {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = contentColor,
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+            }
             Text(
                 text = text,
                 style = textStyle ?: MaterialTheme.typography.labelLarge,
@@ -211,51 +251,16 @@ fun TextActionButton(
                 textAlign = TextAlign.Center,
             )
         }
-        val buttonIcon: @Composable () -> Unit = {
-            if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(22.dp)
-                        .graphicsLayer {
-                            scaleX = iconScale
-                            scaleY = iconScale
-                        },
-                    tint = contentColor,
-                )
-            }
-        }
-        if (stacked) {
-            // 图标在上、文字在下：三个按钮并排时也放得下完整文案，
-            // 系统字号放大到 1.3× 仍然不会把「读给我听」截断。
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                buttonIcon()
-                if (icon != null) {
-                    Spacer(modifier = Modifier.height(2.dp))
-                }
-                label()
-            }
-        } else {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                buttonIcon()
-                if (icon != null) {
-                    Spacer(modifier = Modifier.width(6.dp))
-                }
-                label()
-            }
-        }
     }
 }
 
 // ─────────────────────────── 分段控件（全应用唯一的选中语言） ───────────────────────────
 
+/**
+ * 灰色轨道 + 浓墨选中块：轨道和其它次要控件同一个底色，选中与时间面板、角标档位同一种浓墨。
+ * 不加阴影、不描边——阴影只留给卡片这类内容表面，控件靠填充区分。
+ * 圆角同心：轨道圆角 = 选中块圆角 + 内边距。
+ */
 @Composable
 fun <T> SegmentedControl(
     options: List<T>,
@@ -264,42 +269,31 @@ fun <T> SegmentedControl(
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
     enabledOf: (T) -> Boolean = { true },
-    containerColor: Color = MaterialTheme.colorScheme.surface,
-    containerShape: Shape = RoundedCornerShape(20.dp),
-    containerPadding: Dp = 5.dp,
-    segmentGap: Dp = 5.dp,
-    segmentHeight: Dp = 56.dp,
-    segmentShape: Shape = RoundedCornerShape(16.dp),
+    containerPadding: Dp = 4.dp,
+    segmentGap: Dp = 4.dp,
+    segmentHeight: Dp = 52.dp,
+    segmentCornerRadius: Dp = 14.dp,
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
-    checkSize: Dp = 22.dp,
-    elevated: Boolean = true,
 ) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = containerShape,
-        color = containerColor,
-        shadowElevation = if (elevated) cardShadowElevation else 0.dp,
-        border = if (elevated) cardBorder else null,
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(segmentCornerRadius + containerPadding))
+            .background(MaterialTheme.colorScheme.control)
+            .padding(containerPadding),
+        horizontalArrangement = Arrangement.spacedBy(segmentGap),
     ) {
-        Row(
-            modifier = Modifier.padding(containerPadding),
-            horizontalArrangement = Arrangement.spacedBy(segmentGap),
-        ) {
-            options.forEach { option ->
-                val isSelected = option == selected
-                val isEnabled = enabledOf(option)
-                Segment(
-                    modifier = Modifier.weight(1f),
-                    label = labelOf(option),
-                    selected = isSelected,
-                    enabled = isEnabled,
-                    height = segmentHeight,
-                    shape = segmentShape,
-                    textStyle = textStyle,
-                    checkSize = checkSize,
-                    onClick = { onSelect(option) },
-                )
-            }
+        options.forEach { option ->
+            Segment(
+                modifier = Modifier.weight(1f),
+                label = labelOf(option),
+                selected = option == selected,
+                enabled = enabledOf(option),
+                height = segmentHeight,
+                shape = RoundedCornerShape(segmentCornerRadius),
+                textStyle = textStyle,
+                onClick = { onSelect(option) },
+            )
         }
     }
 }
@@ -312,21 +306,24 @@ private fun Segment(
     height: Dp,
     shape: Shape,
     textStyle: TextStyle,
-    checkSize: Dp,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val duration = motionDuration(200)
     val background by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+        targetValue = if (selected) MaterialTheme.colorScheme.selected else Color.Transparent,
         animationSpec = tween(durationMillis = duration),
         label = "segmentBackground",
     )
-    val contentColor = if (selected) {
-        MaterialTheme.colorScheme.onPrimary
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
+    val contentColor by animateColorAsState(
+        targetValue = if (selected) {
+            MaterialTheme.colorScheme.onSelected
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        },
+        animationSpec = tween(durationMillis = duration),
+        label = "segmentContent",
+    )
     Box(
         modifier = modifier
             .height(height)
@@ -341,27 +338,15 @@ private fun Segment(
             .semantics { this.contentDescription = if (selected) "$label，已选中" else label },
         contentAlignment = Alignment.Center,
     ) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (selected) {
-                Icon(
-                    imageVector = Icons.Rounded.Check,
-                    contentDescription = null,
-                    modifier = Modifier.size(checkSize),
-                    tint = contentColor,
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-            }
-            Text(
-                text = label,
-                style = textStyle,
-                color = contentColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
+        Text(
+            text = label,
+            style = textStyle.copy(
+                fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold,
+            ),
+            color = contentColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 

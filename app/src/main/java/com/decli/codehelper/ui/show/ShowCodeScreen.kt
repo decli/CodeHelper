@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.BrightnessAuto
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
@@ -55,8 +54,10 @@ import androidx.compose.ui.unit.sp
 import com.decli.codehelper.model.PickupCodeItem
 import com.decli.codehelper.ui.components.ActionButton
 import com.decli.codehelper.ui.components.AutoSizeCodeLines
+import com.decli.codehelper.ui.components.SecondaryButton
 import com.decli.codehelper.ui.components.animationsEnabled
 import com.decli.codehelper.ui.formatSmsTime
+import com.decli.codehelper.ui.theme.control
 import com.decli.codehelper.util.CodeSpeech
 
 /** 出示页取件码字号上限：比卡片再放大一档，柜台上一米外也能看清 */
@@ -69,11 +70,8 @@ private const val SHOW_CODE_MAX_FONT_SP = 150
 @Composable
 fun ShowCodeScreen(
     item: PickupCodeItem,
-    isSpeaking: Boolean,
-    speechAvailable: Boolean,
     onClose: () -> Unit,
     onCopyCode: () -> Unit,
-    onSpeakCode: () -> Unit,
     onMarkPickedUp: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -142,7 +140,7 @@ fun ShowCodeScreen(
                         onClick = onClose,
                         modifier = Modifier.size(48.dp),
                         shape = CircleShape,
-                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        color = MaterialTheme.colorScheme.control,
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
@@ -196,10 +194,11 @@ fun ShowCodeScreen(
                         lineGap = 8.dp,
                     )
                     Spacer(modifier = Modifier.height(18.dp))
+                    // 说明而不是「待取」状态，所以用灰底浓墨字，不用柿橙
                     Row(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .background(MaterialTheme.colorScheme.control)
                             .padding(horizontal = 14.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -208,12 +207,12 @@ fun ShowCodeScreen(
                             imageVector = Icons.Rounded.BrightnessAuto,
                             contentDescription = null,
                             modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            tint = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
                             text = "已临时调到最亮",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 }
@@ -224,40 +223,12 @@ fun ShowCodeScreen(
                         .padding(horizontal = 20.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    Row(
+                    SecondaryButton(
+                        text = "复制取件码",
+                        icon = Icons.Rounded.ContentCopy,
+                        onClick = onCopyCode,
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        ActionButton(
-                            text = "复制",
-                            icon = Icons.Rounded.ContentCopy,
-                            onClick = onCopyCode,
-                            modifier = Modifier.weight(1f),
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
-                            height = 56.dp,
-                            shape = RoundedCornerShape(16.dp),
-                            textStyle = MaterialTheme.typography.labelLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                            ),
-                            iconSize = 22.dp,
-                        )
-                        ActionButton(
-                            text = if (isSpeaking) "正在读…" else "读给我听",
-                            icon = Icons.AutoMirrored.Rounded.VolumeUp,
-                            onClick = onSpeakCode,
-                            modifier = Modifier.weight(1f),
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
-                            height = 56.dp,
-                            shape = RoundedCornerShape(16.dp),
-                            textStyle = MaterialTheme.typography.labelLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                            ),
-                            iconSize = 22.dp,
-                            enabled = speechAvailable,
-                        )
-                    }
+                    )
                     ActionButton(
                         text = "我已取到",
                         icon = Icons.Rounded.Check,

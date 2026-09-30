@@ -72,7 +72,6 @@ import com.decli.codehelper.ui.onboarding.OnboardingStep
 import com.decli.codehelper.ui.settings.SettingsScreen
 import com.decli.codehelper.ui.show.ShowCodeScreen
 import com.decli.codehelper.util.BadgeNotifier
-import com.decli.codehelper.util.CodeSpeaker
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -96,12 +95,10 @@ fun CodeHelperApp(
     var showTimeSheet by rememberSaveable { mutableStateOf(false) }
     var showCodeKey by rememberSaveable { mutableStateOf<String?>(null) }
     var onboardingStep by rememberSaveable { mutableStateOf(OnboardingStep.Intro) }
-    var speakingKey by remember { mutableStateOf<String?>(null) }
     var notificationPermissionGranted by remember {
         mutableStateOf(BadgeNotifier.hasNotificationPermission(context))
     }
     val appVersionName = remember(context) { context.appVersionName() }
-    val speaker = rememberCodeSpeaker()
 
     val showCodeItem = remember(showCodeKey, uiState.items) {
         uiState.items.firstOrNull { it.uniqueKey == showCodeKey }
@@ -120,13 +117,6 @@ fun CodeHelperApp(
                     duration = SnackbarDuration.Indefinite,
                 )
             }
-        }
-    }
-
-    fun stopSpeaking() {
-        if (speakingKey != null) {
-            speaker.stop()
-            speakingKey = null
         }
     }
 
@@ -157,11 +147,6 @@ fun CodeHelperApp(
                 Lifecycle.Event.ON_RESUME -> {
                     viewModel.refreshPermissionStatus()
                     notificationPermissionGranted = BadgeNotifier.hasNotificationPermission(context)
-                }
-
-                Lifecycle.Event.ON_PAUSE -> {
-                    speaker.stop()
-                    speakingKey = null
                 }
 
                 else -> Unit
@@ -200,7 +185,6 @@ fun CodeHelperApp(
     }
 
     val onMarkPickedUp: (PickupCodeItem) -> Unit = { item ->
-        stopSpeaking()
         showCodeKey = null
         viewModel.markPickedUp(item)
     }
@@ -209,16 +193,6 @@ fun CodeHelperApp(
         context.copyToClipboard(codes)
         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         showMessage("已复制 $codes")
-    }
-    val onSpeakCode: (PickupCodeItem) -> Unit = { item ->
-        when {
-            speakingKey == item.uniqueKey -> stopSpeaking()
-            !speaker.isAvailable -> showMessage("本机没有语音引擎，无法朗读")
-            else -> {
-                speakingKey = item.uniqueKey
-                speaker.speak(item) { speakingKey = null }
-            }
-        }
     }
     val onOpenSms: (PickupCodeItem) -> Unit = { item ->
         scope.launch {
@@ -297,14 +271,8 @@ fun CodeHelperApp(
                 showCodeItem != null -> {
                     ShowCodeScreen(
                         item = showCodeItem,
-                        isSpeaking = speakingKey == showCodeItem.uniqueKey,
-                        speechAvailable = speaker.isAvailable,
-                        onClose = {
-                            stopSpeaking()
-                            showCodeKey = null
-                        },
+                        onClose = { showCodeKey = null },
                         onCopyCode = { onCopyCode(showCodeItem) },
-                        onSpeakCode = { onSpeakCode(showCodeItem) },
                         onMarkPickedUp = { onMarkPickedUp(showCodeItem) },
                     )
                 }
@@ -351,8 +319,6 @@ fun CodeHelperApp(
                     HomeScreen(
                         uiState = uiState,
                         groupBySender = displaySettings.groupBySender,
-                        speakingKey = speakingKey,
-                        speechAvailable = speaker.isAvailable,
                         onRefresh = viewModel::reload,
                         onOpenTimeSheet = { showTimeSheet = true },
                         onSelectPending = viewModel::showPendingOnly,
@@ -365,11 +331,7 @@ fun CodeHelperApp(
                         onRestorePending = viewModel::restorePending,
                         onOpenSms = onOpenSms,
                         onCopyCode = onCopyCode,
-                        onSpeakCode = onSpeakCode,
-                        onShowCode = { item ->
-                            stopSpeaking()
-                            showCodeKey = item.uniqueKey
-                        },
+                        onShowCode = { item -> showCodeKey = item.uniqueKey },
                     )
                 }
             }
@@ -435,16 +397,6 @@ private fun CodeSnackbar(
             }
         }
     }
-}
-
-@Composable
-private fun rememberCodeSpeaker(): CodeSpeaker {
-    val context = LocalContext.current
-    val speaker = remember(context) { CodeSpeaker(context) }
-    DisposableEffect(speaker) {
-        onDispose { speaker.release() }
-    }
-    return speaker
 }
 
 private fun Context.copyToClipboard(text: String) {
